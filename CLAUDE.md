@@ -6,14 +6,25 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 
 ## Current status
 
-- **Phase 1 — Project Foundation & Design System: complete.**
-- **Next: Phase 2 — Database Schema, RLS & Settings Engine** (see `docs/Roadmap.md`).
+- **Phase 1 — Project Foundation & Design System: complete** (incl. a premium motion
+  system via Framer Motion + light/dark theming).
+- **Phase 2 — Database Schema, RLS & Settings Engine: complete** (applied to the linked
+  Supabase project `kondapkaroqmoduadopj`).
+- **Next: Phase 3 — Authentication, Roles & Route Guards** (see `docs/Roadmap.md`).
 
 Phase 1 delivered: Vite + React 18 + TS (strict) app shell; Tailwind v4 emerald/off-white
-design system; bilingual EN/AR with RTL/LTR flipping; responsive nav (sidebar / top bar /
-mobile bottom nav); placeholder pages for all routes; Supabase client + service accessors
-(Auth, Storage, Realtime, Edge Functions) wired via env; React Query provider; Vitest + ESLint
-+ Prettier; GitHub Actions CI. No database, auth, or AI yet (later phases).
+design system; **Framer Motion** motion primitives (animated Button, reveal/stagger, page
+transitions, `layoutId` nav indicator, count-up, hover-depth) + **dark mode** (CSS-variable
+theming, toggle, `prefers-color-scheme` default); bilingual EN/AR with RTL/LTR flipping;
+responsive nav; placeholder pages for all routes; Supabase client + service accessors wired
+via env; React Query provider; Vitest + ESLint + Prettier; GitHub Actions CI.
+
+Phase 2 delivered: 15 migrations in `supabase/migrations/` — **53 tables, all with RLS
+(deny-by-default), 60 policies, 15 enums, 6 private storage buckets**, seeds (settings, plans,
+job registry), and the four-stage communication schema. Includes the approved improvements:
+soft delete, moderation versioning, AI-usage analytics (`ai_requests`), and immutable
+`settings_history`. Verified on remote (RLS negatives pass; protected inserts → 401). No Edge
+Functions or feature UI yet — those arrive per phase.
 
 ## Tech stack
 
@@ -83,8 +94,34 @@ moderation. Message types: `text | voice | image | video`, each via its own Edge
 (`send-text-message`, `send-voice-message`, `send-image-message`, `send-video-message`). Private
 buckets `chat-voice`, `chat-images`, `chat-videos` via signed URLs.
 
+## Database (Phase 2) — schema, RLS, migrations
+
+- **Migrations-first.** All schema lives in `supabase/migrations/` (timestamped SQL). Never
+  edit an applied migration; add a new one. Apply with `supabase db push` (prompts for the DB
+  password — ask the user; never store it, never request the service_role key).
+- **Enums** are the source of truth for journey stage, roles, tier, message type, moderation
+  verdict/mode, verification/interest/media status — defined in `20260709120000_foundation.sql`.
+- **One canonical `matches.stage`** (`interest_sent → introduction → serious_communication →
+  family → married`, + `terminated`); changed only via the (future) stage-transition function.
+- **RLS is deny-by-default on every table.** Helpers: `is_admin()`, `is_paid()`,
+  `is_match_participant()`, `is_conversation_participant()`, `guardian_has_access()` (all
+  SECURITY DEFINER). Clients **cannot** insert messages/matches/subscriptions/payments/
+  verification (RLS + explicit REVOKEs in `..._rls_hardening.sql`). Admins are structurally
+  blocked from personal finance and private conversations/assistant chats.
+- **Communication rules (Part D)** are enforced by `enforce_message_stage_rules()` (blocks
+  disallowed media per stage) + settings (`intro_messages_per_person`, `family_images_per_day`,
+  `family_videos_per_day`, …). Numeric limits live in `settings`, never in code.
+- **Append-only** (immutable) tables: `stage_history`, `audit_logs`, `settings_history`,
+  `message_moderation` (via the `prevent_mutation()` trigger).
+- **Soft delete** (`deleted_at`/`deleted_by`): profiles, matches, conversations, messages,
+  guardians, notifications.
+- **Storage buckets** (all private, signed-URL access): `profile-photos`, `identity-documents`,
+  `payment-receipts`, `chat-voice`, `chat-images`, `chat-videos`. Identity docs + chat media are
+  server-only (uploads via signed URLs from Edge Functions).
+
 ## Backend setup (per environment)
 
-Create Supabase projects (dev/staging/prod), then set `VITE_SUPABASE_URL` and
-`VITE_SUPABASE_ANON_KEY` (copy `.env.example` → `.env`). The Home page shows a live
-"Backend connected / not configured yet" badge based on these.
+Linked project: **`kondapkaroqmoduadopj`**. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+(copy `.env.example` → `.env`; anon key is public, `.env` is git-ignored). The Home page shows a
+live "Systems connected / not configured" badge. `supabase link` + `db push` need the DB
+password (ask the user at apply time).
