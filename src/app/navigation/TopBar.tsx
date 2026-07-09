@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { Bell, User } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Logo } from '@/components/Logo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { UserMenu } from './UserMenu';
 import { ROUTES } from '@/app/routes';
 import { cn } from '@/utils/cn';
 
@@ -27,9 +28,7 @@ export function TopBar() {
         <Bell className="h-[1.15rem] w-[1.15rem]" aria-hidden />
         <span className="absolute end-2 top-2 h-1.5 w-1.5 rounded-full bg-brand-500 ring-2 ring-canvas" aria-hidden />
       </NavLink>
-      <NavLink to={ROUTES.profile} className={iconLink} aria-label={t('nav.profile')}>
-        <User className="h-[1.15rem] w-[1.15rem]" aria-hidden />
-      </NavLink>
+      <UserMenu />
     </header>
   );
 }

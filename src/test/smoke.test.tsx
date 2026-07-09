@@ -11,8 +11,8 @@ describe('design system', () => {
 });
 
 describe('App shell', () => {
-  it('mounts and renders navigation landmarks', () => {
+  it('redirects unauthenticated visitors to the sign-in screen', () => {
     render(<App />);
-    expect(screen.getAllByRole('navigation').length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument();
   });
 });

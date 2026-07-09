@@ -6,6 +6,7 @@ import { Logo } from '@/components/Logo';
 import { cn } from '@/utils/cn';
 import { springLayout } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
+import { useSession } from '@/hooks/useSession';
 import { primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
 
 function SidebarLink({ item }: { item: NavItem }) {
@@ -54,16 +55,19 @@ function SidebarLink({ item }: { item: NavItem }) {
   );
 }
 
-function GroupLabel({ children }: { children: string }) {
-  return (
-    <p className="px-3 pb-1.5 pt-5 text-[0.7rem] font-semibold uppercase tracking-wider text-faint">
-      {children}
-    </p>
-  );
-}
-
 export function Sidebar() {
   const { t } = useTranslation();
+  const { profile, hasRole } = useSession();
+
+  // Role items appear only for users who actually hold the role (real gating).
+  const roleItems = roleNav.filter((item) =>
+    item.key === 'admin' ? hasRole('admin', 'super_admin') : hasRole('guardian'),
+  );
+
+  const name = profile?.display_name ?? t('common.guest');
+  const initial = (profile?.display_name?.[0] ?? t('common.guestInitial')).toUpperCase();
+  const tier = profile?.subscription_tier ?? 'free';
+
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-e border-line bg-surface/70 backdrop-blur md:flex">
       <div className="flex h-16 items-center px-5">
@@ -75,10 +79,14 @@ export function Sidebar() {
           <SidebarLink key={item.key} item={item} />
         ))}
 
-        <GroupLabel>{t('nav.rolePreview')}</GroupLabel>
-        {roleNav.map((item) => (
-          <SidebarLink key={item.key} item={item} />
-        ))}
+        {roleItems.length > 0 ? (
+          <>
+            <div className="my-2 border-t border-line" />
+            {roleItems.map((item) => (
+              <SidebarLink key={item.key} item={item} />
+            ))}
+          </>
+        ) : null}
 
         <div className="mt-auto pt-4">
           <SidebarLink item={settingsNav} />
@@ -88,11 +96,11 @@ export function Sidebar() {
       <div className="border-t border-line p-3">
         <div className="flex items-center gap-3 rounded-xl px-2 py-1.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-sm font-semibold text-brand-800">
-            {t('common.guestInitial')}
+            {initial}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink">{t('common.guest')}</p>
-            <p className="truncate text-xs text-faint">{t('common.freeMember')}</p>
+            <p className="truncate text-sm font-medium text-ink">{name}</p>
+            <p className="truncate text-xs text-faint">{t(`tier.${tier}`)}</p>
           </div>
         </div>
       </div>

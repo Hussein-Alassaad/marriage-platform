@@ -9,8 +9,12 @@ export const ROUTES = {
   settings: '/settings',
   admin: '/admin',
   guardian: '/guardian',
+  verifyPhone: '/verify-phone',
   login: '/login',
   register: '/register',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  authCallback: '/auth/callback',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

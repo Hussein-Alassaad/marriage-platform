@@ -23,5 +23,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    // Keep tests hermetic: no Supabase env → the client is null → the session
+    // resolves to "unauthenticated" without any network calls.
+    env: {
+      VITE_SUPABASE_URL: '',
+      VITE_SUPABASE_ANON_KEY: '',
+    },
   },
 });

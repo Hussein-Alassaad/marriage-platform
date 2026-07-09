@@ -4,6 +4,7 @@
     "motto": "Find your partner. Build your future. Grow together.",
     "switchLanguage": "Switch language",
     "toggleTheme": "Toggle theme",
+    "pleaseWait": "Please wait…",
     "comingSoonTitle": "Being prepared",
     "comingSoonBody": "This part of your journey is being crafted with the same care as the rest. It arrives in an upcoming release.",
     "backendConfigured": "Systems connected",
@@ -12,6 +13,34 @@
     "guest": "Guest",
     "guestInitial": "G",
     "freeMember": "Free member"
+  },
+  "auth": {
+    "signOut": "Sign out"
+  },
+  "gender": {
+    "man": "Man",
+    "woman": "Woman"
+  },
+  "tier": {
+    "free": "Free member",
+    "serious": "Serious member",
+    "marriage_plus": "Marriage Plus"
+  },
+  "validation": {
+    "email": "Enter a valid email address.",
+    "required": "This field is required.",
+    "displayName": "Please enter your name (at least 2 characters).",
+    "password": "Password must be at least 8 characters.",
+    "passwordMatch": "Passwords do not match.",
+    "gender": "Please select an option.",
+    "minAge": "You must be at least {{minAge}} years old."
+  },
+  "verification": {
+    "gate": {
+      "title": "Verify your identity to continue",
+      "body": "Matching, interests, and communication unlock once your identity is verified — this keeps the community safe and serious. The verification flow arrives in an upcoming release.",
+      "cta": "Go to profile"
+    }
   },
   "nav": {
     "home": "Home",
@@ -71,57 +100,68 @@
         "cta": "Open finance"
       }
     },
-    "match": {
-      "title": "Match",
-      "subtitle": "Meaningful, AI-curated recommendations for serious marriage."
-    },
-    "finance": {
-      "title": "Finance",
-      "subtitle": "Build a healthy financial future together."
-    },
-    "assistant": {
-      "title": "Marriage Assistant",
-      "subtitle": "A respectful assistant for your whole marriage journey."
-    },
-    "notifications": {
-      "title": "Notifications",
-      "subtitle": "The next important step — never noise."
-    },
-    "profile": {
-      "title": "Profile",
-      "subtitle": "Your marriage profile, privacy, and verification."
-    },
-    "settings": {
-      "title": "Settings",
-      "subtitle": "Preferences, privacy, and account."
-    },
-    "admin": {
-      "title": "Admin Dashboard",
-      "subtitle": "Operate the platform without touching code."
-    },
-    "guardian": {
-      "title": "Guardian Review",
-      "subtitle": "Only the introductions explicitly shared with you."
-    },
+    "match": { "title": "Match", "subtitle": "Meaningful, AI-curated recommendations for serious marriage." },
+    "finance": { "title": "Finance", "subtitle": "Build a healthy financial future together." },
+    "assistant": { "title": "Marriage Assistant", "subtitle": "A respectful assistant for your whole marriage journey." },
+    "notifications": { "title": "Notifications", "subtitle": "The next important step — never noise." },
+    "profile": { "title": "Profile", "subtitle": "Your marriage profile, privacy, and verification." },
+    "settings": { "title": "Settings", "subtitle": "Preferences, privacy, and account." },
+    "admin": { "title": "Admin Dashboard", "subtitle": "Operate the platform without touching code." },
+    "guardian": { "title": "Guardian Review", "subtitle": "Only the introductions explicitly shared with you." },
     "login": {
       "title": "Sign in",
       "subtitle": "Welcome back to your marriage journey.",
       "email": "Email",
       "password": "Password",
       "submit": "Sign in",
+      "forgot": "Forgot password?",
       "noAccount": "New here?",
-      "registerLink": "Create an account",
-      "phase": "Authentication arrives in Phase 3."
+      "registerLink": "Create an account"
     },
     "register": {
       "title": "Create your account",
       "subtitle": "A serious, privacy-first platform for marriage.",
+      "displayName": "Display name",
       "email": "Email",
       "password": "Password",
+      "gender": "Gender",
+      "genderPlaceholder": "Select…",
+      "genderNote": "Gender is set at registration and locked after identity verification.",
+      "dob": "Date of birth",
       "submit": "Create account",
+      "checkEmailTitle": "Confirm your email",
+      "checkEmailBody": "We sent a confirmation link to {{email}}. Open it to activate your account.",
       "hasAccount": "Already have an account?",
-      "loginLink": "Sign in",
-      "phase": "Registration arrives in Phase 3."
+      "loginLink": "Sign in"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "We'll email you a secure reset link.",
+      "submit": "Send reset link",
+      "sent": "If an account exists for that email, a reset link is on its way.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "subtitle": "Enter a new password for your account.",
+      "password": "New password",
+      "confirm": "Confirm password",
+      "submit": "Update password",
+      "done": "Password updated. Redirecting…"
+    },
+    "authCallback": {
+      "title": "Finishing sign-in…",
+      "body": "If this doesn't continue automatically, return to sign in.",
+      "cta": "Go to sign in"
+    },
+    "phone": {
+      "title": "Phone verification",
+      "subtitle": "Verify your phone number to strengthen your account's trust.",
+      "phone": "Phone number",
+      "sendCode": "Send code",
+      "code": "Verification code",
+      "verify": "Verify",
+      "verified": "Your phone number is verified."
     },
     "notFound": {
       "title": "Page not found",

@@ -72,7 +72,34 @@ authentication automatically; the owner runs the import/login step.
 
 ---
 
-## 5. Pre-deploy checklist
+## 5. Supabase Auth configuration (dashboard — required for Phase 3)
+
+Set these in the Supabase dashboard for project `kondapkaroqmoduadopj`:
+
+**Auth → URL Configuration**
+- **Site URL:** the primary app origin (dev: `http://localhost:5173`; later the Vercel domain).
+- **Redirect URLs (allowlist):** add each origin the auth emails redirect back to —
+  `http://localhost:5173/**`, `http://127.0.0.1:4173/**`, and the Vercel domain `/**`.
+  The app uses `/auth/callback` (email confirmation) and `/reset-password` (recovery).
+
+**Auth → Providers → Email**
+- Keep **Confirm email** on for production. The app handles both modes: with confirmation on,
+  registration shows a "confirm your email" screen; with it off, it signs in immediately.
+- For production email delivery, configure **custom SMTP** (the default sender is rate-limited
+  and for testing only).
+
+**Auth → Providers → Phone (required for phone OTP)**
+- Enable the **Phone** provider and configure an SMS provider (Twilio / MessageBird / Vonage /
+  Textlocal) with its credentials. **Until this is configured, "Send code" on the phone
+  verification screen returns a provider error** — the flow is fully wired and will work as soon
+  as the provider is set. This is the one external setup Phase 3 needs.
+
+**Auth → Policies**
+- Minimum password length: the client enforces 8; set the Supabase minimum to match if desired.
+
+Nothing here is a secret in the repo — SMTP/SMS credentials live only in the Supabase dashboard.
+
+## 6. Pre-deploy checklist
 
 - [ ] `npm run typecheck && npm run lint && npm test && npm run build` all pass.
 - [ ] `.env` is **not** committed (`git check-ignore .env` prints `.env`).

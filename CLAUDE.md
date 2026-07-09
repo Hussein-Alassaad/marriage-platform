@@ -10,7 +10,17 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   system via Framer Motion + light/dark theming).
 - **Phase 2 — Database Schema, RLS & Settings Engine: complete** (applied to the linked
   Supabase project `kondapkaroqmoduadopj`).
-- **Next: Phase 3 — Authentication, Roles & Route Guards** (see `docs/Roadmap.md`).
+- **Phase 3 — Authentication, Roles & Route Guards: complete.**
+- **Next: Phase 4 — Profile System & Onboarding** (see `docs/Roadmap.md`).
+
+Phase 3 delivered: Supabase Auth wired via `authService` + `SessionProvider`/`useSession`
+(session, profile, roles, verification status); register (display name, email, password,
+**gender + DOB validated against the `min_age` setting**), login, logout, forgot/reset password,
+email-confirmation callback, and a **phone-OTP** flow (needs an SMS provider — see
+`docs/Deployment.md`). Route guards: `RequireAuth`, `RequireRole` (admin/guardian from real
+`user_roles`), `RequireVerified` (matchmaking gate). Sidebar role nav + a user menu with sign
+out. Forms use React Hook Form + Zod. One additive migration extends `handle_new_user` to persist
+DOB. Frontend checks are UX only — RLS/triggers remain the real boundary.
 
 Phase 1 delivered: Vite + React 18 + TS (strict) app shell; Tailwind v4 emerald/off-white
 design system; **Framer Motion** motion primitives (animated Button, reveal/stagger, page
