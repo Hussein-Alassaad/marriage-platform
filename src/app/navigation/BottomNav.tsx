@@ -33,7 +33,7 @@ export function BottomNav() {
                     <motion.span
                       layoutId="bottomnav-active"
                       transition={springLayout}
-                      className="absolute inset-0 z-0 rounded-xl bg-brand-50"
+                      className="absolute inset-0 z-0 rounded-xl border border-[color:var(--color-border-accent)] [background:linear-gradient(180deg,var(--color-brand-wash),transparent)]"
                     />
                   ) : null}
                   <Icon className="relative z-10 h-5 w-5" aria-hidden />

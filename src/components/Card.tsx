@@ -15,7 +15,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     <div
       ref={ref}
       className={cn(
-        'rounded-card border border-line bg-surface p-6 shadow-card',
+        'rounded-card border border-line bg-surface p-6 [box-shadow:var(--shadow-card),var(--inner-hi)]',
         interactive && 'lift cursor-default',
         className,
       )}

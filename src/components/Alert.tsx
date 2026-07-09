@@ -5,14 +5,17 @@ import { cn } from '@/utils/cn';
 export type AlertVariant = 'danger' | 'success' | 'info';
 
 const variantClasses: Record<AlertVariant, string> = {
-  danger: 'bg-red-50 text-danger ring-red-100',
-  success: 'bg-brand-50 text-success ring-brand-100',
-  info: 'bg-blue-50 text-info ring-blue-100',
+  danger: 'bg-danger-wash text-danger ring-danger/25',
+  success: 'bg-success-wash text-success ring-success/25',
+  info: 'bg-info-wash text-info ring-info/25',
 };
 
 export function Alert({ variant = 'danger', children }: { variant?: AlertVariant; children: ReactNode }) {
   return (
-    <div className={cn('rounded-lg px-3 py-2 text-sm ring-1 ring-inset', variantClasses[variant])} role="alert">
+    <div
+      className={cn('rounded-md px-3.5 py-2.5 text-sm ring-1 ring-inset', variantClasses[variant])}
+      role="alert"
+    >
       {children}
     </div>
   );

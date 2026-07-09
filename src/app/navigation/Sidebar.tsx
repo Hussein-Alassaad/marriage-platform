@@ -18,8 +18,8 @@ function SidebarLink({ item }: { item: NavItem }) {
       end={item.path === ROUTES.home}
       className={({ isActive }) =>
         cn(
-          'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-          isActive ? 'text-brand-800' : 'text-muted hover:bg-canvas hover:text-ink',
+          'group relative flex h-12 items-center gap-3 rounded-md px-4 text-[0.9rem] font-medium transition-colors',
+          isActive ? 'text-brand-700' : 'text-muted hover:bg-bg-3 hover:text-ink',
         )
       }
     >
@@ -29,15 +29,15 @@ function SidebarLink({ item }: { item: NavItem }) {
             <motion.span
               layoutId="sidebar-active"
               transition={springLayout}
-              className="absolute inset-0 z-0 rounded-xl bg-brand-50"
+              className="absolute inset-0 z-0 rounded-md border border-[color:var(--color-border-accent)] [background:linear-gradient(90deg,var(--color-brand-wash),transparent)]"
             >
-              <span className="absolute inset-y-1.5 start-0 w-1 rounded-full bg-brand-600" />
+              <span className="absolute inset-y-3 start-0 w-[3px] rounded-full bg-brand-400" />
             </motion.span>
           ) : null}
           <Icon
             className={cn(
-              'relative z-10 h-[1.15rem] w-[1.15rem] shrink-0 transition-colors',
-              isActive ? 'text-brand-600' : 'text-faint group-hover:text-muted',
+              'relative z-10 h-5 w-5 shrink-0 transition-colors',
+              isActive ? 'text-brand-500' : 'text-faint group-hover:text-muted',
             )}
             aria-hidden
           />
@@ -69,8 +69,8 @@ export function Sidebar() {
   const tier = profile?.subscription_tier ?? 'free';
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-e border-line bg-surface/70 backdrop-blur md:flex">
-      <div className="flex h-16 items-center px-5">
+    <aside className="hidden w-72 shrink-0 flex-col border-e border-line bg-panel md:flex">
+      <div className="flex h-[72px] items-center px-5">
         <Logo />
       </div>
 

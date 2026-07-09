@@ -15,12 +15,12 @@ export function EmptyState({ icon: Icon, title, description, action, className }
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-card border border-line bg-surface px-6 py-16 text-center shadow-card',
+        'flex flex-col items-center justify-center rounded-card border border-line bg-surface px-6 py-16 text-center [box-shadow:var(--shadow-card),var(--inner-hi)]',
         className,
       )}
     >
       {Icon ? (
-        <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-brand-50 to-brand-100 text-brand-600 ring-1 ring-inset ring-brand-100">
+        <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-wash text-brand-600 ring-1 ring-inset ring-[color:var(--color-border-accent)] [animation:breathe-float_4s_ease-in-out_infinite]">
           <Icon className="h-6 w-6" aria-hidden />
         </span>
       ) : null}
