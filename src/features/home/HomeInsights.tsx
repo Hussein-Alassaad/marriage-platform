@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Lock, MessageCircle, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 import { HoverCard } from '@/components/motion/HoverCard';
 import { Stagger, StaggerItem } from '@/components/motion/Reveal';
+import { EASE_EXPO } from '@/lib/motion';
 import { CardDescription, CardTitle } from '@/components/Card';
 import { Badge } from '@/components/Badge';
 import { ROUTES } from '@/app/routes';
@@ -50,7 +52,7 @@ function MatchPreviewCard() {
             />
           ))}
         </div>
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink/80 text-white">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-on-brand">
           <Lock className="h-3 w-3" aria-hidden />
         </span>
       </div>
@@ -84,8 +86,15 @@ function FinanceCard() {
       </span>
       <CardTitle className="mt-5">{t('page.home.finance.title')}</CardTitle>
       <CardDescription>{t('page.home.finance.body')}</CardDescription>
-      <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-line" aria-hidden>
-        <div className="h-full w-[8%] rounded-full bg-brand-400" />
+      <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-bg-4" aria-hidden>
+        <motion.div
+          className="h-full origin-left rounded-full rtl:origin-right [background:linear-gradient(90deg,var(--color-brand-500),var(--color-brand-300))]"
+          style={{ width: '8%' }}
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.9, ease: EASE_EXPO }}
+        />
       </div>
       <InsightLink to={ROUTES.finance} label={t('page.home.finance.cta')} />
     </HoverCard>

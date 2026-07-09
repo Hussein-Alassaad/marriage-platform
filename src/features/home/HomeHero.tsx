@@ -6,6 +6,8 @@ import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } fro
 
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
+import { AuroraBackground } from '@/components/motion/AuroraBackground';
+import { GeometricVeil } from '@/components/motion/GeometricVeil';
 import { ROUTES } from '@/app/routes';
 import { isSupabaseConfigured } from '@/services/backendService';
 import { EASE_OUT_EXPO, revealVariants } from '@/lib/motion';
@@ -91,23 +93,23 @@ export function HomeHero() {
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
       onPointerMove={parallaxOn ? handleMove : undefined}
       onPointerLeave={parallaxOn ? handleLeave : undefined}
-      className="relative overflow-hidden rounded-card shadow-card ring-1 ring-inset ring-brand-100/70"
+      className="relative overflow-hidden rounded-card border border-line bg-surface [box-shadow:var(--shadow-card),var(--inner-hi)]"
     >
-      {/* Background layer parallaxes opposite to the headline. Oversized so the
-          drift never reveals an edge. */}
+      {/* Layer order (back→front): surface → hero wash (parallax) → aurora drift
+          → geometric veil → content. */}
       <motion.div
         aria-hidden
         style={{ x: bgX, y: bgY }}
         className="hero-gradient pointer-events-none absolute -inset-6"
-      >
-        <span className="absolute end-10 top-4 h-64 w-64 rounded-full bg-brand-400/15 blur-3xl" />
-      </motion.div>
+      />
+      <AuroraBackground />
+      <GeometricVeil />
 
-      <div className="relative px-6 py-9 sm:px-10 sm:py-12">
+      <div className="relative px-6 py-10 sm:px-12 sm:py-14">
         <div className="max-w-2xl">
           <motion.span
             variants={revealVariants}
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface/70 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100 backdrop-blur"
+            className="inline-flex items-center gap-1.5 rounded-full bg-brand-wash px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-[color:var(--color-border-accent)] backdrop-blur"
           >
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {t('page.home.eyebrow')}
