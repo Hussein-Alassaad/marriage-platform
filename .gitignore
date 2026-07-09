@@ -24,3 +24,8 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# Supabase local state (never commit) — schema/migrations ARE committed in Phase 2
+supabase/.branches
+supabase/.temp
+supabase/.env
