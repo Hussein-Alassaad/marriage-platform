@@ -1,0 +1,90 @@
+# CLAUDE.md — AI-Powered Marriage Platform
+
+Context for every Claude Code session. Read this first. The authoritative specs live in
+`docs/`: **PRD.md**, **Implementation-Decisions.md**, **Architecture.md**, **Roadmap.md**,
+**Development-Handbook.md**. When this file and a doc disagree, the docs win — update this file.
+
+## Current status
+
+- **Phase 1 — Project Foundation & Design System: complete.**
+- **Next: Phase 2 — Database Schema, RLS & Settings Engine** (see `docs/Roadmap.md`).
+
+Phase 1 delivered: Vite + React 18 + TS (strict) app shell; Tailwind v4 emerald/off-white
+design system; bilingual EN/AR with RTL/LTR flipping; responsive nav (sidebar / top bar /
+mobile bottom nav); placeholder pages for all routes; Supabase client + service accessors
+(Auth, Storage, Realtime, Edge Functions) wired via env; React Query provider; Vitest + ESLint
++ Prettier; GitHub Actions CI. No database, auth, or AI yet (later phases).
+
+## Tech stack
+
+React 18 · TypeScript (strict) · Vite 6 · Tailwind CSS **v4** (CSS-first `@theme` in
+`src/index.css`, `@tailwindcss/vite` plugin — no `tailwind.config.js`) · React Router 6 ·
+TanStack React Query · i18next · Lucide icons · Supabase JS. Backend (Supabase: Postgres, Auth,
+Storage, Realtime, Edge Functions) is wired but unschemad until Phase 2.
+
+## Commands
+
+```bash
+npm run dev         # start dev server
+npm run build       # tsc -b && vite build
+npm run typecheck   # tsc -b
+npm run lint        # eslint .
+npm test            # vitest run
+npm run format      # prettier --write .
+```
+
+## Architecture guardrails (do not break these)
+
+- **No business logic in components.** Components render; data/logic lives in `services/` →
+  hooks → components. Components never import the Supabase client directly (use `services/`).
+- **No client writes to protected tables.** Messages, matches, subscriptions, payments, and
+  verification are written only by Edge Functions. If a feature "needs" a client insert, the
+  answer is a new Edge Function. Clients never insert messages of any type.
+- **No hardcoded limits, prices, thresholds, or user-facing strings.** Tunables come from the
+  `settings` table (Phase 2+); all copy comes from `src/i18n/locales/{en,ar}.json`.
+- **No secrets in the frontend.** Only `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (public
+  anon key). Service-role / AI / payment keys live only in Edge Function env.
+- **Fail-closed rules are sacred** (later phases): moderation unavailable → message not sent;
+  photo permission check fails → blurred/denied. Never "fail open for better UX."
+- **RTL is first-class.** Use Tailwind **logical** utilities (`ms-/me-/ps-/pe-`, `border-s/-e`,
+  `start-/end-`) — never `left/right`. Direction flips via `dir` on `<html>` (LanguageProvider).
+- **One canonical journey stage** (Phase 2+): `introduction → serious_communication → family →
+  married` (+ `interest_sent`, `terminated`), changed only via the `stage-transition` function.
+- Every async view needs loading (Skeleton), empty (EmptyState), and error states — no blank
+  screens. `any` is banned; `strict` stays on.
+
+## Folder conventions (Architecture §16 — do not add new top-level folders)
+
+```
+src/
+  app/         App, providers, router, routes, layouts/, navigation/
+  components/  Design system only (no domain knowledge): Button, Card, Input, Modal, Badge,
+               Skeleton, EmptyState, PageHeader, ComingSoon, Logo, LanguageSwitcher
+  features/    One folder per domain (home, match, finance, assistant, notifications, profile,
+               settings, admin, guardian, auth, errors). Features never import from each other.
+  contexts/    LanguageContext (session/theme later)
+  hooks/       useLanguage, useDirection (useAuth, useJourneyStage, useSettings later)
+  lib/         supabase client, queryClient
+  services/    backendService (domain services added per phase); the only Supabase callers
+  i18n/        i18next setup + locales/en.json, ar.json
+  utils/       cn() and formatters
+  test/        Vitest setup + tests
+```
+
+Design-system components never import from `features/`. Feature components never import from
+other features — shared needs move to `components/`, `hooks/`, or `utils/`.
+
+## Communication stages & media (Decisions Part D — for Phases 8 & 10)
+
+Introduction = **text only** (10/person). Serious = text + **unlimited voice** (record →
+transcribe → moderate → deliver; fail-closed). Family = + **images/videos** (default 3 img/day,
+2 vid/day, admin-configurable); contact info now allowed. Married = all media, safety-only
+moderation. Message types: `text | voice | image | video`, each via its own Edge Function
+(`send-text-message`, `send-voice-message`, `send-image-message`, `send-video-message`). Private
+buckets `chat-voice`, `chat-images`, `chat-videos` via signed URLs.
+
+## Backend setup (per environment)
+
+Create Supabase projects (dev/staging/prod), then set `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_ANON_KEY` (copy `.env.example` → `.env`). The Home page shows a live
+"Backend connected / not configured yet" badge based on these.

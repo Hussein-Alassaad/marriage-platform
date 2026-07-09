@@ -1,0 +1,131 @@
+{
+  "common": {
+    "appName": "Marriage Platform",
+    "motto": "Find your partner. Build your future. Grow together.",
+    "switchLanguage": "Switch language",
+    "toggleTheme": "Toggle theme",
+    "comingSoonTitle": "Being prepared",
+    "comingSoonBody": "This part of your journey is being crafted with the same care as the rest. It arrives in an upcoming release.",
+    "backendConfigured": "Systems connected",
+    "backendNotConfigured": "Backend not configured",
+    "backHome": "Back to home",
+    "guest": "Guest",
+    "guestInitial": "G",
+    "freeMember": "Free member"
+  },
+  "nav": {
+    "home": "Home",
+    "match": "Match",
+    "finance": "Finance",
+    "assistant": "Marriage Assistant",
+    "assistantShort": "Assistant",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "settings": "Settings",
+    "admin": "Admin Dashboard",
+    "guardian": "Guardian Review",
+    "rolePreview": "Role views"
+  },
+  "page": {
+    "home": {
+      "eyebrow": "Privacy-first · Marriage-focused",
+      "greeting": "Welcome back",
+      "subtitle": "A calm, considered space to find a compatible partner — and to prepare for a marriage that lasts.",
+      "ctaPrimary": "Continue your journey",
+      "ctaSecondary": "Complete your profile",
+      "trustVerified": "Verified community",
+      "trustPrivate": "Private by design",
+      "journey": {
+        "eyebrow": "Your journey",
+        "title": "Every step toward marriage, in one place",
+        "subtitle": "You're just getting started. Here's the path ahead — you move at your own pace.",
+        "next": "Next step",
+        "nextDetail": "Verify your identity to unlock private, compatibility-based matching.",
+        "cta": "Verify identity",
+        "stepOf": "Step {{current}} of {{total}}",
+        "stages": {
+          "account": "Account",
+          "verify": "Identity",
+          "profile": "Profile",
+          "matching": "Matching",
+          "introduction": "Introduction",
+          "family": "Family",
+          "married": "Marriage"
+        }
+      },
+      "match": {
+        "title": "Your matches, curated",
+        "body": "Compatibility-ranked introductions — never endless browsing. Your first recommendations arrive after verification.",
+        "badge": "Preview",
+        "locked": "Privately curated",
+        "metric": "avg. compatibility"
+      },
+      "assistant": {
+        "title": "Marriage Assistant",
+        "body": "From preparing for marriage to a respectful first conversation — thoughtful guidance whenever you need it.",
+        "cta": "Ask the assistant"
+      },
+      "finance": {
+        "title": "Build your future together",
+        "body": "Plan a wedding budget and shared goals — tools that keep working long after the wedding day.",
+        "cta": "Open finance"
+      }
+    },
+    "match": {
+      "title": "Match",
+      "subtitle": "Meaningful, AI-curated recommendations for serious marriage."
+    },
+    "finance": {
+      "title": "Finance",
+      "subtitle": "Build a healthy financial future together."
+    },
+    "assistant": {
+      "title": "Marriage Assistant",
+      "subtitle": "A respectful assistant for your whole marriage journey."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "The next important step — never noise."
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Your marriage profile, privacy, and verification."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Preferences, privacy, and account."
+    },
+    "admin": {
+      "title": "Admin Dashboard",
+      "subtitle": "Operate the platform without touching code."
+    },
+    "guardian": {
+      "title": "Guardian Review",
+      "subtitle": "Only the introductions explicitly shared with you."
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back to your marriage journey.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "New here?",
+      "registerLink": "Create an account",
+      "phase": "Authentication arrives in Phase 3."
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "A serious, privacy-first platform for marriage.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "phase": "Registration arrives in Phase 3."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "subtitle": "The page you're looking for doesn't exist or has moved."
+    }
+  }
+}
