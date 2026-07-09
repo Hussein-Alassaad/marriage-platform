@@ -1,17 +1,30 @@
 @import 'tailwindcss';
 
-/*
- * Design tokens — a calm, premium, marriage-first identity.
- * Light values live in @theme (so Tailwind generates utilities from them); the
- * dark palette re-tints the same CSS variables under [data-theme='dark'], so
- * every utility (bg-canvas, text-ink, bg-brand-50, …) shifts with the theme
- * without touching a single component class.
- */
+/* Theme is driven by [data-theme] (not prefers-color-scheme), so re-point
+ * Tailwind's `dark:` variant at it — lets components use `dark:…` utilities. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ============================================================================
+ * MITHAQ (ميثاق) — the design language of the covenant.
+ * Pillars: Sakinah (tranquil motion) · Amanah (trust through depth, not noise) ·
+ * Karamah (dignity — soft semantic colour, never harsh red) · Barakah (gold is
+ * reserved for milestone moments only).
+ *
+ * Tokens live here (Tailwind v4 is CSS-first — there is no config file). Light
+ * values sit in @theme so Tailwind generates utilities from them; the dark
+ * palette (MITHAQ's primary designed target) re-tints the SAME variables under
+ * [data-theme='dark'], so every utility shifts with the theme untouched.
+ * Legacy semantic names (canvas/surface/ink/muted/line/brand-*) are preserved
+ * and simply re-pointed onto the MITHAQ palette, so existing components adopt
+ * the new identity without churn.
+ * ==========================================================================*/
 @theme {
+  /* ── Type ─────────────────────────────────────────────────────────────── */
   --font-sans:
     'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', 'Amiri', ui-serif, Georgia, 'Times New Roman', serif;
 
-  /* Brand — deep emerald (light) */
+  /* ── Brand — emerald (light values; interactive steps sit one darker) ──── */
   --color-brand-50: #ecfdf5;
   --color-brand-100: #d1fae5;
   --color-brand-200: #a7f3d0;
@@ -22,95 +35,179 @@
   --color-brand-700: #047857;
   --color-brand-800: #065f46;
   --color-brand-900: #064e3b;
+  --color-brand-wash: rgba(5, 150, 105, 0.1);
+  --color-on-brand: #04110b;
 
-  /* Surfaces & text — slate-tinted neutrals (light) */
-  --color-canvas: #f6f7f7;
+  /* ── Gold (Barakah) — milestones only, ≤1 per screen ──────────────────── */
+  --color-gold-300: #b8901f;
+  --color-gold-400: #a88420;
+  --color-gold-500: #c9a227;
+  --color-gold-wash: rgba(201, 162, 39, 0.12);
+
+  /* ── Surfaces & text — MITHAQ light (§2.2) ────────────────────────────── */
+  --color-bg-0: #f6faf8;
+  --color-bg-1: #ffffff;
+  --color-bg-2: #ffffff;
+  --color-bg-3: #eff5f1;
+  --color-bg-4: #e7efea;
+
+  /* Legacy aliases → MITHAQ surfaces */
+  --color-canvas: #f6faf8;
   --color-surface: #ffffff;
-  --color-raised: #ffffff;
-  --color-ink: #0f172a;
-  --color-ink-soft: #334155;
-  --color-muted: #64748b;
-  --color-faint: #94a3b8;
-  --color-line: #e8eaee;
-  --color-line-strong: #d7dae1;
+  --color-panel: #ffffff;
+  --color-raised: #eff5f1;
 
-  /* Status */
+  --color-text-1: #0e1f18;
+  --color-text-2: #3f544b;
+  --color-text-3: #6c8078;
+  --color-text-4: #93a49c;
+  /* Legacy aliases → MITHAQ text ramp */
+  --color-ink: #0e1f18;
+  --color-ink-soft: #3f544b;
+  --color-muted: #6c8078;
+  --color-faint: #93a49c;
+
+  --color-border-1: rgba(10, 31, 23, 0.08);
+  --color-border-2: rgba(10, 31, 23, 0.14);
+  --color-border-accent: rgba(5, 150, 105, 0.35);
+  /* Legacy aliases */
+  --color-line: rgba(10, 31, 23, 0.08);
+  --color-line-strong: rgba(10, 31, 23, 0.14);
+
+  /* ── Semantic status — dignity: danger is soft coral, never pure red ──── */
   --color-success: #059669;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-info: #2563eb;
+  --color-warning: #c07d1f;
+  --color-danger: #c25a52;
+  --color-info: #2b7fb0;
+  --color-success-wash: rgba(5, 150, 105, 0.1);
+  --color-warning-wash: rgba(245, 184, 76, 0.14);
+  --color-danger-wash: rgba(229, 114, 106, 0.12);
+  --color-info-wash: rgba(43, 127, 176, 0.1);
 
+  /* ── Radii (§2.4) ─────────────────────────────────────────────────────── */
+  --radius-xs: 0.375rem; /* 6 */
+  --radius-sm: 0.625rem; /* 10 */
+  --radius-md: 0.875rem; /* 14 */
+  --radius-lg: 1.25rem; /* 20 */
+  --radius-xl: 1.5rem; /* 24 */
   --radius-card: 1.25rem;
+  --radius-pill: 999px;
 
-  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.1);
-  --shadow-elevated: 0 2px 6px rgb(15 23 42 / 0.06), 0 20px 48px -16px rgb(15 23 42 / 0.18);
-  --shadow-glow: 0 1px 2px rgb(4 120 87 / 0.12), 0 12px 32px -12px rgb(4 120 87 / 0.28);
+  /* ── Elevation (MITHAQ light e1/e2/e3) — legacy names remapped ────────── */
+  --shadow-xs: 0 1px 2px rgba(10, 31, 23, 0.06);
+  --shadow-e1: 0 1px 2px rgba(10, 31, 23, 0.06);
+  --shadow-card: 0 6px 20px rgba(10, 31, 23, 0.08);
+  --shadow-e2: 0 6px 20px rgba(10, 31, 23, 0.08);
+  --shadow-elevated: 0 16px 48px rgba(10, 31, 23, 0.12);
+  --shadow-e3: 0 16px 48px rgba(10, 31, 23, 0.12);
+  --shadow-glow: 0 8px 28px rgba(5, 150, 105, 0.22);
 
-  --animate-fade-up: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-fade-in: fade-in 0.35s ease-out both;
+  /* ── Named animations ─────────────────────────────────────────────────── */
+  --animate-fade-up: fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade-in: fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Primary-button colours as their own tokens so the button never depends on the
- * brand ramp doubling as both a fill and accent-text colour across themes. */
+/* Non-utility tokens (effects that aren't Tailwind colour/space scales). */
 :root {
-  --btn-primary-bg: #047857;
-  --btn-primary-bg-hover: #059669;
+  --inner-hi: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --glow-brand: 0 8px 28px rgba(5, 150, 105, 0.22);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-blur: blur(12px);
+
+  --btn-primary-bg: #059669;
+  --btn-primary-bg-hover: #047857;
   --btn-primary-fg: #ffffff;
+  --btn-gold-bg: linear-gradient(135deg, #d8b74e, #c9a227);
+  --btn-gold-fg: #241a02;
 }
 
-/* ── Dark theme ─────────────────────────────────────────────────────────────
- * Near-black slate surfaces, off-white ink, and a slightly desaturated accent
- * that reads calm (not glowing) on dark. Brand tints (50–200) become dark-green
- * surfaces; brand text steps (600–800) become light greens legible on dark. */
+/* ── Dark theme — MITHAQ's primary designed target (§2.1) ───────────────────
+ * Near-black canvas, calm emerald accent, off-white ink. Every legacy and
+ * MITHAQ token is re-tinted; utilities reference the vars so nothing else
+ * needs to change. */
 :root[data-theme='dark'] {
-  --color-brand-50: #12271f;
-  --color-brand-100: #183327;
+  --color-brand-50: #0f241b;
+  --color-brand-100: #14301f;
   --color-brand-200: #204331;
-  --color-brand-300: #2b5a45;
-  --color-brand-400: #35d996;
-  --color-brand-500: #2fcf90;
-  --color-brand-600: #45d9a3;
-  --color-brand-700: #63e0b0;
-  --color-brand-800: #8fefc9;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #34d399;
+  --color-brand-800: #6ee7b7;
   --color-brand-900: #0c3a2e;
+  --color-brand-wash: rgba(16, 185, 129, 0.12);
+  --color-on-brand: #04110b;
 
-  --color-canvas: #0c1116;
-  --color-surface: #141b23;
-  --color-raised: #1a222c;
-  --color-ink: #e7ebf0;
-  --color-ink-soft: #c4cbd6;
-  --color-muted: #93a0b0;
-  --color-faint: #64717f;
-  --color-line: #232c37;
-  --color-line-strong: #313c49;
+  --color-gold-300: #efd9a7;
+  --color-gold-400: #e3c567;
+  --color-gold-500: #c9a227;
+  --color-gold-wash: rgba(201, 162, 39, 0.12);
 
-  --color-success: #35d996;
-  --color-warning: #f0b25a;
-  --color-danger: #f87171;
-  --color-info: #60a5fa;
+  --color-bg-0: #0a0f0d;
+  --color-bg-1: #0d1411;
+  --color-bg-2: #111a16;
+  --color-bg-3: #16211c;
+  --color-bg-4: #1b2822;
+  --color-canvas: #0a0f0d;
+  --color-surface: #111a16;
+  --color-panel: #0d1411;
+  --color-raised: #16211c;
 
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.55);
-  --shadow-elevated: 0 2px 6px rgb(0 0 0 / 0.5), 0 20px 48px -16px rgb(0 0 0 / 0.7);
-  --shadow-glow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(53 217 150 / 0.25);
+  --color-text-1: #eef5f1;
+  --color-text-2: #a9bab2;
+  --color-text-3: #74857d;
+  --color-text-4: #4c5a53;
+  --color-ink: #eef5f1;
+  --color-ink-soft: #a9bab2;
+  --color-muted: #74857d;
+  --color-faint: #4c5a53;
 
-  --btn-primary-bg: #0f9b71;
-  --btn-primary-bg-hover: #14b183;
-  --btn-primary-fg: #05160f;
+  --color-border-1: rgba(255, 255, 255, 0.06);
+  --color-border-2: rgba(255, 255, 255, 0.11);
+  --color-border-accent: rgba(52, 211, 153, 0.3);
+  --color-line: rgba(255, 255, 255, 0.06);
+  --color-line-strong: rgba(255, 255, 255, 0.11);
+
+  --color-success: #34d399;
+  --color-warning: #f5b84c;
+  --color-danger: #e5726a;
+  --color-info: #7dd3fc;
+  --color-success-wash: rgba(52, 211, 153, 0.12);
+  --color-warning-wash: rgba(245, 184, 76, 0.12);
+  --color-danger-wash: rgba(229, 114, 106, 0.12);
+  --color-info-wash: rgba(125, 211, 252, 0.1);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-e1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-e2: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-e3: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 8px 28px rgba(16, 185, 129, 0.35);
+
+  --inner-hi: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glow-brand: 0 8px 28px rgba(16, 185, 129, 0.35);
+  --glass-bg: rgba(13, 20, 17, 0.72);
+
+  --btn-primary-bg: #10b981;
+  --btn-primary-bg-hover: #34d399;
+  --btn-primary-fg: #04110b;
+  --btn-gold-bg: linear-gradient(135deg, #e3c567, #c9a227);
+  --btn-gold-fg: #241a02;
 }
 
+/* ── Keyframes ─────────────────────────────────────────────────────────── */
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
-
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -119,13 +216,69 @@
     opacity: 1;
   }
 }
-
 @keyframes shimmer {
   from {
     background-position: 200% 0;
   }
   to {
     background-position: -200% 0;
+  }
+}
+/* Aurora drift — pre-blurred radial gradients translating slowly (no filter). */
+@keyframes aurora-a {
+  0%,
+  100% {
+    transform: translate3d(-4%, -3%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(5%, 4%, 0) scale(1.06);
+  }
+}
+@keyframes aurora-b {
+  0%,
+  100% {
+    transform: translate3d(4%, 3%, 0) scale(1.04);
+  }
+  50% {
+    transform: translate3d(-5%, -4%, 0) scale(1);
+  }
+}
+/* Breathing halo for the current journey node / live dots. */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  70%,
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Gentle float for empty-state / decorative icon tiles. */
+@keyframes breathe-float {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
   }
 }
 
@@ -136,76 +289,136 @@
   }
 
   body {
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
+    background-color: var(--color-bg-0);
+    color: var(--color-text-1);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
-  [dir='rtl'] body {
-    font-family: 'IBM Plex Sans Arabic', 'Inter', ui-sans-serif, system-ui, sans-serif;
-    font-feature-settings: normal;
-  }
-
+  /* Display face on headings — set at element level so existing size utilities
+   * still win; only the family changes. Fraunces (Latin) / Amiri (Arabic). */
   h1,
   h2,
   h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
     letter-spacing: -0.02em;
+  }
+
+  /* Arabic: display face = Amiri, body = IBM Plex Sans Arabic; taller leading,
+   * no negative tracking, no uppercase (weight/colour carry emphasis). */
+  [dir='rtl'] body {
+    font-family: 'IBM Plex Sans Arabic', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.75;
+    font-feature-settings: normal;
   }
   [dir='rtl'] h1,
   [dir='rtl'] h2,
   [dir='rtl'] h3 {
+    font-family: 'Amiri', var(--font-display);
+    font-weight: 700;
     letter-spacing: normal;
+  }
+  [dir='rtl'] .uppercase {
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  /* Tabular figures for finance/admin numerics. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--color-brand-wash);
+    color: var(--color-text-1);
+  }
+
+  /* Refined scrollbars (§4.12). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-2) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-border-2);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-accent);
+    background-clip: content-box;
   }
 }
 
 @layer components {
   .app-backdrop {
     background:
-      radial-gradient(48rem 48rem at 100% -8%, rgb(5 120 87 / 0.05), transparent 60%),
-      radial-gradient(42rem 42rem at 0% -6%, rgb(16 185 129 / 0.035), transparent 58%),
-      var(--color-canvas);
-  }
-  :root[data-theme='dark'] .app-backdrop {
-    background:
-      radial-gradient(48rem 48rem at 100% -8%, rgb(53 217 150 / 0.06), transparent 60%),
-      radial-gradient(42rem 42rem at 0% -6%, rgb(53 217 150 / 0.04), transparent 58%),
-      var(--color-canvas);
+      radial-gradient(48rem 48rem at 100% -8%, var(--color-brand-wash), transparent 60%),
+      radial-gradient(42rem 42rem at 0% -6%, var(--color-gold-wash), transparent 58%),
+      var(--color-bg-0);
   }
 
+  /* Hero surface wash (aurora is a separate motion layer). */
   .hero-gradient {
     background:
-      radial-gradient(120% 140% at 0% 0%, rgb(6 95 70 / 0.12), transparent 55%),
-      radial-gradient(120% 150% at 100% 0%, rgb(16 185 129 / 0.1), transparent 52%),
-      linear-gradient(180deg, rgb(4 120 87 / 0.05), rgb(4 120 87 / 0.015));
+      radial-gradient(120% 140% at 0% 0%, var(--color-brand-wash), transparent 55%),
+      radial-gradient(120% 150% at 100% 0%, var(--color-gold-wash), transparent 52%),
+      var(--color-bg-2);
   }
-  :root[data-theme='dark'] .hero-gradient {
-    background:
-      radial-gradient(120% 140% at 0% 0%, rgb(53 217 150 / 0.12), transparent 55%),
-      radial-gradient(120% 150% at 100% 0%, rgb(16 185 129 / 0.1), transparent 52%),
-      linear-gradient(180deg, rgb(53 217 150 / 0.05), rgb(53 217 150 / 0.015));
+
+  /* Inner top-highlight — apply to every card for a hint of depth. */
+  .card-hi {
+    box-shadow: var(--shadow-card), var(--inner-hi);
   }
 
   .lift {
     transition:
-      transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.2s ease;
+      transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.24s ease,
+      border-color 0.24s ease;
   }
   .lift:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-elevated);
+    border-color: var(--color-border-accent);
+  }
+
+  /* Glass recipe (§2.3) — cap 3 per viewport. */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--color-border-1);
   }
 
   .shimmer {
-    background: linear-gradient(100deg, var(--color-line) 38%, var(--color-line-strong) 50%, var(--color-line) 62%);
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in srgb, var(--color-text-1) 6%, transparent) 50%,
+      transparent 80%
+    );
     background-size: 200% 100%;
-    animation: shimmer 1.6s ease-in-out infinite;
+    animation: shimmer 1.6s linear infinite;
+  }
+
+  /* Focus ring — double ring (bg gap + brand), never removed without a
+   * replacement. Applied via .focus-ring or focus-visible utilities. */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--color-bg-0),
+      0 0 0 4px var(--color-brand-400);
   }
 }
 
-/* Smooth tint shift ONLY during a theme switch (added briefly, then removed),
- * so it never slows normal hover/colour transitions. Colour props only. */
+/* Colour-only transition, added only for the duration of a theme switch. */
 .theme-transition,
 .theme-transition *,
 .theme-transition *::before,
@@ -218,6 +431,7 @@
     stroke 0.25s ease !important;
 }
 
+/* Reduced motion: kill all decorative movement; the app stays fully usable. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
