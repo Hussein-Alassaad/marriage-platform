@@ -64,6 +64,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const y = useSpring(my, { stiffness: 380, damping: 30 });
 
   const magneticOn = magnetic && pointerFine && !reduced;
+  // A green light that travels around filled CTAs (gold buttons get a gold light).
+  const showGlow = variant === 'primary' || variant === 'gold';
+  const glowGradient =
+    variant === 'gold'
+      ? 'conic-gradient(from 0deg, transparent, var(--color-gold-400), transparent 40%, var(--color-gold-500), transparent 75%, var(--color-gold-400))'
+      : 'conic-gradient(from 0deg, transparent, var(--color-brand-400), transparent 40%, var(--color-brand-600), transparent 75%, var(--color-brand-400))';
 
   const handleMagnet = (event: PointerEvent<HTMLSpanElement>) => {
     const el = wrapRef.current;
@@ -92,10 +98,28 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <motion.span
       ref={wrapRef}
       style={{ x, y }}
-      className="relative inline-flex"
+      className="relative inline-flex w-fit"
       onPointerMove={magneticOn ? handleMagnet : undefined}
       onPointerLeave={magneticOn ? resetMagnet : undefined}
     >
+      {showGlow ? (
+        // Traveling light: a conic gradient rotates inside a thin ring that is
+        // clipped to the button's shape, so a green (gold) light circles the
+        // edge without ever leaking onto the surface. The button (above) covers
+        // the center, leaving only the lit border. Static for reduced motion.
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-[2px] -z-0 overflow-hidden rounded-[1rem]"
+        >
+          <motion.span
+            className="absolute left-1/2 top-1/2 h-[240%] w-[240%] -translate-x-1/2 -translate-y-1/2 opacity-90"
+            style={{ background: glowGradient }}
+            animate={reduced ? undefined : { rotate: 360 }}
+            transition={{ duration: 4, ease: 'linear', repeat: Infinity }}
+          />
+        </span>
+      ) : null}
+
       <motion.button
         ref={ref}
         type={type}
