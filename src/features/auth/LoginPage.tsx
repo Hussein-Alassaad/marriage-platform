@@ -45,9 +45,9 @@ export function LoginPage() {
       setFormError(error.message);
       return;
     }
-    // Barakah moment, then continue.
+    // Barakah moment — confetti — then continue.
     setSucceeded(true);
-    setTimeout(() => navigate(from, { replace: true }), 900);
+    setTimeout(() => navigate(from, { replace: true }), 1100);
   });
 
   return (
@@ -63,16 +63,19 @@ export function LoginPage() {
       />
       <ConfettiBurst active={succeeded} />
 
-      {/* In-card header */}
-      <div className="flex items-center gap-2.5">
+      {/* In-card header (centered brand lockup) */}
+      <div className="flex flex-col items-center text-center">
         <Logo />
+        <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-400">
+          {t('common.tagline')}
+        </p>
       </div>
 
-      <h1 className="mt-6 font-display text-[clamp(30px,4vw,40px)] font-semibold leading-[1.1] text-ink">
+      <h1 className="mt-5 text-center font-display text-[clamp(30px,4vw,40px)] font-semibold leading-[1.1] text-ink">
         <RevealText text={t('page.login.title')} />
       </h1>
       <FadeRise immediate delay={0.25}>
-        <p className="mt-2 text-sm leading-relaxed text-muted">{t('page.login.subtitle')}</p>
+        <p className="mt-2 text-center text-sm leading-relaxed text-muted">{t('page.login.subtitle')}</p>
       </FadeRise>
 
       <form className="mt-7 flex flex-col gap-4" onSubmit={onSubmit} noValidate>

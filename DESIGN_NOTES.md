@@ -50,33 +50,35 @@ props, i18n strings and file locations are unchanged throughout.
 - Micro-interactions: magnetic sign-in button, traveling-light button ring,
   spring page/entrance transitions.
 
-## Covenant Threshold sign-in scene
+## Auth scene — luxury Islamic architecture (no characters)
 
-A cinematic auth scene: two dignified figures approach a glowing arched threshold
-from their own sides toward a glass card. Never facing each other, never touching.
+The platform is named **Mithaq** (ميثاق, "the covenant") — tagline "Together in faith".
+The sign-in scene is character-free by explicit request: a centered glass card framed
+by Islamic architectural decoration.
 
-- **Characters**: `AuthCharacter` renders your art (`<img>`) when it loads, else a
-  premium emerald **silhouette** (man / woman). Drop `char-man.png` / `char-woman.png`
-  into **`public/auth/`** (transparent WebP/PNG) and they upgrade instantly — no code
-  change. Each slides in from its own side, then breathes. RTL-aware (`flip` + `dx`).
-  (I can't generate the art — produce it from the Part-A prompts in an image tool.)
 - **Layers** (`src/features/auth/scene/`): `Starfield` (twinkle), `GeometricVeil`
-  (mashrabiya lattice, reused), `AuroraBackground` (reused), `ArchedWindow` (gold light
-  + lattice, blooms in), `Lantern` (drops in, sways + flickers), `TrustBar` (4 bilingual
-  badges, stagger). All CSS/Framer — no WebGL — for 60fps on low-end devices.
-- **Card**: arched glass (`rounded-[40px_40px_24px_24px]`, `.auth-card-glass`) with
-  emerald edge-glow; in-card header, Fraunces H1 word-reveal, `AuthField` dark-glass
-  fields (leading icon, theme-aware via `color-mix`, focus glow, error shake, password
-  eye toggle, valid check), full-width gradient button with loading spinner → success
-  check → **ConfettiBurst on successful sign-in** (Barakah, reduced-motion-safe).
-- **Choreography**: staggered entrance timeline (lantern → window → card → figures →
-  fields → trust bar), idle loops, pointer parallax at layered depths (desktop only),
-  and a one-time "homage nudge" on the card as the figures arrive.
-- **Mobile** (`useMediaQuery`): dedicated — card is the hero (full-width), figures
-  shrink to the bottom corners peeking behind the trust bar, lantern top-center,
-  parallax off. Not a shrink of desktop.
-- Auth logic / routes / validation / i18n untouched; new trust copy added as bilingual
-  `auth.trust.*` keys. `AuthMascot` (previous single character) is now superseded.
+  (mashrabiya 8-point-star lattice), `AuroraBackground` + `auth-mesh` (drifting mesh
+  gradient), `ArchedWindow` (a pointed arch with warm gold light, centered behind the
+  card as an architectural frame), twin `Lantern`s (sway + flicker), `AmbientParticles`
+  (12 slow motes), `CalligraphyVerse`, `TrustBar` (4 bilingual badges). All CSS/Framer —
+  **no WebGL** — for 60fps on average phones.
+- **Calligraphy** (`CalligraphyVerse`): Ar-Rum 30:21 in Amiri. Desktop places the four
+  words flanking the card — وَجَعَلَ / بَيْنَكُم on the left, مَوَدَّةً / وَرَحْمَةً on
+  the right — never above/below/behind the card; each floats slowly (transform+opacity).
+  Mobile recomposes to two centered lines near the top, smaller/fainter. aria-hidden.
+- **Card**: arched glass (`rounded-[40px_40px_24px_24px]`, `.auth-card-glass`) with a
+  pooled gold+emerald glow and gold top hairline; centered Mithaq brand lockup + gold
+  tagline, Fraunces H1 word-reveal, `AuthField` dark-glass fields (leading icon,
+  theme-aware via `color-mix`, focus glow, error shake, password eye toggle, valid
+  check), full-width gradient button → spinner → success check → **ConfettiBurst** on
+  sign-in (Barakah, reduced-motion-safe).
+- **Choreography**: staggered entrance, idle loops, pointer parallax at layered depths
+  (desktop only; disabled on touch + reduced motion).
+- **Mobile** (`useMediaQuery`): dedicated — card is the hero, decoration simplified
+  (one lantern, arch hidden), parallax off, lighter animation.
+- Auth logic / routes / validation / i18n untouched; bilingual `auth.trust.*`,
+  `auth.trustedBy`, `common.tagline` keys added. The earlier character components
+  (`AuthCharacter`, `AuthSceneContext`, `AuthMascot`) were removed.
 
 ## Skipped / deferred (with reason)
 

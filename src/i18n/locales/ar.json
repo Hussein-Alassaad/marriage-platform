@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "منصة الزواج",
+    "appName": "ميثاق",
+    "tagline": "معًا في الإيمان",
     "motto": "اعثر على شريكك. ابنِ مستقبلك. انموا معًا.",
     "switchLanguage": "تغيير اللغة",
     "toggleTheme": "تبديل السمة",
@@ -18,6 +19,7 @@
     "signOut": "تسجيل الخروج",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
+    "trustedBy": "موثوق به من آلاف الباحثين عن الزواج",
     "trust": {
       "privacyTitle": "الخصوصية أولاً",
       "privacyCaption": "خصوصيتك هي أولويتنا",

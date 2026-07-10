@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "Marriage Platform",
+    "appName": "Mithaq",
+    "tagline": "Together in faith",
     "motto": "Find your partner. Build your future. Grow together.",
     "switchLanguage": "Switch language",
     "toggleTheme": "Toggle theme",
@@ -18,6 +19,7 @@
     "signOut": "Sign out",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "trustedBy": "Trusted by thousands seeking marriage",
     "trust": {
       "privacyTitle": "Privacy-first",
       "privacyCaption": "Your privacy is our priority",
