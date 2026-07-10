@@ -113,6 +113,14 @@ through the **`verify-identity`** Edge Function (in `supabase/functions/`).
 - Admin approve/reject is a `{ action:'review' }` call to the same function
   (admin-gated); the admin UI arrives with the Admin phase.
 
+**`matchmaking`** powers discovery + the interest flow (cross-user profile reads
+are RLS-blocked, and `matches`/`interests` are not client-writable). Deploy:
+`supabase functions deploy matchmaking`. Same default-injected keys, no manual
+secret. Actions: `discover` (privacy-safe candidate cards; falls back to a simple
+verified/opposite-gender query until the compatibility engine runs), `connections`,
+`send-interest`, `respond-interest`. Photos are returned only when the candidate's
+visibility (and the viewer's tier) allow.
+
 ## 6. Pre-deploy checklist
 
 - [ ] `npm run typecheck && npm run lint && npm test && npm run build` all pass.

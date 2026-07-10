@@ -95,6 +95,52 @@
     "errorFile": "Use a JPG, PNG, WebP or PDF up to 10 MB.",
     "errorService": "The verification service isn't available yet. Please try again later."
   },
+  "match": {
+    "tabs": { "discover": "Discover", "connections": "Connections" },
+    "error": "Something went wrong. Please try again.",
+    "empty": {
+      "title": "No recommendations yet",
+      "body": "We're preparing thoughtful, compatibility-based introductions for you. Check back soon."
+    },
+    "age": "{{age}} yrs",
+    "new": "New",
+    "privatePhoto": "Private photo",
+    "sendInterest": "Send interest",
+    "save": "Save",
+    "saved": "Saved",
+    "pass": "Pass",
+    "interest": {
+      "title": "Send interest to {{name}}",
+      "body": "A short, sincere note travels with your interest. Keep it respectful — it's the first thing they'll read.",
+      "notePlaceholder": "Assalamu alaikum — I admired your profile and would value getting to know you with good intentions…",
+      "send": "Send interest",
+      "cancel": "Cancel",
+      "error": "Couldn't send your interest. You may already be connected."
+    },
+    "connections": {
+      "incoming": "Interests received",
+      "incomingEmpty": "No interests yet",
+      "matches": "Your matches",
+      "matchesEmpty": "No matches yet — send an interest to begin.",
+      "outgoing": "Interests sent",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "stage": {
+      "interest_sent": "Interest sent",
+      "introduction": "Introduction",
+      "serious_communication": "Serious",
+      "family": "Family",
+      "married": "Married",
+      "terminated": "Ended"
+    },
+    "interestStatus": {
+      "sent": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "expired": "Expired"
+    }
+  },
   "profile": {
     "verified": "Verified",
     "complete": "complete",

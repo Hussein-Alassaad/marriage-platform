@@ -13,7 +13,20 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 3 — Authentication, Roles & Route Guards: complete.**
 - **Phase 4 — Profile System & Onboarding: complete.**
 - **Verification slice — Identity Verification: complete** (unlocks the matchmaking gate).
-- **Next: Phase 5 — Matching & Compatibility** (see `docs/Roadmap.md`).
+- **Phase 5 — Matching & Compatibility: core complete** (discovery + interest flow).
+- **Next: Phase 6 — Communication (four stages)** (see `docs/Roadmap.md`).
+
+Phase 5 core delivered: a `matchmaking` Edge Function (cross-user reads are RLS-blocked
+and matches/interests aren't client-writable, so discovery + the interest flow run
+server-side, returning only privacy-safe candidate fields; photos gated by the
+candidate's visibility + viewer tier; `discover` falls back to a verified/opposite-gender
+query until the compatibility engine's batch job runs). `matchService` + `useMatch`
+hooks; a real **Match page** with Discover (candidate cards, compat ring, save/pass,
+send-interest modal with a note) and Connections (incoming interests accept/decline,
+your matches, sent interests). Saved/declined/viewed are direct RLS writes. Deploy:
+`supabase functions deploy matchmaking`. Still engine-less (real scores/daily recs land
+with the batch job); accepting an interest advances the match to `introduction` — chat
+arrives in Phase 6.
 
 Verification slice delivered: `verificationService` + `useVerification`, a **Verify
 Identity** page (`/verify-identity`; submit → pending → verified/rejected states), the
