@@ -13,7 +13,10 @@
     "backHome": "Back to home",
     "guest": "Guest",
     "guestInitial": "G",
-    "freeMember": "Free member"
+    "freeMember": "Free member",
+    "next": "Next",
+    "back": "Back",
+    "selectPlaceholder": "Select…"
   },
   "auth": {
     "signOut": "Sign out",
@@ -54,6 +57,144 @@
       "title": "Verify your identity to continue",
       "body": "Matching, interests, and communication unlock once your identity is verified — this keeps the community safe and serious. The verification flow arrives in an upcoming release.",
       "cta": "Go to profile"
+    },
+    "status": {
+      "unverified": "Not verified",
+      "pending": "Verification pending",
+      "verified": "Verified",
+      "rejected": "Verification rejected"
+    }
+  },
+  "profile": {
+    "verified": "Verified",
+    "complete": "complete",
+    "completeCta": "Complete your profile",
+    "editCta": "Edit profile",
+    "genderLockedNote": "Gender is set at registration and locks after identity verification.",
+    "sections": {
+      "about": "About",
+      "basics": "Basics",
+      "background": "Education & work",
+      "goals": "Marriage goals",
+      "values": "Values & lifestyle",
+      "photos": "Photos"
+    },
+    "fields": {
+      "displayName": "Display name",
+      "gender": "Gender",
+      "dob": "Date of birth",
+      "nationality": "Nationality",
+      "country": "Country",
+      "city": "City",
+      "languages": "Languages",
+      "educationLevel": "Education level",
+      "university": "University",
+      "major": "Field of study",
+      "graduationYear": "Graduation year",
+      "occupation": "Occupation",
+      "industry": "Industry",
+      "employmentStatus": "Employment status",
+      "timeline": "Marriage timeline",
+      "children": "Children",
+      "relocate": "Open to relocating",
+      "religiosity": "Religious commitment",
+      "smoking": "Smoking",
+      "familyInvolvement": "Family involvement",
+      "savings": "Financial readiness",
+      "bio": "About you",
+      "bioPlaceholder": "Share a little about yourself, your values, and what you seek in marriage…",
+      "photoPrivacy": "Photo visibility"
+    },
+    "photos": {
+      "add": "Add photo",
+      "primary": "Primary",
+      "makePrimary": "Set as primary",
+      "delete": "Delete photo",
+      "hint": "JPG, PNG or WebP up to 5 MB. Your photos are private and shared only per your visibility settings.",
+      "errorType": "Please choose a JPG, PNG, or WebP image.",
+      "errorSize": "Image must be 5 MB or smaller."
+    }
+  },
+  "onboarding": {
+    "eyebrow": "Build your profile",
+    "finish": "Finish",
+    "steps": {
+      "basics": "Let's start with the basics",
+      "background": "Education & work",
+      "goals": "Your marriage goals",
+      "values": "Values & lifestyle",
+      "about": "Tell us about you",
+      "photos": "Photos & privacy"
+    }
+  },
+  "profileOptions": {
+    "education": {
+      "high_school": "High school",
+      "diploma": "Diploma",
+      "bachelor": "Bachelor's",
+      "master": "Master's",
+      "doctorate": "Doctorate",
+      "other": "Other"
+    },
+    "employment": {
+      "employed": "Employed",
+      "self_employed": "Self-employed",
+      "business_owner": "Business owner",
+      "student": "Student",
+      "seeking": "Seeking work",
+      "other": "Other"
+    },
+    "language": {
+      "ar": "Arabic",
+      "en": "English",
+      "fr": "French",
+      "tr": "Turkish",
+      "ur": "Urdu",
+      "fa": "Persian",
+      "id": "Indonesian",
+      "ms": "Malay",
+      "other": "Other"
+    },
+    "timeline": {
+      "within_year": "Within a year",
+      "one_two_years": "In 1–2 years",
+      "exploring": "Exploring"
+    },
+    "children": {
+      "want": "Want children",
+      "open": "Open to children",
+      "prefer_not": "Prefer not"
+    },
+    "relocate": {
+      "willing": "Willing to relocate",
+      "open": "Open to it",
+      "stay": "Prefer to stay"
+    },
+    "religiosity": {
+      "practicing": "Practicing",
+      "moderate": "Moderate",
+      "growing": "Growing in faith"
+    },
+    "smoking": {
+      "no": "No",
+      "sometimes": "Sometimes",
+      "yes": "Yes"
+    },
+    "family": {
+      "high": "Closely involved",
+      "moderate": "Moderately involved",
+      "independent": "Independent"
+    },
+    "savings": {
+      "ready": "Financially ready",
+      "building": "Building toward it",
+      "early": "Early stage"
+    },
+    "photoPrivacy": {
+      "1": "Visible to matches",
+      "2": "Blurred until approved",
+      "3": "On request only",
+      "4": "Private"
     }
   },
   "nav": {

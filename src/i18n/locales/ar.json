@@ -13,6 +13,9 @@
     "backHome": "العودة إلى الرئيسية",
     "guest": "زائر",
     "guestInitial": "ز",
+    "next": "التالي",
+    "back": "رجوع",
+    "selectPlaceholder": "اختر…",
     "freeMember": "عضو مجاني"
   },
   "auth": {
@@ -54,6 +57,144 @@
       "title": "وثّق هويتك للمتابعة",
       "body": "تُفتح التوصيات وطلبات التعارف والتواصل بعد توثيق هويتك — للحفاظ على مجتمع آمن وجادّ. ستتوفّر عملية التوثيق في إصدار قادم.",
       "cta": "الذهاب إلى الملف الشخصي"
+    },
+    "status": {
+      "unverified": "غير موثّق",
+      "pending": "التوثيق قيد المراجعة",
+      "verified": "موثّق",
+      "rejected": "رُفض التوثيق"
+    }
+  },
+  "profile": {
+    "verified": "موثّق",
+    "complete": "مكتمل",
+    "completeCta": "أكمل ملفك الشخصي",
+    "editCta": "تعديل الملف",
+    "genderLockedNote": "يُحدَّد الجنس عند التسجيل ويُقفل بعد توثيق الهوية.",
+    "sections": {
+      "about": "نبذة",
+      "basics": "الأساسيات",
+      "background": "التعليم والعمل",
+      "goals": "أهداف الزواج",
+      "values": "القيم ونمط الحياة",
+      "photos": "الصور"
+    },
+    "fields": {
+      "displayName": "الاسم الظاهر",
+      "gender": "الجنس",
+      "dob": "تاريخ الميلاد",
+      "nationality": "الجنسية",
+      "country": "الدولة",
+      "city": "المدينة",
+      "languages": "اللغات",
+      "educationLevel": "المستوى التعليمي",
+      "university": "الجامعة",
+      "major": "التخصّص",
+      "graduationYear": "سنة التخرّج",
+      "occupation": "المهنة",
+      "industry": "المجال",
+      "employmentStatus": "الحالة الوظيفية",
+      "timeline": "الإطار الزمني للزواج",
+      "children": "الأطفال",
+      "relocate": "الاستعداد للانتقال",
+      "religiosity": "الالتزام الديني",
+      "smoking": "التدخين",
+      "familyInvolvement": "مشاركة العائلة",
+      "savings": "الجاهزية المالية",
+      "bio": "نبذة عنك",
+      "bioPlaceholder": "شاركنا نبذة عنك، وقيمك، وما تبحث عنه في الزواج…",
+      "photoPrivacy": "ظهور الصور"
+    },
+    "photos": {
+      "add": "إضافة صورة",
+      "primary": "رئيسية",
+      "makePrimary": "تعيين كرئيسية",
+      "delete": "حذف الصورة",
+      "hint": "JPG أو PNG أو WebP حتى ٥ ميغابايت. صورك خاصة ولا تُشارَك إلا وفق إعدادات الظهور.",
+      "errorType": "يرجى اختيار صورة JPG أو PNG أو WebP.",
+      "errorSize": "يجب ألا يتجاوز حجم الصورة ٥ ميغابايت."
+    }
+  },
+  "onboarding": {
+    "eyebrow": "أنشئ ملفك",
+    "finish": "إنهاء",
+    "steps": {
+      "basics": "لنبدأ بالأساسيات",
+      "background": "التعليم والعمل",
+      "goals": "أهداف الزواج",
+      "values": "القيم ونمط الحياة",
+      "about": "عرّفنا بنفسك",
+      "photos": "الصور والخصوصية"
+    }
+  },
+  "profileOptions": {
+    "education": {
+      "high_school": "ثانوية",
+      "diploma": "دبلوم",
+      "bachelor": "بكالوريوس",
+      "master": "ماجستير",
+      "doctorate": "دكتوراه",
+      "other": "أخرى"
+    },
+    "employment": {
+      "employed": "موظّف",
+      "self_employed": "عمل حر",
+      "business_owner": "صاحب عمل",
+      "student": "طالب",
+      "seeking": "يبحث عن عمل",
+      "other": "أخرى"
+    },
+    "language": {
+      "ar": "العربية",
+      "en": "الإنجليزية",
+      "fr": "الفرنسية",
+      "tr": "التركية",
+      "ur": "الأردية",
+      "fa": "الفارسية",
+      "id": "الإندونيسية",
+      "ms": "الماليزية",
+      "other": "أخرى"
+    },
+    "timeline": {
+      "within_year": "خلال سنة",
+      "one_two_years": "خلال سنة إلى سنتين",
+      "exploring": "أستكشف"
+    },
+    "children": {
+      "want": "أرغب بالأطفال",
+      "open": "منفتح على الأطفال",
+      "prefer_not": "أفضّل عدم ذلك"
+    },
+    "relocate": {
+      "willing": "مستعد للانتقال",
+      "open": "منفتح على ذلك",
+      "stay": "أفضّل البقاء"
+    },
+    "religiosity": {
+      "practicing": "ملتزم",
+      "moderate": "معتدل",
+      "growing": "أنمو في التزامي"
+    },
+    "smoking": {
+      "no": "لا",
+      "sometimes": "أحيانًا",
+      "yes": "نعم"
+    },
+    "family": {
+      "high": "مشاركة كبيرة",
+      "moderate": "مشاركة معتدلة",
+      "independent": "مستقل"
+    },
+    "savings": {
+      "ready": "جاهز ماليًا",
+      "building": "أبني نحو ذلك",
+      "early": "مرحلة مبكرة"
+    },
+    "photoPrivacy": {
+      "1": "ظاهرة للتوصيات",
+      "2": "مموّهة حتى الموافقة",
+      "3": "عند الطلب فقط",
+      "4": "خاصة"
     }
   },
   "nav": {

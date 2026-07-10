@@ -11,7 +11,17 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 2 — Database Schema, RLS & Settings Engine: complete** (applied to the linked
   Supabase project `kondapkaroqmoduadopj`).
 - **Phase 3 — Authentication, Roles & Route Guards: complete.**
-- **Next: Phase 4 — Profile System & Onboarding** (see `docs/Roadmap.md`).
+- **Phase 4 — Profile System & Onboarding: complete.**
+- **Next: Phase 5 — Matching & Compatibility** (see `docs/Roadmap.md`).
+
+Phase 4 delivered: `profileService` (owner reads/writes own `profiles` row via RLS +
+`min_age`/`gender_lock` triggers; photo upload/list/signed-URL/delete on the private
+`profile-photos` bucket), `useProfile`/`useUpdateProfile` (React Query; recomputes
+`profile_completion`, refreshes session), a resumable 6-step **onboarding wizard**
+(`/onboarding`, incremental saves, direction-aware, RTL), a real **Profile page**
+(completion `ProgressRing`, verified/tier badges, view sections, photo manager +
+visibility), reference option lists with i18n labels, and bilingual EN/AR keys. The
+sign-in scene remains the character-free Mithaq/Islamic-architecture design.
 
 Phase 3 delivered: Supabase Auth wired via `authService` + `SessionProvider`/`useSession`
 (session, profile, roles, verification status); register (display name, email, password,

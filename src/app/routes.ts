@@ -6,6 +6,7 @@ export const ROUTES = {
   assistant: '/assistant',
   notifications: '/notifications',
   profile: '/profile',
+  onboarding: '/onboarding',
   settings: '/settings',
   admin: '/admin',
   guardian: '/guardian',

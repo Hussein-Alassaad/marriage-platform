@@ -13,6 +13,7 @@ import { FinancePage } from '@/features/finance/FinancePage';
 import { AssistantPage } from '@/features/assistant/AssistantPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
+import { OnboardingPage } from '@/features/profile/onboarding/OnboardingPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { AdminPage } from '@/features/admin/AdminPage';
 import { GuardianPage } from '@/features/guardian/GuardianPage';
@@ -50,6 +51,7 @@ export function AppRouter() {
           <Route path={ROUTES.assistant} element={<AssistantPage />} />
           <Route path={ROUTES.notifications} element={<NotificationsPage />} />
           <Route path={ROUTES.profile} element={<ProfilePage />} />
+          <Route path={ROUTES.onboarding} element={<OnboardingPage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
           <Route path={ROUTES.verifyPhone} element={<PhoneVerificationPage />} />
 
