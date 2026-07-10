@@ -2,7 +2,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Camera,
+  Check,
+  GraduationCap,
+  HeartHandshake,
+  PenLine,
+  Sparkles,
+  User,
+  type LucideIcon,
+} from 'lucide-react';
 
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
@@ -11,14 +22,21 @@ import { Select } from '@/components/Select';
 import { FormField } from '@/components/FormField';
 import { Alert } from '@/components/Alert';
 import { FullScreenLoader } from '@/components/FullScreenLoader';
+import { ProgressRing } from '@/components/motion/ProgressRing';
+import { CountUp } from '@/components/motion/CountUp';
+import { ConfettiBurst } from '@/components/motion/ConfettiBurst';
+import { AnimatedCheck } from '@/components/motion/AnimatedCheck';
+import { GeometricVeil } from '@/components/motion/GeometricVeil';
 import { OptionSelect, LanguagesField } from '@/features/profile/ProfileFields';
 import { PhotoManager } from '@/features/profile/PhotoManager';
 import { cn } from '@/utils/cn';
-import { EASE_EXPO } from '@/lib/motion';
+import { EASE_EXPO, SPRING_SNAPPY } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useSettings } from '@/hooks/useSettings';
-import type { JsonMap, ProfilePatch, ProfileRecord } from '@/services/profileService';
+import { computeCompletion, type JsonMap, type ProfilePatch, type ProfileRecord } from '@/services/profileService';
+
+const STEP_ICONS: LucideIcon[] = [User, GraduationCap, HeartHandshake, Sparkles, PenLine, Camera];
 
 interface FormState {
   display_name: string;
@@ -99,6 +117,27 @@ function toPatch(f: FormState, lockedGender: boolean): ProfilePatch {
   return patch;
 }
 
+/** Live completion % from the working form (mirrors the stored value). */
+function formCompletion(f: FormState): number {
+  return computeCompletion({
+    display_name: f.display_name || null,
+    dob: f.dob || null,
+    gender: (f.gender || null) as ProfileRecord['gender'],
+    country: f.country || null,
+    city: f.city || null,
+    nationality: f.nationality || null,
+    languages: f.languages,
+    education_level: f.education_level || null,
+    occupation: f.occupation || null,
+    employment_status: f.employment_status || null,
+    bio: f.bio || null,
+    marriage_goals: clean({ timeline: f.mg_timeline, children: f.mg_children, relocate: f.mg_relocate }),
+    lifestyle: clean({ religiosity: f.ls_religiosity, smoking: f.ls_smoking }),
+    family_values: clean({ involvement: f.fv_involvement }),
+    financial_readiness: clean({ savings: f.fr_savings }),
+  });
+}
+
 export function OnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -112,6 +151,7 @@ export function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
     if (profile && !initialized) {
@@ -169,7 +209,8 @@ export function OnboardingPage() {
     }
     if (!(await persist())) return;
     if (step === steps.length - 1) {
-      navigate(ROUTES.profile, { replace: true });
+      setFinished(true); // Barakah finish, then continue
+      window.setTimeout(() => navigate(ROUTES.profile, { replace: true }), 2600);
       return;
     }
     setDir(1);
@@ -182,29 +223,38 @@ export function OnboardingPage() {
     setStep((s) => Math.max(0, s - 1));
   };
 
-  if (isLoading || !initialized) return <FullScreenLoader />;
+  const liveCompletion = formCompletion(form);
 
-  const slide = 40 * (rtl ? -1 : 1);
+  if (isLoading || !initialized) return <FullScreenLoader />;
+  if (finished)
+    return <OnboardingDone completion={liveCompletion} onGo={() => navigate(ROUTES.profile, { replace: true })} />;
+
+  const slide = 44 * (rtl ? -1 : 1);
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">{t('onboarding.eyebrow')}</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold text-ink sm:text-3xl">{steps[step].title}</h1>
-        <div className="mt-4 flex items-center gap-2">
-          {steps.map((s, i) => (
-            <span
-              key={s.key}
-              className={cn(
-                'h-2 rounded-full transition-all duration-300',
-                i === step ? 'w-6 bg-brand-500' : i < step ? 'w-2 bg-brand-400' : 'w-2 bg-line-strong',
-              )}
-            />
-          ))}
+    <div className="relative mx-auto max-w-2xl">
+      <GeometricVeil />
+      <div className="relative mb-6">
+        <div className="flex items-center gap-4">
+          <ProgressRing value={liveCompletion} size={64} stroke={5}>
+            <span className="text-[13px] font-bold text-ink">
+              <CountUp value={liveCompletion} suffix="%" />
+            </span>
+          </ProgressRing>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">{t('onboarding.eyebrow')}</p>
+            <h1 className="font-display text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+              {steps[step].title}
+            </h1>
+            <p className="mt-0.5 text-xs text-muted">
+              {t('onboarding.stepOf', { current: step + 1, total: steps.length })}
+            </p>
+          </div>
         </div>
+        <StepRail steps={steps} step={step} />
       </div>
 
-      <Card>
+      <Card className="relative [box-shadow:var(--shadow-elevated),var(--inner-hi)]">
         {error ? (
           <div className="mb-4">
             <Alert>{error}</Alert>
@@ -214,10 +264,10 @@ export function OnboardingPage() {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={step}
-            initial={{ opacity: 0, x: dir * slide }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: dir * -slide }}
-            transition={{ duration: 0.28, ease: EASE_EXPO }}
+            initial={{ opacity: 0, x: dir * slide, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, x: dir * -slide, filter: 'blur(6px)' }}
+            transition={{ duration: 0.34, ease: EASE_EXPO }}
             className="flex flex-col gap-4"
           >
             {step === 0 ? (
@@ -344,7 +394,7 @@ export function OnboardingPage() {
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" aria-hidden />
             {t('common.back')}
           </Button>
-          <Button onClick={next} disabled={updateProfile.isPending}>
+          <Button onClick={next} magnetic disabled={updateProfile.isPending}>
             {step === steps.length - 1 ? (
               <>
                 {t('onboarding.finish')}
@@ -372,5 +422,81 @@ function OptionSelectGender({ value, onChange }: { value: string; onChange: (v: 
       <option value="man">{t('gender.man')}</option>
       <option value="woman">{t('gender.woman')}</option>
     </Select>
+  );
+}
+
+/** Icon step-rail with a spring-filling connector + breathing current node. */
+function StepRail({ steps, step }: { steps: { key: string; title: string }[]; step: number }) {
+  const pct = steps.length > 1 ? step / (steps.length - 1) : 0;
+  return (
+    <div className="relative mt-6">
+      <div aria-hidden className="absolute inset-x-5 top-5 h-0.5 rounded bg-line-strong" />
+      <motion.div
+        aria-hidden
+        className="absolute inset-x-5 top-5 h-0.5 origin-left rounded bg-brand-500 rtl:origin-right"
+        initial={false}
+        animate={{ scaleX: pct }}
+        transition={SPRING_SNAPPY}
+      />
+      <ol className="relative flex items-start justify-between">
+        {steps.map((s, i) => {
+          const Icon = STEP_ICONS[i];
+          const done = i < step;
+          const current = i === step;
+          return (
+            <li key={s.key}>
+              <span
+                className={cn(
+                  'relative grid h-10 w-10 place-items-center rounded-full border transition-colors',
+                  done && 'border-brand-400 bg-brand-500 text-on-brand',
+                  current && 'border-2 border-brand-400 bg-bg-3 text-brand-600',
+                  !done && !current && 'border-line-strong bg-surface text-faint',
+                )}
+              >
+                {current ? (
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 rounded-full border-2 border-brand-400 [animation:breathe_2.4s_ease-in-out_infinite]"
+                  />
+                ) : null}
+                {done ? <Check className="h-5 w-5" aria-hidden /> : <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+/** Barakah finish: a confetti-lit success panel before continuing to the profile. */
+function OnboardingDone({ completion, onGo }: { completion: number; onGo: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center pt-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE_EXPO }}
+        className="w-full"
+      >
+        <Card className="relative overflow-hidden text-center [box-shadow:var(--shadow-elevated),var(--inner-hi)]">
+          <ConfettiBurst active />
+          <div className="relative flex flex-col items-center">
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-brand-wash text-brand-500 ring-1 ring-inset ring-[color:var(--color-border-accent)]">
+              <AnimatedCheck size={34} strokeWidth={2.5} />
+            </span>
+            <h1 className="mt-5 font-display text-2xl font-semibold text-ink">{t('onboarding.doneTitle')}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{t('onboarding.doneBody', { completion })}</p>
+            <div className="mt-6">
+              <Button onClick={onGo} magnetic>
+                {t('onboarding.goToProfile')}
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" aria-hidden />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    </div>
   );
 }

@@ -118,6 +118,10 @@
   "onboarding": {
     "eyebrow": "أنشئ ملفك",
     "finish": "إنهاء",
+    "stepOf": "الخطوة {{current}} من {{total}}",
+    "doneTitle": "ملفك جاهز",
+    "doneBody": "عمل رائع. اكتمل ملفك بنسبة {{completion}}٪ — يمكنك تحسينه في أي وقت.",
+    "goToProfile": "عرض ملفي",
     "steps": {
       "basics": "لنبدأ بالأساسيات",
       "background": "التعليم والعمل",

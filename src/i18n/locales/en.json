@@ -118,6 +118,10 @@
   "onboarding": {
     "eyebrow": "Build your profile",
     "finish": "Finish",
+    "stepOf": "Step {{current}} of {{total}}",
+    "doneTitle": "Your profile is ready",
+    "doneBody": "Beautiful work. Your profile is now {{completion}}% complete — you can refine it anytime.",
+    "goToProfile": "View my profile",
     "steps": {
       "basics": "Let's start with the basics",
       "background": "Education & work",
