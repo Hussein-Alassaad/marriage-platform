@@ -55,8 +55,8 @@
   "verification": {
     "gate": {
       "title": "Verify your identity to continue",
-      "body": "Matching, interests, and communication unlock once your identity is verified — this keeps the community safe and serious. The verification flow arrives in an upcoming release.",
-      "cta": "Go to profile"
+      "body": "Matching, interests, and communication unlock once your identity is verified — this keeps the community safe and serious.",
+      "cta": "Verify identity"
     },
     "status": {
       "unverified": "Not verified",
@@ -64,6 +64,36 @@
       "verified": "Verified",
       "rejected": "Verification rejected"
     }
+  },
+  "verify": {
+    "title": "Identity verification",
+    "subtitle": "A quick, private check that keeps the community safe and serious.",
+    "intro": "Upload a government-issued ID. Your documents are encrypted, stored privately, and reviewed only for verification — never shown on your profile.",
+    "documentType": "Document type",
+    "document": "ID document",
+    "selfie": "Selfie (optional)",
+    "selfieHint": "A selfie helps us match you to your ID faster.",
+    "fileHint": "JPG, PNG, WebP or PDF, up to 10 MB.",
+    "choose": "Choose a file",
+    "submit": "Submit for review",
+    "resubmit": "Submit again",
+    "privacy": "Private & encrypted — used only to verify your identity.",
+    "reason": "Reason",
+    "goToMatch": "Explore matches",
+    "docTypes": {
+      "passport": "Passport",
+      "national_id": "National ID",
+      "residence_permit": "Residence permit"
+    },
+    "pendingTitle": "Under review",
+    "pendingBody": "Thanks — your documents are being reviewed. This usually takes a short while, and your status will update here.",
+    "verifiedTitle": "You're verified",
+    "verifiedBody": "Your identity is confirmed. Matching and communication are now unlocked.",
+    "rejectedTitle": "Verification needs another look",
+    "rejectedBody": "We couldn't verify your documents. Please review and submit again.",
+    "errorNoDocument": "Please attach your ID document.",
+    "errorFile": "Use a JPG, PNG, WebP or PDF up to 10 MB.",
+    "errorService": "The verification service isn't available yet. Please try again later."
   },
   "profile": {
     "verified": "Verified",

@@ -30,8 +30,8 @@ export function RequireVerified() {
         title={t('verification.gate.title')}
         description={t('verification.gate.body')}
         action={
-          <Link to={ROUTES.profile}>
-            <Button>{t('verification.gate.cta')}</Button>
+          <Link to={ROUTES.verifyIdentity}>
+            <Button magnetic>{t('verification.gate.cta')}</Button>
           </Link>
         }
       />

@@ -12,7 +12,16 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   Supabase project `kondapkaroqmoduadopj`).
 - **Phase 3 — Authentication, Roles & Route Guards: complete.**
 - **Phase 4 — Profile System & Onboarding: complete.**
+- **Verification slice — Identity Verification: complete** (unlocks the matchmaking gate).
 - **Next: Phase 5 — Matching & Compatibility** (see `docs/Roadmap.md`).
+
+Verification slice delivered: `verificationService` + `useVerification`, a **Verify
+Identity** page (`/verify-identity`; submit → pending → verified/rejected states), the
+**`verify-identity` Edge Function** (multipart submit uploads to the private
+`identity-documents` bucket + inserts a pending `identity_verifications` row; admin
+`review` action; a DB trigger locks gender + flips the profile on approval). The match
+gate (`RequireVerified`) and the profile status badge now link to it. Deploy the
+function with `supabase functions deploy verify-identity` (see `docs/Deployment.md §5b`).
 
 Phase 4 delivered: `profileService` (owner reads/writes own `profiles` row via RLS +
 `min_age`/`gender_lock` triggers; photo upload/list/signed-URL/delete on the private

@@ -11,6 +11,7 @@ export const ROUTES = {
   admin: '/admin',
   guardian: '/guardian',
   verifyPhone: '/verify-phone',
+  verifyIdentity: '/verify-identity',
   login: '/login',
   register: '/register',
   forgotPassword: '/forgot-password',

@@ -66,7 +66,12 @@ export function ProfilePage() {
                 {t('profile.verified')}
               </Badge>
             ) : (
-              <Badge variant="neutral">{t(`verification.status.${profile?.verification_status ?? 'unverified'}`)}</Badge>
+              <Link to={ROUTES.verifyIdentity} className="transition-opacity hover:opacity-80">
+                <Badge variant="warning" withDot pulse>
+                  <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+                  {t(`verification.status.${profile?.verification_status ?? 'unverified'}`)}
+                </Badge>
+              </Link>
             )}
             <Badge variant="brand">{t(`tier.${profile?.subscription_tier ?? 'free'}`)}</Badge>
           </div>

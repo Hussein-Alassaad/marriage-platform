@@ -23,6 +23,7 @@ import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { AuthCallbackPage } from '@/features/auth/AuthCallbackPage';
 import { PhoneVerificationPage } from '@/features/auth/PhoneVerificationPage';
+import { VerifyIdentityPage } from '@/features/verification/VerifyIdentityPage';
 import { NotFoundPage } from '@/features/errors/NotFoundPage';
 
 export function AppRouter() {
@@ -54,6 +55,7 @@ export function AppRouter() {
           <Route path={ROUTES.onboarding} element={<OnboardingPage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
           <Route path={ROUTES.verifyPhone} element={<PhoneVerificationPage />} />
+          <Route path={ROUTES.verifyIdentity} element={<VerifyIdentityPage />} />
 
           {/* Role-scoped */}
           <Route element={<RequireRole roles={['admin', 'super_admin']} />}>

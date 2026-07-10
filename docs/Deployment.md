@@ -99,6 +99,20 @@ Set these in the Supabase dashboard for project `kondapkaroqmoduadopj`:
 
 Nothing here is a secret in the repo — SMTP/SMS credentials live only in the Supabase dashboard.
 
+## 5b. Edge Functions
+
+Identity documents are server-only, so identity verification submissions go
+through the **`verify-identity`** Edge Function (in `supabase/functions/`).
+
+- Deploy: `supabase functions deploy verify-identity` (requires your Supabase
+  login). It uses the default-injected `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and
+  `SUPABASE_SERVICE_ROLE_KEY` — **no manual secret**, and the service-role key
+  never leaves Supabase.
+- Until it's deployed, the Verify Identity screen renders normally but a
+  submission returns a friendly "service isn't available yet" message.
+- Admin approve/reject is a `{ action:'review' }` call to the same function
+  (admin-gated); the admin UI arrives with the Admin phase.
+
 ## 6. Pre-deploy checklist
 
 - [ ] `npm run typecheck && npm run lint && npm test && npm run build` all pass.

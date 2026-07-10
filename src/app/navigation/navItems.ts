@@ -2,6 +2,8 @@ import { Bell, Heart, Home, Settings, Shield, Sparkles, User, Users, Wallet } fr
 import { type LucideIcon } from 'lucide-react';
 
 import { ROUTES } from '@/app/routes';
+// Verification lives at ROUTES.verifyIdentity (reached via the match gate + the
+// profile status badge), not the primary nav.
 
 export interface NavItem {
   /** Translation key under `nav.*`. */
