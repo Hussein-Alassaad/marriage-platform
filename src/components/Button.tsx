@@ -13,6 +13,8 @@ export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'>
   size?: ButtonSize;
   /** Subtly pull toward the cursor on approach (fine pointers only). */
   magnetic?: boolean;
+  /** Stretch to the container width (wrapper + button + clipped glow). */
+  fullWidth?: boolean;
   children?: ReactNode;
 }
 
@@ -49,7 +51,7 @@ interface Ripple {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant = 'primary', size = 'md', magnetic = false, type = 'button', children, onPointerDown, ...props },
+  { className, variant = 'primary', size = 'md', magnetic = false, fullWidth = false, type = 'button', children, onPointerDown, ...props },
   ref,
 ) {
   const reduced = useReducedMotion();
@@ -98,7 +100,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <motion.span
       ref={wrapRef}
       style={{ x, y }}
-      className="relative inline-flex w-fit"
+      className={cn('relative inline-flex', fullWidth ? 'w-full' : 'w-fit')}
       onPointerMove={magneticOn ? handleMagnet : undefined}
       onPointerLeave={magneticOn ? resetMagnet : undefined}
     >
@@ -126,6 +128,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         onPointerDown={handlePointerDown}
         className={cn(
           'group relative isolate inline-flex items-center justify-center overflow-hidden rounded-md font-semibold',
+          fullWidth && 'w-full',
           'transition-[filter,box-shadow,background-color,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
           'focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--color-bg-0),0_0_0_4px_var(--color-brand-400)]',
           'disabled:pointer-events-none disabled:opacity-45',

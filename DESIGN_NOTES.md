@@ -50,6 +50,34 @@ props, i18n strings and file locations are unchanged throughout.
 - Micro-interactions: magnetic sign-in button, traveling-light button ring,
   spring page/entrance transitions.
 
+## Covenant Threshold sign-in scene
+
+A cinematic auth scene: two dignified figures approach a glowing arched threshold
+from their own sides toward a glass card. Never facing each other, never touching.
+
+- **Characters**: `AuthCharacter` renders your art (`<img>`) when it loads, else a
+  premium emerald **silhouette** (man / woman). Drop `char-man.png` / `char-woman.png`
+  into **`public/auth/`** (transparent WebP/PNG) and they upgrade instantly — no code
+  change. Each slides in from its own side, then breathes. RTL-aware (`flip` + `dx`).
+  (I can't generate the art — produce it from the Part-A prompts in an image tool.)
+- **Layers** (`src/features/auth/scene/`): `Starfield` (twinkle), `GeometricVeil`
+  (mashrabiya lattice, reused), `AuroraBackground` (reused), `ArchedWindow` (gold light
+  + lattice, blooms in), `Lantern` (drops in, sways + flickers), `TrustBar` (4 bilingual
+  badges, stagger). All CSS/Framer — no WebGL — for 60fps on low-end devices.
+- **Card**: arched glass (`rounded-[40px_40px_24px_24px]`, `.auth-card-glass`) with
+  emerald edge-glow; in-card header, Fraunces H1 word-reveal, `AuthField` dark-glass
+  fields (leading icon, theme-aware via `color-mix`, focus glow, error shake, password
+  eye toggle, valid check), full-width gradient button with loading spinner → success
+  check → **ConfettiBurst on successful sign-in** (Barakah, reduced-motion-safe).
+- **Choreography**: staggered entrance timeline (lantern → window → card → figures →
+  fields → trust bar), idle loops, pointer parallax at layered depths (desktop only),
+  and a one-time "homage nudge" on the card as the figures arrive.
+- **Mobile** (`useMediaQuery`): dedicated — card is the hero (full-width), figures
+  shrink to the bottom corners peeking behind the trust bar, lantern top-center,
+  parallax off. Not a shrink of desktop.
+- Auth logic / routes / validation / i18n untouched; new trust copy added as bilingual
+  `auth.trust.*` keys. `AuthMascot` (previous single character) is now superseded.
+
 ## Skipped / deferred (with reason)
 
 - **§5.2–5.8 feature pages don't exist yet.** Match, Finance, Assistant,

@@ -15,7 +15,19 @@
     "freeMember": "Free member"
   },
   "auth": {
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "trust": {
+      "privacyTitle": "Privacy-first",
+      "privacyCaption": "Your privacy is our priority",
+      "verifiedTitle": "Verified members",
+      "verifiedCaption": "Real people seeking real connections",
+      "valuesTitle": "Islamic values",
+      "valuesCaption": "Guided by faith, built on trust",
+      "marriageTitle": "Marriage-focused",
+      "marriageCaption": "Designed for a purpose that truly matters"
+    }
   },
   "gender": {
     "man": "Man",

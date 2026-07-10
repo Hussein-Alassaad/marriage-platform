@@ -15,7 +15,19 @@
     "freeMember": "عضو مجاني"
   },
   "auth": {
-    "signOut": "تسجيل الخروج"
+    "signOut": "تسجيل الخروج",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "trust": {
+      "privacyTitle": "الخصوصية أولاً",
+      "privacyCaption": "خصوصيتك هي أولويتنا",
+      "verifiedTitle": "أعضاء موثّقون",
+      "verifiedCaption": "أشخاص حقيقيون يبحثون عن ارتباط حقيقي",
+      "valuesTitle": "قيم إسلامية",
+      "valuesCaption": "مستلهمة من الإيمان، قائمة على الثقة",
+      "marriageTitle": "هدفها الزواج",
+      "marriageCaption": "مصمّمة لغاية ذات معنى حقيقي"
+    }
   },
   "gender": {
     "man": "رجل",
