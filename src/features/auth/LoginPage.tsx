@@ -69,7 +69,7 @@ export function LoginPage() {
           </Link>
         </div>
 
-        <Button size="lg" type="submit" disabled={isSubmitting}>
+        <Button size="lg" type="submit" magnetic disabled={isSubmitting}>
           {isSubmitting ? t('common.pleaseWait') : t('page.login.submit')}
         </Button>
       </form>

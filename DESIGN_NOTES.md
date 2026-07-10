@@ -27,6 +27,29 @@ props, i18n strings and file locations are unchanged throughout.
   Inter + IBM Plex Sans Arabic continue to ship via `@fontsource`. No npm deps
   added except the already-present `framer-motion@^11`.
 
+## Auth experience elevation (login as flagship)
+
+- **Character physically pushes the card.** A shared `pushPhase` motion value
+  drives both the character (lean + arm) and an under-damped `useSpring` on the
+  card's x — the card recoils ~9px on contact then settles with a natural bounce.
+  Desktop-only loop; paused under reduced motion and on small screens.
+- **Premium 3D-style character** (`AuthMascot`): layered SVG radial gradients,
+  rim light + soft blurred ground shadow, page-load entrance, continuous idle
+  breathing. Accepts an optional `src` (transparent PNG / rendered 3D frame) that
+  swaps the visual while keeping identical interactions — drop in a real asset later.
+- **Cinematic depth, no WebGL** (deliberate perf choice — CSS/Framer match the
+  look at a fraction of the GPU cost, and honour the low-end-device requirement):
+  mesh-gradient wash + drifting aurora + geometric veil + low-count ambient motes
+  (14, transform/opacity only, disabled under reduced motion).
+- **Glass login card** via `.auth-card-glass` (blur + saturate + top sheen); the
+  nested design-system Card is neutralised with a `:where()` reset so the form
+  reads as one pane of glass — **no markup/logic/i18n change** in the auth pages.
+- **Dedicated mobile layout** (`useMediaQuery`), not a shrink: smaller character
+  greeting from the top (clear of the centred motto), full-width glass card,
+  atmosphere preserved, no push loop (lighter on phones).
+- Micro-interactions: magnetic sign-in button, traveling-light button ring,
+  spring page/entrance transitions.
+
 ## Skipped / deferred (with reason)
 
 - **§5.2–5.8 feature pages don't exist yet.** Match, Finance, Assistant,
