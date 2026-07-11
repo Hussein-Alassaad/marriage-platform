@@ -66,7 +66,7 @@ export function ConversationPage() {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-9rem)] max-w-2xl flex-col">
+    <div className="mx-auto flex max-w-2xl flex-col">
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
         <Link
@@ -91,8 +91,11 @@ export function ConversationPage() {
       </div>
 
       {/* Messages */}
-      <Card className="flex flex-1 flex-col overflow-hidden p-0">
-        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-5">
+      <Card className="flex flex-col overflow-hidden p-0">
+        <div
+          ref={scrollRef}
+          className="max-h-[calc(100dvh-22rem)] min-h-[260px] flex-1 space-y-3 overflow-y-auto p-5"
+        >
           {isLoading ? (
             <>
               <Skeleton className="h-10 w-2/3 rounded-2xl" />
