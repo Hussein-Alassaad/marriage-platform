@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from '@/app/navigation/Sidebar';
 import { TopBar } from '@/app/navigation/TopBar';
 import { BottomNav } from '@/app/navigation/BottomNav';
+import { ErrorBoundary } from '@/app/ErrorBoundary';
 import { PageTransition } from '@/components/motion/PageTransition';
 
 /**
@@ -20,7 +21,9 @@ export function AppLayout() {
         <main className="flex-1 px-4 pb-28 pt-8 md:px-8 md:pb-12">
           <div className="mx-auto w-full max-w-6xl">
             <PageTransition pathname={location.pathname}>
-              <Outlet />
+              <ErrorBoundary key={location.pathname}>
+                <Outlet />
+              </ErrorBoundary>
             </PageTransition>
           </div>
         </main>
