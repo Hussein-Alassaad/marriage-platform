@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Send, ShieldCheck } from 'lucide-react';
@@ -15,7 +15,7 @@ import { EASE_EXPO } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { useSettings } from '@/hooks/useSettings';
-import { chatService } from '@/services/chatService';
+import { chatService, type ChatMessage } from '@/services/chatService';
 import { useConversationId, useMessages, useSendText, useSentCount } from '@/hooks/useChat';
 
 const MESSAGING_STAGES = new Set(['introduction', 'serious_communication', 'family', 'married']);
@@ -27,6 +27,7 @@ export function ConversationPage() {
   const { user } = useSession();
   const uid = user?.id;
   const { number } = useSettings();
+  const queryClient = useQueryClient();
 
   const person = (location.state as { person?: { displayName?: string | null } } | null)?.person ?? null;
 
@@ -49,24 +50,50 @@ export function ConversationPage() {
   const cap = number('intro_messages_per_person', 10);
   const remaining = stage === 'introduction' ? Math.max(0, cap - (sentCount ?? 0)) : null;
 
+  const blockedNotice = (category?: string) => {
+    if (category === 'quota') return t('chat.quotaReached');
+    if (category === 'contact_info') return t('chat.contactBlocked');
+    if (category === 'too_soon') return t('chat.blockedTooSoon');
+    return t('chat.blockedInappropriate');
+  };
+
   const onSend = async () => {
     const value = text.trim();
     if (!value || send.isPending) return;
     setNotice(null);
+
+    // Optimistic: show the message immediately, reconcile with the server after.
+    const cid = conversationId ?? null;
+    const temp: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      sender_id: uid ?? '',
+      type: 'text',
+      body: value,
+      created_at: new Date().toISOString(),
+    };
+    const rollback = () => {
+      if (cid) queryClient.setQueryData<ChatMessage[]>(['messages', cid], (old) => (old ?? []).filter((m) => m.id !== temp.id));
+    };
+    if (cid) queryClient.setQueryData<ChatMessage[]>(['messages', cid], (old) => [...(old ?? []), temp]);
+    setText('');
+
     try {
       const r = await send.mutateAsync(value);
       if (r.blocked) {
-        setNotice(r.category === 'quota' ? t('chat.quotaReached') : t('chat.contactBlocked'));
-        return;
+        rollback();
+        setText(value);
+        setNotice(blockedNotice(r.category));
       }
-      setText('');
+      // On success the mutation invalidates the messages query → temp is replaced.
     } catch {
+      rollback();
+      setText(value);
       setNotice(t('chat.sendError'));
     }
   };
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col">
+    <div className="mx-auto flex max-w-3xl flex-col">
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
         <Link
@@ -94,7 +121,7 @@ export function ConversationPage() {
       <Card className="flex flex-col overflow-hidden p-0">
         <div
           ref={scrollRef}
-          className="max-h-[calc(100dvh-22rem)] min-h-[260px] flex-1 space-y-3 overflow-y-auto p-5"
+          className="h-[58vh] min-h-[440px] flex-1 space-y-3 overflow-y-auto p-5"
         >
           {isLoading ? (
             <>

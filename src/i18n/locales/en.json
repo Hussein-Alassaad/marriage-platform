@@ -105,6 +105,8 @@
     "emptyBody": "This is the Introduction stage — text only, and kept respectful. Say salaam and share why you felt this could be a match.",
     "quotaReached": "You've used all your introduction messages for now.",
     "contactBlocked": "Contact details can't be shared before the Family stage. Please keep it on-platform for now.",
+    "blockedInappropriate": "That message can't be sent — please keep the conversation respectful.",
+    "blockedTooSoon": "Let's keep the introduction respectful and unhurried — that can come later, insha'Allah.",
     "sendError": "Couldn't send. Please try again.",
     "notAvailable": "Messaging isn't available for this connection yet."
   },

@@ -24,6 +24,24 @@ const EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
 const PHONE_RE = /\+?\d[\d\s-]{6,}\d/;
 const CONTACT_STAGES = new Set(['introduction', 'serious_communication']);
 
+// Fast, key-free safety filter (an LLM moderator can layer on later, writing the
+// same message_moderation record). Blocks profanity/sexual content always, and —
+// before the Family stage — contact info and premature romantic intimacy.
+const PROFANITY = ['fuck', 'fucking', 'fuk', 'shit', 'bitch', 'asshole', 'ass', 'cunt', 'dick', 'pussy', 'bastard', 'slut', 'whore', 'piss', 'motherfucker'];
+const SEXUAL = ['sex', 'sexy', 'nude', 'nudes', 'naked', 'horny', 'boobs', 'porn', 'xxx', 'hookup'];
+const ROMANTIC = ['i love you', 'love you', 'my love', 'in love with you', 'babe', 'baby', 'sweetheart', 'my heart', 'kiss', 'kisses', 'marry me', 'miss you', 'honey', 'darling', 'my darling', 'cutie', 'beautiful eyes'];
+
+const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+const hasWord = (norm: string, words: string[]) => words.some((w) => new RegExp(`(^| )${w}( |$)`).test(norm));
+
+function moderate(text: string, stage: string): { category: string } | null {
+  const norm = normalize(text);
+  if (hasWord(norm, PROFANITY) || hasWord(norm, SEXUAL)) return { category: 'inappropriate' };
+  if (CONTACT_STAGES.has(stage) && (EMAIL_RE.test(text) || PHONE_RE.test(text))) return { category: 'contact_info' };
+  if (CONTACT_STAGES.has(stage) && ROMANTIC.some((p) => norm.includes(p))) return { category: 'too_soon' };
+  return null;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -83,36 +101,38 @@ Deno.serve(async (req: Request) => {
       ]);
     }
 
-    // Moderation (key-free, Part D): block contact info before the Family stage.
-    if (CONTACT_STAGES.has(stage) && (EMAIL_RE.test(text) || PHONE_RE.test(text))) {
+    // Moderation (Part D + safety).
+    const mod = moderate(text, stage);
+    if (mod) {
       await admin.from('message_moderation').insert({
         conversation_id: conversationId,
         sender_id: uid,
         verdict: 'blocked',
-        category: 'contact_info',
+        category: mod.category,
         original_text: text,
         stage,
         provider: 'local',
-        policy_version: 'partD-v1',
+        policy_version: 'partD-v2',
       });
-      return json({ blocked: true, category: 'contact_info' });
+      return json({ blocked: true, category: mod.category });
     }
 
-    // Introduction per-person quota (delivered messages only).
-    if (stage === 'introduction') {
-      const { data: setting } = await admin
-        .from('settings')
-        .select('value')
-        .eq('key', 'intro_messages_per_person')
-        .maybeSingle();
-      const cap = Number(setting?.value ?? 10) || 10;
-      const { data: counter } = await admin
-        .from('message_counters')
-        .select('sent_count')
-        .eq('conversation_id', conversationId)
-        .eq('user_id', uid)
-        .maybeSingle();
-      const sent = counter?.sent_count ?? 0;
+    // Introduction per-person quota — read cap + counter once, in parallel.
+    const intro = stage === 'introduction';
+    let cap = 0;
+    let sent = 0;
+    if (intro) {
+      const [{ data: setting }, { data: counter }] = await Promise.all([
+        admin.from('settings').select('value').eq('key', 'intro_messages_per_person').maybeSingle(),
+        admin
+          .from('message_counters')
+          .select('sent_count')
+          .eq('conversation_id', conversationId)
+          .eq('user_id', uid)
+          .maybeSingle(),
+      ]);
+      cap = Number(setting?.value ?? 10) || 10;
+      sent = counter?.sent_count ?? 0;
       if (sent >= cap) return json({ blocked: true, category: 'quota', remaining: 0 });
     }
 
@@ -124,38 +144,29 @@ Deno.serve(async (req: Request) => {
       .single();
     if (mErr) return json({ error: mErr.message }, 400);
 
-    await admin.from('message_moderation').insert({
-      message_id: message.id,
-      conversation_id: conversationId,
-      sender_id: uid,
-      verdict: 'allowed',
-      stage,
-      provider: 'local',
-      policy_version: 'partD-v1',
-    });
-
+    // Audit + counter + conversation touch run together (don't serialize).
+    const after: Promise<unknown>[] = [
+      admin.from('message_moderation').insert({
+        message_id: message.id,
+        conversation_id: conversationId,
+        sender_id: uid,
+        verdict: 'allowed',
+        stage,
+        provider: 'local',
+        policy_version: 'partD-v2',
+      }),
+      admin.from('conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId),
+    ];
     let remaining: number | null = null;
-    if (stage === 'introduction') {
-      const { data: setting } = await admin
-        .from('settings')
-        .select('value')
-        .eq('key', 'intro_messages_per_person')
-        .maybeSingle();
-      const cap = Number(setting?.value ?? 10) || 10;
-      const { data: counter } = await admin
-        .from('message_counters')
-        .select('sent_count')
-        .eq('conversation_id', conversationId)
-        .eq('user_id', uid)
-        .maybeSingle();
-      const next = (counter?.sent_count ?? 0) + 1;
-      await admin
-        .from('message_counters')
-        .upsert({ conversation_id: conversationId, user_id: uid, sent_count: next }, { onConflict: 'conversation_id,user_id' });
-      remaining = Math.max(0, cap - next);
+    if (intro) {
+      after.push(
+        admin
+          .from('message_counters')
+          .upsert({ conversation_id: conversationId, user_id: uid, sent_count: sent + 1 }, { onConflict: 'conversation_id,user_id' }),
+      );
+      remaining = Math.max(0, cap - (sent + 1));
     }
-
-    await admin.from('conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId);
+    await Promise.all(after);
     return json({ ok: true, conversationId, messageId: message.id, remaining });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : 'unexpected_error' }, 500);
