@@ -95,6 +95,19 @@
     "errorFile": "Use a JPG, PNG, WebP or PDF up to 10 MB.",
     "errorService": "The verification service isn't available yet. Please try again later."
   },
+  "chat": {
+    "conversation": "Conversation",
+    "open": "Open",
+    "send": "Send",
+    "placeholder": "Write a respectful message…",
+    "messagesLeft": "{{count}} left",
+    "emptyTitle": "Begin with good intentions",
+    "emptyBody": "This is the Introduction stage — text only, and kept respectful. Say salaam and share why you felt this could be a match.",
+    "quotaReached": "You've used all your introduction messages for now.",
+    "contactBlocked": "Contact details can't be shared before the Family stage. Please keep it on-platform for now.",
+    "sendError": "Couldn't send. Please try again.",
+    "notAvailable": "Messaging isn't available for this connection yet."
+  },
   "match": {
     "tabs": { "discover": "Discover", "connections": "Connections" },
     "error": "Something went wrong. Please try again.",

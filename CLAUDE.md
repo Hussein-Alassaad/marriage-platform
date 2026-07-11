@@ -14,7 +14,17 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 4 — Profile System & Onboarding: complete.**
 - **Verification slice — Identity Verification: complete** (unlocks the matchmaking gate).
 - **Phase 5 — Matching & Compatibility: core complete** (discovery + interest flow).
-- **Next: Phase 6 — Communication (four stages)** (see `docs/Roadmap.md`).
+- **Phase 6 — Communication: Introduction text chat complete** (first of four stages).
+- **Next: Phase 6 cont. — Serious voice, then Family media** (see `docs/Roadmap.md`).
+
+Phase 6 (Introduction) delivered: a `send-text-message` Edge Function (clients can't
+insert messages; it ensures the conversation, enforces stage + the per-person intro
+quota from settings, runs key-free Part-D moderation that blocks contact info before
+the Family stage, then inserts). `chatService` + `useChat` (messages gently polled for
+near-live updates — no Realtime setup needed). A **ConversationPage** (`/messages/:matchId`,
+verified-gated) with bubbles, composer, quota badge, and blocked/quota notices; opened
+from an accepted match in Match → Connections. Deploy: `supabase functions deploy
+send-text-message`.
 
 Phase 5 core delivered: a `matchmaking` Edge Function (cross-user reads are RLS-blocked
 and matches/interests aren't client-writable, so discovery + the interest flow run

@@ -121,6 +121,13 @@ verified/opposite-gender query until the compatibility engine runs), `connection
 `send-interest`, `respond-interest`. Photos are returned only when the candidate's
 visibility (and the viewer's tier) allow.
 
+**`send-text-message`** delivers Introduction-stage chat. Clients can never insert
+messages, so this function (service role) ensures the conversation exists, enforces
+stage + the per-person introduction quota (`intro_messages_per_person` setting),
+runs key-free moderation (blocks contact info before the Family stage, Decisions
+Part D), then inserts the message. Deploy: `supabase functions deploy
+send-text-message`. Voice/image/video senders arrive with their stages.
+
 ## 6. Pre-deploy checklist
 
 - [ ] `npm run typecheck && npm run lint && npm test && npm run build` all pass.

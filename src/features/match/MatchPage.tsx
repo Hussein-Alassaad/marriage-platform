@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -25,6 +26,7 @@ import { Skeleton } from '@/components/Skeleton';
 import { ProgressRing } from '@/components/motion/ProgressRing';
 import { cn } from '@/utils/cn';
 import { SPRING_SNAPPY } from '@/lib/motion';
+import { ROUTES } from '@/app/routes';
 import { useOptionLabel } from '@/features/profile/ProfileFields';
 import {
   useCandidateActions,
@@ -348,12 +350,22 @@ function Connections() {
           <EmptyState icon={Sparkles} title={t('match.connections.matchesEmpty')} />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {matches.map((m: MatchEntry) => (
-              <Card key={m.id} className="flex items-center justify-between gap-3">
-                <p className="font-semibold text-ink">{personName(m.person)}</p>
-                <Badge variant="brand">{t(`match.stage.${m.stage}`, { defaultValue: m.stage })}</Badge>
-              </Card>
-            ))}
+            {matches.map((m: MatchEntry) => {
+              const canChat = m.stage !== 'interest_sent' && m.stage !== 'terminated';
+              return (
+                <Card key={m.id} className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-ink">{personName(m.person)}</p>
+                    <Badge variant="brand">{t(`match.stage.${m.stage}`, { defaultValue: m.stage })}</Badge>
+                  </div>
+                  {canChat ? (
+                    <Link to={`${ROUTES.messages}/${m.id}`} state={{ person: m.person, stage: m.stage }}>
+                      <Button variant="secondary">{t('chat.open')}</Button>
+                    </Link>
+                  ) : null}
+                </Card>
+              );
+            })}
           </div>
         )}
       </section>

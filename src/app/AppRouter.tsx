@@ -9,6 +9,7 @@ import { RequireVerified } from './guards/RequireVerified';
 
 import { HomePage } from '@/features/home/HomePage';
 import { MatchPage } from '@/features/match/MatchPage';
+import { ConversationPage } from '@/features/chat/ConversationPage';
 import { FinancePage } from '@/features/finance/FinancePage';
 import { AssistantPage } from '@/features/assistant/AssistantPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
@@ -46,6 +47,7 @@ export function AppRouter() {
           {/* Matchmaking requires a verified identity (Decision #5) */}
           <Route element={<RequireVerified />}>
             <Route path={ROUTES.match} element={<MatchPage />} />
+            <Route path={`${ROUTES.messages}/:matchId`} element={<ConversationPage />} />
           </Route>
 
           <Route path={ROUTES.finance} element={<FinancePage />} />
