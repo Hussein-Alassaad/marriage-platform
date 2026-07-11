@@ -43,3 +43,38 @@ export function useSendText(matchId: string) {
     },
   });
 }
+
+/** Journey state — polled so a partner's consent shows up without a refresh. */
+export function useStageStatus(matchId: string) {
+  return useQuery({
+    queryKey: ['stage-status', matchId],
+    queryFn: () => chatService.getStageStatus(matchId),
+    enabled: Boolean(matchId),
+    refetchInterval: 15000,
+  });
+}
+
+export function useStageConsent(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (consent: boolean) => chatService.setStageConsent(matchId, consent),
+    onSuccess: (status) => {
+      queryClient.setQueryData(['stage-status', matchId], status);
+      if (status.advanced) {
+        queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+        queryClient.invalidateQueries({ queryKey: ['connections'] });
+      }
+    },
+  });
+}
+
+export function useEndConnection(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => chatService.endConnection(matchId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+      queryClient.invalidateQueries({ queryKey: ['connections'] });
+    },
+  });
+}

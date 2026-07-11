@@ -16,6 +16,7 @@
     "freeMember": "Free member",
     "next": "Next",
     "back": "Back",
+    "cancel": "Cancel",
     "selectPlaceholder": "Select…"
   },
   "auth": {
@@ -111,7 +112,25 @@
     "blockedScam": "Money or payment requests aren't allowed on Mithaq. This has been recorded.",
     "moderationUnavailable": "Safety review is temporarily unavailable, so your message wasn't sent. Please try again shortly.",
     "sendError": "Couldn't send. Please try again.",
-    "notAvailable": "Messaging isn't available for this connection yet."
+    "notAvailable": "Messaging isn't available for this connection yet.",
+    "thePerson": "them"
+  },
+  "journey": {
+    "explain": "Moving to {{next}} needs both of you to agree.",
+    "finalStage": "You've reached the final stage of the journey.",
+    "you": "You",
+    "continueTo": "Continue to {{next}}",
+    "withdraw": "Withdraw",
+    "waiting": "You've agreed. Waiting for {{name}}.",
+    "end": "End connection",
+    "endTitle": "End this connection?",
+    "endBody": "This ends your connection with {{name}} and closes the conversation. It can't be undone, and you won't be able to re-request for a while.",
+    "seriousNotice": "Contact details and meeting arrangements stay closed until the Family stage, when a guardian joins.",
+    "req": {
+      "you_paid": "You need a Serious or Marriage Plus membership.",
+      "they_paid": "{{name}} needs a Serious or Marriage Plus membership.",
+      "guardian_ready": "A guardian must be invited, verified, and given access to this connection."
+    }
   },
   "match": {
     "tabs": { "discover": "Discover", "connections": "Connections" },

@@ -14,9 +14,28 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 4 — Profile System & Onboarding: complete.**
 - **Verification slice — Identity Verification: complete** (unlocks the matchmaking gate).
 - **Phase 5 — Matching & Compatibility: core complete** (discovery + interest flow).
-- **Phase 6 — Communication: Introduction text chat complete** (first of four stages).
+- **Phase 6 — Communication: Introduction text chat complete** (first of four stages),
+  with **strict two-layer moderation** and **mutual-consent stage transitions**.
 - **Compatibility engine — deterministic scoring: complete** (real scores + ranked recs).
 - **Next: Phase 6 cont. — Serious voice, then Family media** (see `docs/Roadmap.md`).
+
+Journey transitions delivered: a `stage_consents` table (client-read-only) + a
+`stage-transition` Edge Function — the **only** writer of `matches.stage`. A match
+advances only when BOTH participants consent to the same next stage *and* that
+stage's requirements are met (Serious: both on a paid tier, gated by the
+`serious_stage_requires_paid` setting; Family: the woman's guardian confirmed and
+granted match access — so Family stays locked until the Guardian phase; Married:
+mutual confirmation). Either party can `terminate` (cooldown from settings). Surfaced
+as a `JourneyPanel` above the conversation showing both consents, the unmet
+requirements (never a silent disabled button), and End connection. Deploy:
+`supabase db push` then `supabase functions deploy stage-transition`.
+
+Chat moderation is now two layers: an evasion-resistant local pre-filter (normalizes
+accents/leetspeak/stretched letters/separators/chat shorthand, so "l0ve u", "ily" and
+"i n s t a g r a m" are all caught; detects handles, URLs, emails and phone numbers)
+and an **AI moderator (Claude)** that judges intent against the Part D stage rules.
+**Fail-closed**: configured but unavailable → the message is not sent. The key lives
+only in Supabase: `supabase secrets set ANTHROPIC_API_KEY=...` (never in the frontend).
 
 Compatibility engine delivered: a `compute-compatibility` Edge Function scores eligible
 candidates from profile data (deterministic, explainable breakdown — religion, values,

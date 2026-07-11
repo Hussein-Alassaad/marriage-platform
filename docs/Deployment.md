@@ -121,12 +121,34 @@ verified/opposite-gender query until the compatibility engine runs), `connection
 `send-interest`, `respond-interest`. Photos are returned only when the candidate's
 visibility (and the viewer's tier) allow.
 
-**`send-text-message`** delivers Introduction-stage chat. Clients can never insert
-messages, so this function (service role) ensures the conversation exists, enforces
-stage + the per-person introduction quota (`intro_messages_per_person` setting),
-runs key-free moderation (blocks contact info before the Family stage, Decisions
-Part D), then inserts the message. Deploy: `supabase functions deploy
-send-text-message`. Voice/image/video senders arrive with their stages.
+**`send-text-message`** delivers Introduction/Serious-stage chat. Clients can never
+insert messages, so this function (service role) ensures the conversation exists,
+enforces stage + the per-person introduction quota (`intro_messages_per_person`
+setting), moderates, then inserts. Moderation is two layers: an evasion-resistant
+local pre-filter (normalizes leetspeak/spacing/abbreviations, blocks contact info,
+social handles and premature romance before the Family stage — Decisions Part D)
+and an **AI moderator (Claude)** that judges intent. Deploy: `supabase functions
+deploy send-text-message`. Voice/image/video senders arrive with their stages.
+
+> The AI moderator needs one secret — set it once, and **never** put it in the
+> frontend or in `.env`:
+> ```
+> supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+> ```
+> It is **fail-closed**: if the key is set and the moderator errors or times out,
+> the message is not delivered. If the key is absent the function still runs, but
+> on the local pre-filter alone.
+
+**`stage-transition`** is the only writer of `matches.stage`. Actions: `status`
+(current + next stage, both consents, unmet requirements), `consent` / `withdraw`
+(records a `stage_consents` row; advances the match only when BOTH people have
+consented and the stage's requirements are met), and `terminate` (ends the
+connection with the `rerequest_cooldown_days` cooldown). Requirements per Part D:
+Serious needs both users on a paid tier (gate: `serious_stage_requires_paid`);
+Family needs the woman's guardian confirmed and granted access to the match (so it
+stays locked until the Guardian phase ships); Married needs only mutual
+confirmation. Deploy: `supabase functions deploy stage-transition`. Needs the
+`20260711120000_stage_consents.sql` migration applied first (`supabase db push`).
 
 **`compute-compatibility`** scores eligible candidates from profile data
 (deterministic, no AI key), upserts `compatibility_scores`, and rebuilds the

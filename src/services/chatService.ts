@@ -11,9 +11,23 @@ export interface ChatMessage {
 export interface SendResult {
   ok?: boolean;
   blocked?: boolean;
-  category?: 'contact_info' | 'quota';
+  category?: string;
   remaining?: number | null;
   conversationId?: string;
+}
+
+export interface StageRequirement {
+  key: string;
+  met: boolean;
+}
+
+export interface StageStatus {
+  stage: string;
+  next: string | null;
+  youConsented: boolean;
+  theyConsented: boolean;
+  requirements: StageRequirement[];
+  advanced?: boolean;
 }
 
 export interface MatchRow {
@@ -79,5 +93,29 @@ export const chatService = {
     const { data, error } = await supabase.functions.invoke('send-text-message', { body: { matchId, body } });
     if (error) throw error;
     return data as SendResult;
+  },
+
+  /** Journey state for this match: next stage, both consents, unmet requirements. */
+  async getStageStatus(matchId: string): Promise<StageStatus> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('stage-transition', { body: { action: 'status', matchId } });
+    if (error) throw error;
+    return data as StageStatus;
+  },
+
+  /** Consent to (or withdraw consent from) the next stage. Advances only when mutual. */
+  async setStageConsent(matchId: string, consent: boolean): Promise<StageStatus> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('stage-transition', {
+      body: { action: consent ? 'consent' : 'withdraw', matchId },
+    });
+    if (error) throw error;
+    return data as StageStatus;
+  },
+
+  async endConnection(matchId: string): Promise<void> {
+    const supabase = requireSupabaseClient();
+    const { error } = await supabase.functions.invoke('stage-transition', { body: { action: 'terminate', matchId } });
+    if (error) throw error;
   },
 };

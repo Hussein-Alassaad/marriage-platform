@@ -17,6 +17,7 @@ import { useSession } from '@/hooks/useSession';
 import { useSettings } from '@/hooks/useSettings';
 import { chatService, type ChatMessage } from '@/services/chatService';
 import { useConversationId, useMessages, useSendText, useSentCount } from '@/hooks/useChat';
+import { JourneyPanel } from '@/features/chat/JourneyPanel';
 
 const MESSAGING_STAGES = new Set(['introduction', 'serious_communication', 'family', 'married']);
 
@@ -119,6 +120,9 @@ export function ConversationPage() {
           <Badge variant="gold">{t('chat.messagesLeft', { count: remaining })}</Badge>
         ) : null}
       </div>
+
+      {/* Journey: mutual consent to advance, or end the connection */}
+      <JourneyPanel matchId={matchId} personName={person?.displayName} />
 
       {/* Messages */}
       <Card className="flex flex-col overflow-hidden p-0">
