@@ -15,7 +15,15 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Verification slice — Identity Verification: complete** (unlocks the matchmaking gate).
 - **Phase 5 — Matching & Compatibility: core complete** (discovery + interest flow).
 - **Phase 6 — Communication: Introduction text chat complete** (first of four stages).
+- **Compatibility engine — deterministic scoring: complete** (real scores + ranked recs).
 - **Next: Phase 6 cont. — Serious voice, then Family media** (see `docs/Roadmap.md`).
+
+Compatibility engine delivered: a `compute-compatibility` Edge Function scores eligible
+candidates from profile data (deterministic, explainable breakdown — religion, values,
+goals, lifestyle, distance, financial, communication, personality; no AI key), upserts
+`compatibility_scores`, and rebuilds the caller's ranked `daily_recommendations`. Wired
+to a "Generate recommendations" button in Discover (so cards show real % + ranking
+instead of the "New" placeholder). Deploy: `supabase functions deploy compute-compatibility`.
 
 Phase 6 (Introduction) delivered: a `send-text-message` Edge Function (clients can't
 insert messages; it ensures the conversation, enforces stage + the per-person intro

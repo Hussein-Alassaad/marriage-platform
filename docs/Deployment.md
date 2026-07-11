@@ -128,6 +128,13 @@ runs key-free moderation (blocks contact info before the Family stage, Decisions
 Part D), then inserts the message. Deploy: `supabase functions deploy
 send-text-message`. Voice/image/video senders arrive with their stages.
 
+**`compute-compatibility`** scores eligible candidates from profile data
+(deterministic, no AI key), upserts `compatibility_scores`, and rebuilds the
+caller's ranked `daily_recommendations` for today — which `matchmaking.discover`
+then reads. Triggered on demand by the "Generate recommendations" button; a
+scheduled batch can call the same logic for everyone later. Deploy:
+`supabase functions deploy compute-compatibility`.
+
 ## 6. Pre-deploy checklist
 
 - [ ] `npm run typecheck && npm run lint && npm test && npm run build` all pass.

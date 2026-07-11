@@ -11,6 +11,14 @@ export function useConnections() {
   return useQuery({ queryKey: ['connections'], queryFn: matchService.connections });
 }
 
+export function useRefreshRecommendations() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => matchService.refreshRecommendations(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['discover'] }),
+  });
+}
+
 export function useSendInterest() {
   const queryClient = useQueryClient();
   return useMutation({

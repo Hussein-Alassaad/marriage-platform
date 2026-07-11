@@ -49,6 +49,14 @@ export const matchService = {
   respondInterest: (interestId: string, decision: 'accepted' | 'declined') =>
     invoke<{ ok: boolean }>({ action: 'respond-interest', interestId, decision }),
 
+  /** Rebuild the caller's compatibility scores + today's ranked recommendations. */
+  async refreshRecommendations(): Promise<{ count: number }> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('compute-compatibility', { body: { action: 'refresh' } });
+    if (error) throw error;
+    return data as { count: number };
+  },
+
   // Personal collections — direct writes allowed by RLS (own rows).
   async save(userId: string, candidateId: string) {
     const supabase = requireSupabaseClient();

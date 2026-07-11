@@ -117,6 +117,8 @@
     },
     "age": "{{age}} سنة",
     "new": "جديد",
+    "refresh": "تحديث",
+    "generate": "إنشاء التوصيات",
     "privatePhoto": "صورة خاصة",
     "sendInterest": "إرسال اهتمام",
     "save": "حفظ",

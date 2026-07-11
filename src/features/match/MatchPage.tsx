@@ -10,6 +10,7 @@ import {
   Lock,
   MapPin,
   Briefcase,
+  RefreshCw,
   Send,
   Sparkles,
   X,
@@ -32,6 +33,7 @@ import {
   useCandidateActions,
   useConnections,
   useDiscover,
+  useRefreshRecommendations,
   useRespondInterest,
   useSendInterest,
 } from '@/hooks/useMatch';
@@ -89,6 +91,14 @@ function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useDiscover();
   const actions = useCandidateActions();
+  const refresh = useRefreshRecommendations();
+
+  const refreshBtn = (ghost?: boolean) => (
+    <Button variant={ghost ? 'ghost' : 'primary'} onClick={() => refresh.mutate()} disabled={refresh.isPending}>
+      <RefreshCw className={cn('h-4 w-4', refresh.isPending && 'animate-[spin_0.8s_linear_infinite]')} aria-hidden />
+      {ghost ? t('match.refresh') : t('match.generate')}
+    </Button>
+  );
 
   if (isLoading) {
     return (
@@ -101,12 +111,16 @@ function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
   }
   if (isError) return <Alert>{t('match.error')}</Alert>;
   if (!data || data.candidates.length === 0) {
-    return <EmptyState icon={Sparkles} title={t('match.empty.title')} description={t('match.empty.body')} />;
+    return (
+      <EmptyState icon={Sparkles} title={t('match.empty.title')} description={t('match.empty.body')} action={refreshBtn()} />
+    );
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      {data.candidates.map((c) => (
+    <>
+      <div className="mb-4 flex justify-end">{refreshBtn(true)}</div>
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {data.candidates.map((c) => (
         <CandidateCard
           key={c.id}
           candidate={c}
@@ -115,8 +129,9 @@ function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
           onPass={() => actions.decline.mutate(c.id)}
           busy={actions.decline.isPending || actions.save.isPending}
         />
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }
 

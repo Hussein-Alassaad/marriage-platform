@@ -117,6 +117,8 @@
     },
     "age": "{{age}} yrs",
     "new": "New",
+    "refresh": "Refresh",
+    "generate": "Generate recommendations",
     "privatePhoto": "Private photo",
     "sendInterest": "Send interest",
     "save": "Save",
