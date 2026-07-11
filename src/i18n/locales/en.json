@@ -107,6 +107,9 @@
     "contactBlocked": "Contact details can't be shared before the Family stage. Please keep it on-platform for now.",
     "blockedInappropriate": "That message can't be sent — please keep the conversation respectful.",
     "blockedTooSoon": "Let's keep the introduction respectful and unhurried — that can come later, insha'Allah.",
+    "blockedMeeting": "Private meetings aren't arranged here. Families are involved at the Family stage, insha'Allah.",
+    "blockedScam": "Money or payment requests aren't allowed on Mithaq. This has been recorded.",
+    "moderationUnavailable": "Safety review is temporarily unavailable, so your message wasn't sent. Please try again shortly.",
     "sendError": "Couldn't send. Please try again.",
     "notAvailable": "Messaging isn't available for this connection yet."
   },

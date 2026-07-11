@@ -54,6 +54,9 @@ export function ConversationPage() {
     if (category === 'quota') return t('chat.quotaReached');
     if (category === 'contact_info') return t('chat.contactBlocked');
     if (category === 'too_soon') return t('chat.blockedTooSoon');
+    if (category === 'haram_meeting') return t('chat.blockedMeeting');
+    if (category === 'scam') return t('chat.blockedScam');
+    if (category === 'unavailable') return t('chat.moderationUnavailable');
     return t('chat.blockedInappropriate');
   };
 
