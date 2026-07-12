@@ -19,6 +19,8 @@ import { SettingsPage } from '@/features/settings/SettingsPage';
 import { PlansPage } from '@/features/plans/PlansPage';
 import { AdminPage } from '@/features/admin/AdminPage';
 import { GuardianPage } from '@/features/guardian/GuardianPage';
+import { GuardiansPage } from '@/features/guardian/GuardiansPage';
+import { GuardianAcceptPage } from '@/features/guardian/GuardianAcceptPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
 import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
@@ -58,6 +60,10 @@ export function AppRouter() {
           <Route path={ROUTES.onboarding} element={<OnboardingPage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
           <Route path={ROUTES.plans} element={<PlansPage />} />
+          <Route path={ROUTES.guardians} element={<GuardiansPage />} />
+          {/* Redeeming an invite code happens BEFORE the guardian role exists,
+              so it must sit outside the role guard. */}
+          <Route path={ROUTES.guardianAccept} element={<GuardianAcceptPage />} />
           <Route path={ROUTES.verifyPhone} element={<PhoneVerificationPage />} />
           <Route path={ROUTES.verifyIdentity} element={<VerifyIdentityPage />} />
 

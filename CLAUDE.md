@@ -20,7 +20,22 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 9 — Subscriptions & Payments: manual (Lebanese) family complete**
   (plans page, OMT/Whish/bank claims, admin approval → tier activation). Card gateway
   (Areeba) still to come; coupons + "can't pay" ticket not built yet.
+- **Guardian (wali) system: complete** — invite → accept → per-connection sharing,
+  which is what unlocks the Family-stage requirement.
 - **Next: Phase 10 — Serious voice, then Family media** (see `docs/Roadmap.md`).
+
+Guardian delivered: a `guardian` Edge Function — the only writer of the guardian
+relationship (clients cannot write `guardians` / `guardian_invitations` /
+`guardian_access` at all). She invites one guardian (`invite` → a one-time code that
+expires per `guardian_invite_expiry_days`); he redeems it at `/guardian/accept`,
+**explicitly declaring** he is authorised, and is granted the `guardian` role; she
+then shares connections one at a time (`grant-access` / `revoke-access`), which is
+exactly what satisfies the Family requirement in `stage-transition`. A guardian never
+browses: `shared-matches` returns only what she shared, and she can revoke any of it
+instantly. Pages: `/guardians` (hers — invite, code, per-connection sharing) and
+`/guardian` (his — the shared connections). The relationship is *declared* by her and
+*confirmed* by him; the UI says plainly that Mithaq does not verify it (Decisions §9).
+Deploy: `supabase db push` then `supabase functions deploy guardian`.
 
 Subscriptions delivered: a `subscriptions` Edge Function — the only writer of a
 user's tier. `create-claim` (amount from the plan catalog, expiry from settings —

@@ -12,6 +12,8 @@ export const ROUTES = {
   plans: '/plans',
   admin: '/admin',
   guardian: '/guardian',
+  guardianAccept: '/guardian/accept',
+  guardians: '/guardians',
   verifyPhone: '/verify-phone',
   verifyIdentity: '/verify-identity',
   login: '/login',

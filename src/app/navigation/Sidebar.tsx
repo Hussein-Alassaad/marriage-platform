@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn';
 import { springLayout } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
-import { plansNav, primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
+import { guardiansNav, plansNav, primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
 
 function SidebarLink({ item }: { item: NavItem }) {
   const { t } = useTranslation();
@@ -89,6 +89,8 @@ export function Sidebar() {
         ) : null}
 
         <div className="mt-auto pt-4">
+          {/* Only she can invite a guardian (Decisions §9), so only she sees the entry. */}
+          {profile?.gender === 'woman' ? <SidebarLink item={guardiansNav} /> : null}
           <SidebarLink item={plansNav} />
           <SidebarLink item={settingsNav} />
         </div>

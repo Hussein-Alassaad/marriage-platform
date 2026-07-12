@@ -1,4 +1,4 @@
-import { Bell, Gem, Heart, Home, Settings, Shield, Sparkles, User, Users, Wallet } from 'lucide-react';
+import { Bell, Gem, Heart, Home, Settings, Shield, ShieldCheck, Sparkles, User, Users, Wallet } from 'lucide-react';
 import { type LucideIcon } from 'lucide-react';
 
 import { ROUTES } from '@/app/routes';
@@ -26,6 +26,9 @@ export const settingsNav: NavItem = { key: 'settings', path: ROUTES.settings, ic
 
 /** Membership lives beside settings — reached when a gate asks for a paid tier. */
 export const plansNav: NavItem = { key: 'plans', path: ROUTES.plans, icon: Gem };
+
+/** Her guardian screen (invite + per-connection sharing). Shown to women only. */
+export const guardiansNav: NavItem = { key: 'guardians', path: ROUTES.guardians, icon: ShieldCheck };
 
 /**
  * Role-gated destinations. Shown as a preview in Phase 1 so the routes are

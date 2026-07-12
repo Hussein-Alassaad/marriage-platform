@@ -150,6 +150,20 @@ stays locked until the Guardian phase ships); Married needs only mutual
 confirmation. Deploy: `supabase functions deploy stage-transition`. Needs the
 `20260711120000_stage_consents.sql` migration applied first (`supabase db push`).
 
+**`guardian`** is the only writer of the guardian relationship — a self-declared
+guardian link is exactly the thing an attacker would forge, so clients cannot write
+`guardians`, `guardian_invitations`, or `guardian_access` at all. Actions: `invite`
+(women only; one open invitation at a time; returns a one-time code that expires per
+`guardian_invite_expiry_days`), `accept` (the invited person redeems the code, must
+explicitly declare they are authorised, and is granted the `guardian` role),
+`grant-access` / `revoke-access` (she shares ONE connection at a time, revocable),
+`my-guardians`, and `shared-matches` (the guardian's whole view — nothing else is
+visible to them). This is what satisfies the Family-stage requirement in
+`stage-transition`. Deploy: `supabase functions deploy guardian`. Needs the
+`20260711140000_guardian_settings.sql` migration applied (`supabase db push`).
+Invite delivery is manual for now (she shares the code); email/SMS lands with the
+notification service.
+
 **`subscriptions`** is the only writer of a user's tier. Actions: `create-claim`
 (starts a manual OMT / Whish / bank-transfer payment — the amount comes from the
 plan catalog and the expiry from settings, never from the client), `attach-receipt`

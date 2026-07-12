@@ -11,6 +11,7 @@ import { cn } from '@/utils/cn';
 import { EASE_OUT } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useEndConnection, useStageConsent, useStageStatus } from '@/hooks/useChat';
+import { useSession } from '@/hooks/useSession';
 
 interface JourneyPanelProps {
   matchId: string;
@@ -26,6 +27,7 @@ interface JourneyPanelProps {
 export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { profile } = useSession();
   const { data: status, isLoading } = useStageStatus(matchId);
   const consent = useStageConsent(matchId);
   const end = useEndConnection(matchId);
@@ -106,6 +108,12 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
                   {r.key === 'you_paid' ? (
                     <Link to={ROUTES.plans} className="ms-1.5 font-medium text-brand-700 underline-offset-4 hover:underline">
                       {t('journey.viewPlans')}
+                    </Link>
+                  ) : null}
+                  {/* Only she can invite her guardian — don't send him somewhere he can't act. */}
+                  {r.key === 'guardian_ready' && profile?.gender === 'woman' ? (
+                    <Link to={ROUTES.guardians} className="ms-1.5 font-medium text-brand-700 underline-offset-4 hover:underline">
+                      {t('journey.inviteGuardian')}
                     </Link>
                   ) : null}
                 </span>
