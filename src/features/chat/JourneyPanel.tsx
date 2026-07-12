@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Check, Circle, Heart, Lock, ShieldAlert } from 'lucide-react';
@@ -101,7 +101,14 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
             {unmet.map((r) => (
               <li key={r.key} className="flex items-start gap-2 text-xs text-muted">
                 <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" aria-hidden />
-                <span>{t(`journey.req.${r.key}`, { name: who })}</span>
+                <span>
+                  {t(`journey.req.${r.key}`, { name: who })}
+                  {r.key === 'you_paid' ? (
+                    <Link to={ROUTES.plans} className="ms-1.5 font-medium text-brand-700 underline-offset-4 hover:underline">
+                      {t('journey.viewPlans')}
+                    </Link>
+                  ) : null}
+                </span>
               </li>
             ))}
           </motion.ul>

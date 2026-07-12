@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchPublicSettings, settingNumber, type PublicSettings } from '@/services/settingsService';
+import {
+  fetchPublicSettings,
+  settingBool,
+  settingNumber,
+  settingText,
+  type PublicSettings,
+} from '@/services/settingsService';
 
 /**
  * Public platform settings, cached via React Query. Features read tunables from
@@ -20,5 +26,7 @@ export function useSettings() {
     settings,
     isLoading: query.isLoading,
     number: (key: string, fallback: number) => settingNumber(settings, key, fallback),
+    text: (key: string, fallback = '') => settingText(settings, key, fallback),
+    bool: (key: string, fallback = false) => settingBool(settings, key, fallback),
   };
 }

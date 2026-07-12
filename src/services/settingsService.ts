@@ -21,3 +21,15 @@ export function settingNumber(settings: PublicSettings, key: string, fallback: n
   const n = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
+
+/** Coerce a string setting (e.g. admin-edited payment instructions). */
+export function settingText(settings: PublicSettings, key: string, fallback = ''): string {
+  const value = settings[key];
+  return typeof value === 'string' ? value : fallback;
+}
+
+/** Coerce a boolean flag (e.g. whether card checkout is switched on). */
+export function settingBool(settings: PublicSettings, key: string, fallback = false): boolean {
+  const value = settings[key];
+  return typeof value === 'boolean' ? value : fallback;
+}

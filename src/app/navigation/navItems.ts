@@ -1,4 +1,4 @@
-import { Bell, Heart, Home, Settings, Shield, Sparkles, User, Users, Wallet } from 'lucide-react';
+import { Bell, Gem, Heart, Home, Settings, Shield, Sparkles, User, Users, Wallet } from 'lucide-react';
 import { type LucideIcon } from 'lucide-react';
 
 import { ROUTES } from '@/app/routes';
@@ -23,6 +23,9 @@ export const primaryNav: NavItem[] = [
 ];
 
 export const settingsNav: NavItem = { key: 'settings', path: ROUTES.settings, icon: Settings };
+
+/** Membership lives beside settings — reached when a gate asks for a paid tier. */
+export const plansNav: NavItem = { key: 'plans', path: ROUTES.plans, icon: Gem };
 
 /**
  * Role-gated destinations. Shown as a preview in Phase 1 so the routes are

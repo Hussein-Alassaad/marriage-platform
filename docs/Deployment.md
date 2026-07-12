@@ -150,6 +150,19 @@ stays locked until the Guardian phase ships); Married needs only mutual
 confirmation. Deploy: `supabase functions deploy stage-transition`. Needs the
 `20260711120000_stage_consents.sql` migration applied first (`supabase db push`).
 
+**`subscriptions`** is the only writer of a user's tier. Actions: `create-claim`
+(starts a manual OMT / Whish / bank-transfer payment — the amount comes from the
+plan catalog and the expiry from settings, never from the client), `attach-receipt`
+(the client uploads to its own folder in the private `payment-receipts` bucket; the
+function validates the path before recording it), `pending-claims` + `review` (admin
+only — approving inserts the payment, opens the subscription, and sets
+`profiles.subscription_tier`, all audited), and `checkout` (card), which returns
+`gateway_not_configured` until `card_payments_enabled` **and** the Areeba secrets
+exist — so no fake checkout screen can take a payment that goes nowhere. Deploy:
+`supabase functions deploy subscriptions`. Needs the
+`20260711130000_payment_settings.sql` migration applied (`supabase db push`).
+Payment instructions, claim expiry, and period lengths are admin-editable settings.
+
 **`compute-compatibility`** scores eligible candidates from profile data
 (deterministic, no AI key), upserts `compatibility_scores`, and rebuilds the
 caller's ranked `daily_recommendations` for today — which `matchmaking.discover`

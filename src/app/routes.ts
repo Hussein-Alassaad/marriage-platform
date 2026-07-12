@@ -9,6 +9,7 @@ export const ROUTES = {
   profile: '/profile',
   onboarding: '/onboarding',
   settings: '/settings',
+  plans: '/plans',
   admin: '/admin',
   guardian: '/guardian',
   verifyPhone: '/verify-phone',

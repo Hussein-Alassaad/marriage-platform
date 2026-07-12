@@ -17,7 +17,23 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 6 — Communication: Introduction text chat complete** (first of four stages),
   with **strict two-layer moderation** and **mutual-consent stage transitions**.
 - **Compatibility engine — deterministic scoring: complete** (real scores + ranked recs).
-- **Next: Phase 6 cont. — Serious voice, then Family media** (see `docs/Roadmap.md`).
+- **Phase 9 — Subscriptions & Payments: manual (Lebanese) family complete**
+  (plans page, OMT/Whish/bank claims, admin approval → tier activation). Card gateway
+  (Areeba) still to come; coupons + "can't pay" ticket not built yet.
+- **Next: Phase 10 — Serious voice, then Family media** (see `docs/Roadmap.md`).
+
+Subscriptions delivered: a `subscriptions` Edge Function — the only writer of a
+user's tier. `create-claim` (amount from the plan catalog, expiry from settings —
+never the client), `attach-receipt` (client uploads to its own folder in the private
+`payment-receipts` bucket; the function validates the path), admin `pending-claims` +
+`review` (approve → payment row + subscription + `profiles.subscription_tier`, all
+audited), and a `checkout` action that honestly returns `gateway_not_configured`
+until Areeba credentials exist. A **Plans page** (`/plans`) with the DB-driven plan
+comparison, monthly/yearly toggle, the manual-payment flow (method → reference code →
+receipt upload → "under review"), and a **payments review queue** on the Admin page
+(the only way a claim can be approved). Payment instructions/expiry/period lengths are
+admin-editable settings. Deploy: `supabase db push` then
+`supabase functions deploy subscriptions`.
 
 Journey transitions delivered: a `stage_consents` table (client-read-only) + a
 `stage-transition` Edge Function — the **only** writer of `matches.stage`. A match

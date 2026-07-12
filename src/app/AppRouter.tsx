@@ -16,6 +16,7 @@ import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { OnboardingPage } from '@/features/profile/onboarding/OnboardingPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { PlansPage } from '@/features/plans/PlansPage';
 import { AdminPage } from '@/features/admin/AdminPage';
 import { GuardianPage } from '@/features/guardian/GuardianPage';
 import { LoginPage } from '@/features/auth/LoginPage';
@@ -56,6 +57,7 @@ export function AppRouter() {
           <Route path={ROUTES.profile} element={<ProfilePage />} />
           <Route path={ROUTES.onboarding} element={<OnboardingPage />} />
           <Route path={ROUTES.settings} element={<SettingsPage />} />
+          <Route path={ROUTES.plans} element={<PlansPage />} />
           <Route path={ROUTES.verifyPhone} element={<PhoneVerificationPage />} />
           <Route path={ROUTES.verifyIdentity} element={<VerifyIdentityPage />} />
 

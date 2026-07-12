@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn';
 import { springLayout } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
-import { primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
+import { plansNav, primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
 
 function SidebarLink({ item }: { item: NavItem }) {
   const { t } = useTranslation();
@@ -89,6 +89,7 @@ export function Sidebar() {
         ) : null}
 
         <div className="mt-auto pt-4">
+          <SidebarLink item={plansNav} />
           <SidebarLink item={settingsNav} />
         </div>
       </nav>
