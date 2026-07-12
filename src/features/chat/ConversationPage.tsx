@@ -16,10 +16,14 @@ import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { useSettings } from '@/hooks/useSettings';
 import { chatService, type ChatMessage } from '@/services/chatService';
-import { useConversationId, useMessages, useSendText, useSentCount } from '@/hooks/useChat';
+import { useConversationId, useMessages, useSendText, useSendVoice, useSentCount } from '@/hooks/useChat';
 import { JourneyPanel } from '@/features/chat/JourneyPanel';
+import { VoiceRecorder } from '@/features/chat/VoiceRecorder';
+import { VoiceBubble } from '@/features/chat/VoiceBubble';
 
 const MESSAGING_STAGES = new Set(['introduction', 'serious_communication', 'family', 'married']);
+/** Introduction is text only; voice arrives with the Serious stage (Part D). */
+const VOICE_STAGES = new Set(['serious_communication', 'family', 'married']);
 
 export function ConversationPage() {
   const { t } = useTranslation();
@@ -27,7 +31,7 @@ export function ConversationPage() {
   const location = useLocation();
   const { user } = useSession();
   const uid = user?.id;
-  const { number } = useSettings();
+  const { number, bool } = useSettings();
   const queryClient = useQueryClient();
 
   const person = (location.state as { person?: { displayName?: string | null } } | null)?.person ?? null;
@@ -38,6 +42,7 @@ export function ConversationPage() {
   const { data: messages, isLoading } = useMessages(conversationId);
   const { data: sentCount } = useSentCount(conversationId);
   const send = useSendText(matchId);
+  const sendVoice = useSendVoice(matchId);
 
   const [text, setText] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
@@ -50,6 +55,15 @@ export function ConversationPage() {
   const canMessage = stage ? MESSAGING_STAGES.has(stage) : true;
   const cap = number('intro_messages_per_person', 10);
   const remaining = stage === 'introduction' ? Math.max(0, cap - (sentCount ?? 0)) : null;
+
+  const voiceAllowed = Boolean(stage && VOICE_STAGES.has(stage)) && bool('voice_enabled');
+  const voiceMaxSeconds = number('voice_max_seconds', 120);
+
+  const onSendVoice = async (audio: Blob, durationMs: number) => {
+    setNotice(null);
+    const r = await sendVoice.mutateAsync({ audio, durationMs });
+    if (r.blocked) setNotice(blockedNotice(r.category));
+  };
 
   const blockedNotice = (category?: string) => {
     if (category === 'quota') return t('chat.quotaReached');
@@ -73,6 +87,8 @@ export function ConversationPage() {
       sender_id: uid ?? '',
       type: 'text',
       body: value,
+      transcript: null,
+      media_path: null,
       created_at: new Date().toISOString(),
     };
     const rollback = () => {
@@ -156,7 +172,11 @@ export function ConversationPage() {
                         : 'rounded-tl-md bg-bg-3 text-ink-soft',
                     )}
                   >
-                    {m.body}
+                    {m.type === 'voice' ? (
+                      <VoiceBubble messageId={m.id} transcript={m.transcript} />
+                    ) : (
+                      m.body
+                    )}
                   </span>
                 </motion.div>
               );
@@ -167,6 +187,15 @@ export function ConversationPage() {
         {/* Composer */}
         <div className="border-t border-line p-3">
           {notice ? <p className="mb-2 px-1 text-xs text-danger">{notice}</p> : null}
+
+          {/* Voice unlocks at the Serious stage (Part D) — and only once an STT
+              provider is configured, which the admin flag reflects. */}
+          {canMessage && voiceAllowed ? (
+            <div className="mb-3 border-b border-line pb-3">
+              <VoiceRecorder maxSeconds={voiceMaxSeconds} onSend={onSendVoice} />
+            </div>
+          ) : null}
+
           {canMessage ? (
             <div className="flex items-end gap-2">
               <textarea

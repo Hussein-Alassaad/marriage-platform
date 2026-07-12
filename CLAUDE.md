@@ -22,7 +22,21 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   (Areeba) still to come; coupons + "can't pay" ticket not built yet.
 - **Guardian (wali) system: complete** — invite → accept → per-connection sharing,
   which is what unlocks the Family-stage requirement.
-- **Next: Phase 10 — Serious voice, then Family media** (see `docs/Roadmap.md`).
+- **Phase 10 — Serious-stage voice: complete** (pluggable STT; disabled until keys exist).
+- **Next: Phase 10 cont. — Family images/videos** (see `docs/Roadmap.md`).
+
+Voice delivered: `send-voice-message` — receive → **transcribe** → **moderate the
+transcript** → only then store and deliver. Fail-closed at every step (no STT provider,
+transcription failure, moderator unreachable, or a Part D violation ⇒ the note is not
+delivered and **the audio is never stored**). Claude has no audio input, so STT is a
+pluggable provider (`_shared/transcribe.ts`: `openai` | `deepgram` | `custom`) set via
+`STT_PROVIDER` / `STT_API_KEY` secrets; the `voice_enabled` setting (default **false**)
+reveals the mic once they exist — the flag is UX, the server check is the boundary.
+Moderation now lives in `_shared/moderation.ts`, shared by text and voice, so both pass
+the identical gate. `chat-media` issues participant-checked, 10-minute signed URLs
+(the chat buckets have no client policies at all). UI: a record → review → send
+recorder (auto-stops at `voice_max_seconds`) and a voice bubble that lazily fetches
+playback and shows the moderated transcript beneath.
 
 Guardian delivered: a `guardian` Edge Function — the only writer of the guardian
 relationship (clients cannot write `guardians` / `guardian_invitations` /

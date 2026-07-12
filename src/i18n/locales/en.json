@@ -115,6 +115,18 @@
     "notAvailable": "Messaging isn't available for this connection yet.",
     "thePerson": "them"
   },
+  "voice": {
+    "record": "Record voice",
+    "stop": "Stop",
+    "send": "Send voice note",
+    "discard": "Discard",
+    "play": "Play voice note",
+    "transcript": "Transcript",
+    "playError": "Couldn't load that voice note.",
+    "micDenied": "We couldn't reach your microphone. Check the browser's permission.",
+    "sendError": "Couldn't send that voice note. Please try again.",
+    "unavailable": "Voice notes are reviewed before delivery, and the review service isn't available right now. Your note wasn't sent."
+  },
   "plans": {
     "eyebrow": "Membership",
     "title": "Choose your membership",

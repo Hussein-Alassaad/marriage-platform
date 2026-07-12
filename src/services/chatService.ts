@@ -5,6 +5,9 @@ export interface ChatMessage {
   sender_id: string;
   type: string;
   body: string | null;
+  /** Voice: the moderated transcript. It is what the moderator actually judged. */
+  transcript: string | null;
+  media_path: string | null;
   created_at: string;
 }
 
@@ -68,7 +71,7 @@ export const chatService = {
     const supabase = requireSupabaseClient();
     const { data, error } = await supabase
       .from('messages')
-      .select('id, sender_id, type, body, created_at')
+      .select('id, sender_id, type, body, transcript, media_path, created_at')
       .eq('conversation_id', conversationId)
       .is('deleted_at', null)
       .order('created_at', { ascending: true });
@@ -93,6 +96,36 @@ export const chatService = {
     const { data, error } = await supabase.functions.invoke('send-text-message', { body: { matchId, body } });
     if (error) throw error;
     return data as SendResult;
+  },
+
+  /**
+   * Send a voice note. The server transcribes it, moderates the transcript, and only
+   * then stores the audio — so a blocked note never reaches the other person, and
+   * nothing is stored when transcription is unavailable.
+   */
+  async sendVoice(matchId: string, audio: Blob, durationMs: number): Promise<SendResult> {
+    const supabase = requireSupabaseClient();
+    const form = new FormData();
+    form.append('matchId', matchId);
+    form.append('durationMs', String(Math.round(durationMs)));
+    form.append('audio', audio, 'voice.webm');
+    const { data, error } = await supabase.functions.invoke('send-voice-message', { body: form });
+    if (error) {
+      // A non-2xx carries the reason in the body — surface it instead of a generic throw.
+      const detail = await error.context?.json?.().catch(() => null);
+      if (detail?.error) throw new Error(detail.error);
+      throw error;
+    }
+    return data as SendResult;
+  },
+
+  /** A short-lived signed URL for one media message (participants only). */
+  async getMediaUrl(messageId: string): Promise<string> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('chat-media', { body: { messageId } });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data.url as string;
   },
 
   /** Journey state for this match: next stage, both consents, unmet requirements. */

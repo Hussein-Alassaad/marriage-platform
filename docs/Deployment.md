@@ -150,6 +150,33 @@ stays locked until the Guardian phase ships); Married needs only mutual
 confirmation. Deploy: `supabase functions deploy stage-transition`. Needs the
 `20260711120000_stage_consents.sql` migration applied first (`supabase db push`).
 
+**`send-voice-message`** delivers Serious-stage voice notes. The pipeline is strictly
+receive → **transcribe** → **moderate the transcript** → only then store and deliver
+(Part D). It is fail-closed at every step: no STT provider configured, transcription
+fails, the moderator is unreachable, or the transcript violates Part D → the note is
+**not delivered and the audio is never stored**. Voice needs a speech-to-text provider
+because Claude has no audio input — it is pluggable
+(`supabase/functions/_shared/transcribe.ts`), and configured with secrets:
+
+```
+supabase secrets set STT_PROVIDER=openai   STT_API_KEY=...   # whisper-1
+supabase secrets set STT_PROVIDER=deepgram STT_API_KEY=...   # nova-2
+supabase secrets set STT_PROVIDER=custom   STT_API_KEY=... STT_URL=https://...
+```
+
+Then flip the admin setting **`voice_enabled` to `true`** so the mic appears. The flag
+is UX only — the server refuses voice regardless while STT is unconfigured. Caps
+(`voice_max_seconds`, `voice_max_mb`) are settings too. Deploy:
+`supabase functions deploy send-voice-message`. Moderation now lives in
+`supabase/functions/_shared/moderation.ts` and is shared with `send-text-message` —
+text and voice transcripts pass through exactly the same gate.
+
+**`chat-media`** issues short-lived signed URLs for chat media. The `chat-voice` /
+`chat-images` / `chat-videos` buckets have **no client policies at all** — privacy is
+enforced by which file the server hands you — so this function verifies the caller is
+a participant of the message's conversation, then signs that one file for 10 minutes.
+Deploy: `supabase functions deploy chat-media`.
+
 **`guardian`** is the only writer of the guardian relationship — a self-declared
 guardian link is exactly the thing an attacker would forge, so clients cannot write
 `guardians`, `guardian_invitations`, or `guardian_access` at all. Actions: `invite`

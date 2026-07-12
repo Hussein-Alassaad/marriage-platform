@@ -44,6 +44,31 @@ export function useSendText(matchId: string) {
   });
 }
 
+export function useSendVoice(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { audio: Blob; durationMs: number }) =>
+      chatService.sendVoice(matchId, input.audio, input.durationMs),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', matchId] });
+      if (result.conversationId) {
+        queryClient.invalidateQueries({ queryKey: ['messages', result.conversationId] });
+      }
+    },
+  });
+}
+
+/** Signed playback URL, fetched lazily and cached until it nears expiry. */
+export function useMediaUrl(messageId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['media-url', messageId],
+    queryFn: () => chatService.getMediaUrl(messageId),
+    enabled,
+    staleTime: 8 * 60_000,
+    gcTime: 9 * 60_000,
+  });
+}
+
 /** Journey state — polled so a partner's consent shows up without a refresh. */
 export function useStageStatus(matchId: string) {
   return useQuery({
