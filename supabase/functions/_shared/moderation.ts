@@ -158,12 +158,83 @@ async function aiModerate(apiKey: string, text: string, stage: string): Promise<
   return JSON.parse(block.text) as Verdict;
 }
 
+/**
+ * Image moderation (Family stage, Part D §3). Claude can see, so an image is judged
+ * before it is ever stored. There is no local fallback for pixels — if the moderator
+ * is unavailable, the image is blocked, never delivered unreviewed.
+ */
+const IMAGE_SYSTEM = `You are the image moderation gate for Mithaq, an Islamic marriage platform (NOT a dating app). The couple is at the Family stage: their families are involved and a guardian is present.
+
+Judge ONE image. Block it if it contains ANY of:
+- nudity, partial nudity, underwear, swimwear, or sexually suggestive posing or framing
+- sexual or pornographic content of any kind
+- violence, gore, weapons used threateningly, or self-harm
+- alcohol, drugs, or gambling
+- hateful, extremist, or illegal content
+- content that appears designed to shame, harass, or expose someone
+- screenshots that exist to pass along contact details or move the conversation to another platform (a phone number, an email, a QR code, a social-media handle or profile)
+
+Allow ordinary, modest photographs a family would be comfortable seeing: faces, family and social occasions, food, travel, nature, documents, and everyday life.
+
+Return ONLY the JSON object. No prose.`;
+
+const IMAGE_SCHEMA = {
+  type: 'object',
+  properties: {
+    verdict: { type: 'string', enum: ['allowed', 'blocked'] },
+    category: { type: 'string', enum: ['none', 'inappropriate', 'contact_info', 'unsafe'] },
+    reason: { type: 'string', description: 'Short explanation, max 15 words.' },
+  },
+  required: ['verdict', 'category', 'reason'],
+  additionalProperties: false,
+} as const;
+
 export interface ModerationResult {
   blocked: boolean;
   category: string | null;
   provider: string;
   model: string;
   promptVersion: string;
+}
+
+export async function moderateImage(
+  base64: string,
+  mediaType: string,
+  apiKey?: string | null,
+): Promise<ModerationResult> {
+  const ai = { provider: 'anthropic', model: MODEL, promptVersion: 'mithaq-img-v1' };
+  // No moderator ⇒ no judgement ⇒ no delivery. Pixels have no local pre-filter.
+  if (!apiKey) return { blocked: true, category: 'unavailable', ...ai };
+
+  try {
+    const client = new Anthropic({ apiKey, maxRetries: 1, timeout: 20_000 });
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 200,
+      system: IMAGE_SYSTEM,
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: IMAGE_SCHEMA } },
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: 'Moderate this image.' },
+          ],
+        },
+      ],
+    });
+    const block = response.content.find((b) => b.type === 'text');
+    if (!block || block.type !== 'text') throw new Error('moderator_no_output');
+    const verdict = JSON.parse(block.text) as Verdict;
+    return {
+      blocked: verdict.verdict === 'blocked',
+      category: verdict.verdict === 'blocked' ? verdict.category : null,
+      ...ai,
+    };
+  } catch (err) {
+    console.error('image_moderation_unavailable', err);
+    return { blocked: true, category: 'unavailable', ...ai };
+  }
 }
 
 /**

@@ -127,6 +127,20 @@
     "sendError": "Couldn't send that voice note. Please try again.",
     "unavailable": "Voice notes are reviewed before delivery, and the review service isn't available right now. Your note wasn't sent."
   },
+  "media": {
+    "sendImage": "Photo",
+    "sendVideo": "Video",
+    "reviewNote": "Photos are checked before they're delivered. Videos are reviewed by a person first, so they take a little longer to arrive.",
+    "viewImage": "View photo",
+    "playVideo": "Play video",
+    "imageAlt": "Shared photo",
+    "pendingNotice": "Your video was sent for review. It reaches them once it's approved.",
+    "pendingMine": "Awaiting review — they can't open it yet.",
+    "pendingTheirs": "A video is awaiting review.",
+    "tooLarge": "That file is too large.",
+    "unsupported": "Use a JPG, PNG or WebP photo, or an MP4, WebM or MOV video.",
+    "sendError": "Couldn't send that file. Please try again."
+  },
   "plans": {
     "eyebrow": "Membership",
     "title": "Choose your membership",
@@ -184,6 +198,16 @@
       "emptyTitle": "Nothing to review",
       "emptyBody": "Manual payment claims appear here as soon as members submit them.",
       "error": "Couldn't load the review queue."
+    },
+    "media": {
+      "title": "Videos awaiting review",
+      "subtitle": "No AI can watch a video, so a person approves each one. Until then the recipient cannot open it. Rejecting deletes the file.",
+      "approve": "Approve & deliver",
+      "reject": "Reject & delete",
+      "noPreview": "Preview unavailable.",
+      "emptyTitle": "Nothing awaiting review",
+      "emptyBody": "Videos sent in the Family stage appear here for approval.",
+      "error": "Couldn't load the media queue."
     }
   },
   "guardians": {

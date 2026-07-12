@@ -22,8 +22,20 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   (Areeba) still to come; coupons + "can't pay" ticket not built yet.
 - **Guardian (wali) system: complete** — invite → accept → per-connection sharing,
   which is what unlocks the Family-stage requirement.
-- **Phase 10 — Serious-stage voice: complete** (pluggable STT; disabled until keys exist).
-- **Next: Phase 10 cont. — Family images/videos** (see `docs/Roadmap.md`).
+- **Phase 10 — Communication stages: complete.** Serious-stage voice (pluggable STT)
+  and Family-stage images/videos. All four stages now carry their own media rules.
+- **Next: Phase 11 — Marriage Assistant** (see `docs/Roadmap.md`).
+
+Family media delivered: `send-image-message` (Claude **vision** moderates the image
+before it is stored — no moderator or a violation ⇒ never delivered, never stored) and
+`send-video-message`. **No model can watch a video**, so a video is stored as
+`media_status = 'pending'` and is *not openable by the recipient* until a human
+approves it in the admin media queue; `chat-media` refuses to sign anything not
+`approved`, which makes "deliver only after approval" literally true (rejecting deletes
+the file). Per-day caps come from `family_images_per_day` / `family_videos_per_day`
+(Married is uncapped). `media_enabled` (default false) reveals the buttons once
+`ANTHROPIC_API_KEY` exists. UI: a Family-stage attach bar, image/video bubbles with
+lazily-signed URLs, and an "awaiting review" state instead of a broken player.
 
 Voice delivered: `send-voice-message` — receive → **transcribe** → **moderate the
 transcript** → only then store and deliver. Fail-closed at every step (no STT provider,

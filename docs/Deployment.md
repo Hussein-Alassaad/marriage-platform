@@ -171,7 +171,23 @@ is UX only — the server refuses voice regardless while STT is unconfigured. Ca
 `supabase/functions/_shared/moderation.ts` and is shared with `send-text-message` —
 text and voice transcripts pass through exactly the same gate.
 
-**`chat-media`** issues short-lived signed URLs for chat media. The `chat-voice` /
+**`send-image-message`** / **`send-video-message`** deliver Family-stage media (Part D
+§3), capped per day from settings (`family_images_per_day`, `family_videos_per_day`;
+Married is uncapped). **Images** are moderated by Claude's vision *before* they are
+stored — no moderator, an unreachable one, or a violation means the image is not
+delivered and never reaches storage (there is no local pre-filter for pixels, so an
+unconfigured `ANTHROPIC_API_KEY` blocks images rather than letting an unreviewed one
+through). **Videos cannot be watched by any model**, so they are stored as
+`media_status = 'pending'` and are **not openable by the recipient** until a human
+approves them in the admin media queue — `chat-media` refuses to sign anything not
+`approved`, which makes "deliver only after approval" literally true. Rejecting a video
+deletes the file. Turn on the `media_enabled` setting once `ANTHROPIC_API_KEY` is set.
+Deploy: `supabase functions deploy send-image-message` and
+`supabase functions deploy send-video-message`. Needs
+`20260711160000_media_settings.sql` (`supabase db push`).
+
+**`chat-media`** issues short-lived signed URLs for chat media, and carries the admin
+video-review actions (`pending-media`, `review-media`). The `chat-voice` /
 `chat-images` / `chat-videos` buckets have **no client policies at all** — privacy is
 enforced by which file the server hands you — so this function verifies the caller is
 a participant of the message's conversation, then signs that one file for 10 minutes.

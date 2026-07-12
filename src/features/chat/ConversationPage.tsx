@@ -16,14 +16,25 @@ import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { useSettings } from '@/hooks/useSettings';
 import { chatService, type ChatMessage } from '@/services/chatService';
-import { useConversationId, useMessages, useSendText, useSendVoice, useSentCount } from '@/hooks/useChat';
+import {
+  useConversationId,
+  useMessages,
+  useSendMedia,
+  useSendText,
+  useSendVoice,
+  useSentCount,
+} from '@/hooks/useChat';
 import { JourneyPanel } from '@/features/chat/JourneyPanel';
 import { VoiceRecorder } from '@/features/chat/VoiceRecorder';
 import { VoiceBubble } from '@/features/chat/VoiceBubble';
+import { MediaComposer } from '@/features/chat/MediaComposer';
+import { MediaBubble } from '@/features/chat/MediaBubble';
 
 const MESSAGING_STAGES = new Set(['introduction', 'serious_communication', 'family', 'married']);
 /** Introduction is text only; voice arrives with the Serious stage (Part D). */
 const VOICE_STAGES = new Set(['serious_communication', 'family', 'married']);
+/** Images and videos wait for the Family stage, when the guardian is present. */
+const MEDIA_STAGES = new Set(['family', 'married']);
 
 export function ConversationPage() {
   const { t } = useTranslation();
@@ -43,6 +54,7 @@ export function ConversationPage() {
   const { data: sentCount } = useSentCount(conversationId);
   const send = useSendText(matchId);
   const sendVoice = useSendVoice(matchId);
+  const sendMedia = useSendMedia(matchId);
 
   const [text, setText] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
@@ -58,11 +70,19 @@ export function ConversationPage() {
 
   const voiceAllowed = Boolean(stage && VOICE_STAGES.has(stage)) && bool('voice_enabled');
   const voiceMaxSeconds = number('voice_max_seconds', 120);
+  const mediaAllowed = Boolean(stage && MEDIA_STAGES.has(stage)) && bool('media_enabled');
 
   const onSendVoice = async (audio: Blob, durationMs: number) => {
     setNotice(null);
     const r = await sendVoice.mutateAsync({ audio, durationMs });
     if (r.blocked) setNotice(blockedNotice(r.category));
+  };
+
+  const onSendMedia = async (file: File, kind: 'image' | 'video') => {
+    setNotice(null);
+    const r = await sendMedia.mutateAsync({ file, kind });
+    if (r.blocked) setNotice(blockedNotice(r.category));
+    else if (r.pending) setNotice(t('media.pendingNotice'));
   };
 
   const blockedNotice = (category?: string) => {
@@ -174,6 +194,8 @@ export function ConversationPage() {
                   >
                     {m.type === 'voice' ? (
                       <VoiceBubble messageId={m.id} transcript={m.transcript} />
+                    ) : m.type === 'image' || m.type === 'video' ? (
+                      <MediaBubble messageId={m.id} kind={m.type} mine={mine} />
                     ) : (
                       m.body
                     )}
@@ -193,6 +215,12 @@ export function ConversationPage() {
           {canMessage && voiceAllowed ? (
             <div className="mb-3 border-b border-line pb-3">
               <VoiceRecorder maxSeconds={voiceMaxSeconds} onSend={onSendVoice} />
+            </div>
+          ) : null}
+
+          {canMessage && mediaAllowed ? (
+            <div className="mb-3 border-b border-line pb-3">
+              <MediaComposer onSend={onSendMedia} disabled={sendMedia.isPending} />
             </div>
           ) : null}
 

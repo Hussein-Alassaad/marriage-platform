@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { PageHeader } from '@/components/PageHeader';
 import { PaymentsQueue } from '@/features/admin/PaymentsQueue';
+import { MediaQueue } from '@/features/admin/MediaQueue';
 
 /**
  * Admin home. The full dashboard lands in the Admin phase; the payments review
@@ -14,6 +15,7 @@ export function AdminPage() {
     <div>
       <PageHeader title={t('page.admin.title')} subtitle={t('page.admin.subtitle')} />
       <PaymentsQueue />
+      <MediaQueue />
     </div>
   );
 }
