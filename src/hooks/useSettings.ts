@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   fetchPublicSettings,
   settingBool,
+  settingList,
   settingNumber,
   settingText,
   type PublicSettings,
@@ -28,5 +29,6 @@ export function useSettings() {
     number: (key: string, fallback: number) => settingNumber(settings, key, fallback),
     text: (key: string, fallback = '') => settingText(settings, key, fallback),
     bool: (key: string, fallback = false) => settingBool(settings, key, fallback),
+    list: (key: string, fallback: string[] = []) => settingList(settings, key, fallback),
   };
 }

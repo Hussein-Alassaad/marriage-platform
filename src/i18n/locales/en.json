@@ -175,8 +175,14 @@
     "eyebrow": "Membership",
     "title": "Choose your membership",
     "subtitle": "A paid membership opens the Serious stage, photo access, and deeper compatibility tools.",
-    "period": { "monthly": "Monthly", "yearly": "Yearly" },
-    "per": { "monthly": "/ month", "yearly": "/ year" },
+    "period": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "per": {
+      "monthly": "/ month",
+      "yearly": "/ year"
+    },
     "tier": {
       "free": "Free Member",
       "serious": "Serious Member",
@@ -306,7 +312,10 @@
     }
   },
   "match": {
-    "tabs": { "discover": "Discover", "connections": "Connections" },
+    "tabs": {
+      "discover": "Discover",
+      "connections": "Connections"
+    },
     "error": "Something went wrong. Please try again.",
     "empty": {
       "title": "No recommendations yet",
@@ -489,6 +498,104 @@
       "4": "Private"
     }
   },
+  "finance": {
+    "eyebrow": "Finance",
+    "title": "Finance",
+    "subtitle": "Track what comes in and what goes out — and plan for the marriage ahead.",
+    "add": "Add entry",
+    "history": "History",
+    "displayCurrency": "Display currency",
+    "insightsSoon": "AI financial insights are coming soon.",
+    "kind": {
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "entry": {
+      "title": "Add an entry",
+      "source": "Source",
+      "category": "Category",
+      "amount": "Amount",
+      "currency": "Currency",
+      "date": "Date",
+      "recurring": "This repeats every month",
+      "recurringShort": "Monthly",
+      "save": "Save",
+      "delete": "Delete entry",
+      "amountError": "Enter an amount greater than zero.",
+      "saveError": "Could not save this entry. Please try again."
+    },
+    "empty": {
+      "title": "Nothing recorded yet",
+      "body": "Add your first income or expense to start building your history."
+    },
+    "summary": {
+      "income": "Income this month",
+      "expenses": "Expenses this month",
+      "net": "Net",
+      "savingsRate": "Savings rate",
+      "unconvertible_one": "{{count}} entry could not be converted — no exchange rate for its currency.",
+      "unconvertible_other": "{{count}} entries could not be converted — no exchange rate for their currencies."
+    },
+    "charts": {
+      "byCategory": "Spending by category",
+      "trend": "Net over time",
+      "monthly": "Income vs. expenses",
+      "net": "Net",
+      "empty": "No history to chart yet",
+      "emptyBody": "Once you record income and expenses, your charts appear here.",
+      "noExpensesThisMonth": "No expenses recorded this month."
+    },
+    "budgets": {
+      "title": "Monthly budgets",
+      "add": "Add",
+      "save": "Save",
+      "delete": "Delete budget",
+      "empty": "Set a budget for a category to track your spending against it."
+    },
+    "goals": {
+      "title": "Savings goals",
+      "add": "Add",
+      "save": "Save",
+      "delete": "Delete goal",
+      "contribute": "Add",
+      "namePlaceholder": "e.g. Wedding",
+      "by": "by {{date}}",
+      "empty": "Set a goal — a wedding, a home, a mahr — and track your progress."
+    },
+    "upgrade": {
+      "title": "Unlock your financial dashboard",
+      "body": "Your history is always free. Charts, budgets, savings goals and reports come with a Serious membership.",
+      "cta": "See memberships",
+      "feature": {
+        "charts": "Interactive charts",
+        "statistics": "Monthly statistics",
+        "budgets": "Budget planning",
+        "goals": "Savings goals",
+        "reports": "Financial reports"
+      }
+    },
+    "category": {
+      "housing": "Housing",
+      "food": "Food",
+      "transport": "Transport",
+      "utilities": "Utilities",
+      "health": "Health",
+      "education": "Education",
+      "family": "Family",
+      "savings": "Savings",
+      "charity": "Charity",
+      "wedding": "Wedding",
+      "other": "Other"
+    },
+    "source": {
+      "salary": "Salary",
+      "business": "Business",
+      "freelance": "Freelance",
+      "investment": "Investment",
+      "gift": "Gift",
+      "other": "Other"
+    }
+  },
   "nav": {
     "home": "Home",
     "match": "Match",
@@ -549,14 +656,38 @@
         "cta": "Open finance"
       }
     },
-    "match": { "title": "Match", "subtitle": "Meaningful, AI-curated recommendations for serious marriage." },
-    "finance": { "title": "Finance", "subtitle": "Build a healthy financial future together." },
-    "assistant": { "title": "Marriage Assistant", "subtitle": "A respectful assistant for your whole marriage journey." },
-    "notifications": { "title": "Notifications", "subtitle": "The next important step — never noise." },
-    "profile": { "title": "Profile", "subtitle": "Your marriage profile, privacy, and verification." },
-    "settings": { "title": "Settings", "subtitle": "Preferences, privacy, and account." },
-    "admin": { "title": "Admin Dashboard", "subtitle": "Operate the platform without touching code." },
-    "guardian": { "title": "Guardian Review", "subtitle": "Only the introductions explicitly shared with you." },
+    "match": {
+      "title": "Match",
+      "subtitle": "Meaningful, AI-curated recommendations for serious marriage."
+    },
+    "finance": {
+      "title": "Finance",
+      "subtitle": "Build a healthy financial future together."
+    },
+    "assistant": {
+      "title": "Marriage Assistant",
+      "subtitle": "A respectful assistant for your whole marriage journey."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "The next important step — never noise."
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Your marriage profile, privacy, and verification."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Preferences, privacy, and account."
+    },
+    "admin": {
+      "title": "Admin Dashboard",
+      "subtitle": "Operate the platform without touching code."
+    },
+    "guardian": {
+      "title": "Guardian Review",
+      "subtitle": "Only the introductions explicitly shared with you."
+    },
     "login": {
       "title": "Sign in",
       "subtitle": "Welcome back to your marriage journey.",

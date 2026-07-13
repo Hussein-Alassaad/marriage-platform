@@ -1,6 +1,21 @@
 import { requireSupabaseClient } from '@/lib/supabase';
 
 export type Tier = 'free' | 'serious' | 'marriage_plus';
+
+/** Cheapest to richest. Feature gates compare rank, never equality. */
+export const TIER_ORDER: Tier[] = ['free', 'serious', 'marriage_plus'];
+
+/**
+ * Does `tier` meet the minimum a feature asks for? Minimums come from settings
+ * (e.g. `finance_charts_min_tier`), so an admin can move a feature between tiers
+ * without a deploy — hence the tolerant lookup of an unknown minimum.
+ */
+export function tierAtLeast(tier: string, minimum: string): boolean {
+  const have = TIER_ORDER.indexOf(tier as Tier);
+  const need = TIER_ORDER.indexOf(minimum as Tier);
+  if (need < 0) return false; // unknown minimum: fail closed, do not unlock
+  return have >= need;
+}
 export type BillingPeriod = 'monthly' | 'yearly';
 export type ManualMethod = 'omt' | 'whish' | 'bank_transfer';
 

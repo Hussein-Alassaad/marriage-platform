@@ -33,3 +33,11 @@ export function settingBool(settings: PublicSettings, key: string, fallback = fa
   const value = settings[key];
   return typeof value === 'boolean' ? value : fallback;
 }
+
+/** Coerce a JSON list of strings (e.g. the currency or expense-category lists). */
+export function settingList(settings: PublicSettings, key: string, fallback: string[] = []): string[] {
+  const value = settings[key];
+  if (!Array.isArray(value)) return fallback;
+  const items = value.filter((v): v is string => typeof v === 'string');
+  return items.length ? items : fallback;
+}
