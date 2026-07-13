@@ -59,6 +59,7 @@ export function ConversationPage() {
 
   const [text, setText] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
+  const [noticeDetail, setNoticeDetail] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -76,12 +77,14 @@ export function ConversationPage() {
 
   const onSendVoice = async (audio: Blob, durationMs: number) => {
     setNotice(null);
+    setNoticeDetail(null);
     const r = await sendVoice.mutateAsync({ audio, durationMs });
     if (r.blocked) setNotice(blockedNotice(r.category));
   };
 
   const onSendImage = async (file: File) => {
     setNotice(null);
+    setNoticeDetail(null);
     const r = await sendImage.mutateAsync(file);
     if (r.blocked) setNotice(blockedNotice(r.category));
   };
@@ -100,6 +103,7 @@ export function ConversationPage() {
     const value = text.trim();
     if (!value || send.isPending) return;
     setNotice(null);
+    setNoticeDetail(null);
 
     // Optimistic: show the message immediately, reconcile with the server after.
     const cid = conversationId ?? null;
@@ -124,6 +128,10 @@ export function ConversationPage() {
         rollback();
         setText(value);
         setNotice(blockedNotice(r.category));
+        // Only set when the moderator itself failed — surfacing it is the difference
+        // between a fixable problem and a mystery.
+        setNoticeDetail(r.detail ?? null);
+        if (r.detail) console.error('moderation unavailable:', r.detail);
       }
       // On success the mutation invalidates the messages query → temp is replaced.
     } catch {
@@ -209,7 +217,14 @@ export function ConversationPage() {
 
         {/* Composer */}
         <div className="border-t border-line p-3">
-          {notice ? <p className="mb-2 px-1 text-xs text-danger">{notice}</p> : null}
+          {notice ? (
+            <div className="mb-2 px-1">
+              <p className="text-xs text-danger">{notice}</p>
+              {noticeDetail ? (
+                <p className="mt-0.5 break-all font-mono text-[11px] leading-snug text-faint">{noticeDetail}</p>
+              ) : null}
+            </div>
+          ) : null}
 
           {/* Voice unlocks at the Serious stage (Part D) — and only once an STT
               provider is configured, which the admin flag reflects. */}

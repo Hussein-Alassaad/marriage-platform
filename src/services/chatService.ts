@@ -17,6 +17,12 @@ export interface SendResult {
   category?: string;
   remaining?: number | null;
   conversationId?: string;
+  /**
+   * Only present when category is 'unavailable': the real error from the moderator
+   * (bad key, no model access, network). A gate that blocks for reasons nobody can
+   * see is unfixable, so we carry the reason back instead of swallowing it.
+   */
+  detail?: string;
 }
 
 export interface StageRequirement {
