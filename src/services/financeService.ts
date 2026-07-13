@@ -39,13 +39,29 @@ export interface Goal {
   deadline: string | null;
 }
 
-export interface SharedFinance {
-  id: string;
-  match_id: string;
+/** Consent state for one couple. The function works out which side of the match you are. */
+export interface SharedStatus {
   active: boolean;
-  /** Whether *this* caller has consented — the function resolves which side they are. */
   myConsent: boolean;
   partnerConsent: boolean;
+  married: boolean;
+  partnerName: string | null;
+  /** Both spouses hold the required tier — one cannot buy it on the other's behalf. */
+  tiersOk: boolean;
+  minTier: string;
+}
+
+/** Monthly totals, grouped by the currency each amount was entered in. */
+export interface Totals {
+  currency: string;
+  income: number;
+  expenses: number;
+}
+
+export interface SharedSummary {
+  mine: Totals[];
+  theirs: Totals[];
+  partnerName: string | null;
 }
 
 interface IncomeRow {
@@ -250,4 +266,48 @@ export const financeService = {
     const { error } = await supabase.from('savings_goals').delete().eq('id', id);
     if (error) throw error;
   },
+
+  // ── Shared (couple) finance — Married Stage only, and never a client write ──
+
+  /** The member's married connection, if they have one. RLS: participants only. */
+  async getMarriedMatchId(userId: string): Promise<string | null> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase
+      .from('matches')
+      .select('id')
+      .eq('stage', 'married')
+      .is('deleted_at', null)
+      .or(`user_a.eq.${userId},user_b.eq.${userId}`)
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data?.id ?? null;
+  },
+
+  async sharedStatus(matchId: string): Promise<SharedStatus> {
+    return invokeFinance<SharedStatus>('shared-status', matchId);
+  },
+
+  /** Records MY consent. Activates only when the other side has consented too. */
+  async sharedConsent(matchId: string): Promise<SharedStatus> {
+    return invokeFinance<SharedStatus>('shared-consent', matchId);
+  },
+
+  /** Either side, alone. Leaving never needs the other spouse's signature. */
+  async sharedDisconnect(matchId: string): Promise<SharedStatus> {
+    return invokeFinance<SharedStatus>('shared-disconnect', matchId);
+  },
+
+  /** Monthly totals for both spouses — never the individual entries. */
+  async sharedSummary(matchId: string): Promise<SharedSummary> {
+    return invokeFinance<SharedSummary>('shared-summary', matchId);
+  },
 };
+
+async function invokeFinance<T>(action: string, matchId: string): Promise<T> {
+  const supabase = requireSupabaseClient();
+  const { data, error } = await supabase.functions.invoke('finance', { body: { action, matchId } });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data as T;
+}

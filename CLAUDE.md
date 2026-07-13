@@ -25,7 +25,33 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Phase 10 — Communication stages: complete for the MVP.** Text, voice (Serious) and
   photos (Family) are fully functional; **video is "Coming Soon" (disabled)**.
 - **Conversation suggestions: complete** — the AI proposes what to ask next, per stage.
-- **Next: Phase 11 — Marriage Assistant** (see `docs/Roadmap.md`).
+- **Phase 12 — Finance Module: complete** (personal ledger, tiered dashboard,
+  multi-currency, Couple Finance). Monthly AI reports + exports are not built yet.
+- **Next: Phase 11 — Marriage Assistant** (see `docs/Roadmap.md`). It is **blocked on a
+  funded `ANTHROPIC_API_KEY`**: unlike moderation, an assistant has no key-free
+  fallback — with no model there is nothing for it to say. Phase 12 was built first for
+  exactly this reason (the Roadmap allows 11 and 12 in either order).
+
+Finance delivered (Phase 12): tiers follow Decision #17 — Free adds income/expenses and
+sees a plain history; Serious adds charts, statistics, budgets and savings goals; the
+married couple can connect **Couple Finance**. Each gate reads its minimum tier from
+settings (`finance_charts_min_tier`, `basic_shared_finance_tier`), so a feature moves
+between tiers without a deploy. Nothing is teased and then locked.
+
+Money (Decision #14): amounts are **stored in the currency the member typed** and
+converted only for display — a stored USD figure does not stay honest against the LBP.
+Conversion pivots through USD via `exchange_rates`; an amount whose currency has no rate
+is **reported, never silently dropped** (`sumIn` returns `unconvertible`). The rate job
+(Phase 13) will refresh the seeded rates daily.
+
+Personal finance is **the one domain the client writes directly** — every row is
+owner-only under RLS and there is deliberately **no admin read policy** on those tables:
+admins get aggregates, never a member's spending. **Couple Finance crosses two users, so
+it is Edge-Function-only** (`finance`): the Married stage, *both* consents and *both*
+tiers are required to activate; either spouse disconnects alone; terminating the match
+disconnects it (wired into `stage-transition`). What is shared is **monthly totals, never
+individual entries**. Deploy: `supabase db push` then `supabase functions deploy finance`
+(and re-deploy `stage-transition`).
 
 Suggestions delivered: `suggest-questions` — stage-aware ideas for what to say next,
 grounded in both profiles and the last ~14 messages so it deepens the conversation

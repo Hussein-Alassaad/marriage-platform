@@ -150,3 +150,51 @@ export function useDeleteGoal() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-goals', user?.id] }),
   });
 }
+
+// ── Shared (couple) finance ────────────────────────────────────────────────────
+
+/** Shared finance only exists for a married connection, so everything hangs off this. */
+export function useMarriedMatchId() {
+  const { user } = useSession();
+  return useQuery({
+    queryKey: ['married-match', user?.id],
+    queryFn: () => financeService.getMarriedMatchId(user?.id as string),
+    enabled: Boolean(user?.id),
+  });
+}
+
+export function useSharedStatus(matchId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['shared-finance', matchId],
+    queryFn: () => financeService.sharedStatus(matchId as string),
+    enabled: Boolean(matchId),
+  });
+}
+
+export function useSharedConsent(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => financeService.sharedConsent(matchId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shared-finance', matchId] }),
+  });
+}
+
+export function useSharedDisconnect(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => financeService.sharedDisconnect(matchId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shared-finance', matchId] });
+      queryClient.removeQueries({ queryKey: ['shared-summary', matchId] });
+    },
+  });
+}
+
+/** Fetched only while shared finance is active — the function re-checks that anyway. */
+export function useSharedSummary(matchId: string | null | undefined, active: boolean) {
+  return useQuery({
+    queryKey: ['shared-summary', matchId],
+    queryFn: () => financeService.sharedSummary(matchId as string),
+    enabled: Boolean(matchId) && active,
+  });
+}

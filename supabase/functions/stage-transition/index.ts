@@ -142,6 +142,15 @@ Deno.serve(async (req: Request) => {
         changed_by: uid,
         reason: typeof body.reason === 'string' ? body.reason.slice(0, 300) : null,
       });
+
+      // Ending the match disconnects every shared feature with it (Decision #13).
+      // Shared finance would otherwise keep exposing a spouse's monthly totals to
+      // someone who is no longer connected to them.
+      await admin
+        .from('shared_finance')
+        .update({ active: false, user_a_consent: false, user_b_consent: false, disconnected_at: now })
+        .eq('match_id', matchId);
+
       return json({ ok: true, stage: 'terminated' });
     }
 

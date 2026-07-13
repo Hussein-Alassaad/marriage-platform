@@ -594,6 +594,25 @@
       "investment": "Investment",
       "gift": "Gift",
       "other": "Other"
+    },
+    "shared": {
+      "title": "Couple Finance",
+      "body": "Share your monthly picture with {{name}} — and plan the household together.",
+      "partnerFallback": "your spouse",
+      "active": "Connected",
+      "consent": "I consent to share",
+      "waiting": "Consent given",
+      "waitingFor": "Waiting for {{name}} to consent.",
+      "theyConsented": "{{name}} has consented. Shared finance starts when you do too.",
+      "disconnect": "Disconnect",
+      "disconnectHint": "Either of you can disconnect at any time, on your own.",
+      "tierRequired": "Couple Finance needs both of you to hold a {{tier}} membership.",
+      "promiseTotals": "Only monthly totals are shared — never individual entries.",
+      "promiseBoth": "Nothing is shared until both of you consent.",
+      "promiseLeave": "Either of you can disconnect alone, at any time.",
+      "you": "You",
+      "household": "Household",
+      "error": "Something went wrong. Please try again."
     }
   },
   "nav": {

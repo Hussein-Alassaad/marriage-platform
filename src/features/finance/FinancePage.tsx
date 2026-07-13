@@ -13,6 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import { useSettings } from '@/hooks/useSettings';
 import {
   useEntries,
+  useMarriedMatchId,
   usePrimaryCurrency,
   useRates,
   useSetPrimaryCurrency,
@@ -22,6 +23,8 @@ import { BudgetsCard } from './BudgetsCard';
 import { EntryList } from './EntryList';
 import { EntryModal } from './EntryModal';
 import { GoalsCard } from './GoalsCard';
+import { SharedFinanceCard } from './SharedFinanceCard';
+import { SummaryCards } from './SummaryCards';
 
 // Recharts is heavy and only the paid tiers see it — keep it out of the free bundle.
 const FinanceCharts = lazy(() => import('./FinanceCharts'));
@@ -42,6 +45,7 @@ export function FinancePage() {
   const setCurrency = useSetPrimaryCurrency();
   const { rates } = useRates();
   const { data: entries, isLoading } = useEntries();
+  const { data: marriedMatchId } = useMarriedMatchId();
   const [adding, setAdding] = useState(false);
 
   const tier = profile?.subscription_tier ?? 'free';
@@ -84,6 +88,8 @@ export function FinancePage() {
         </div>
       ) : dashboardUnlocked ? (
         <div className="space-y-6">
+          <SummaryCards entries={rows} currency={currency} rates={rates} />
+
           <Suspense fallback={<Skeleton className="rounded-card h-[560px]" />}>
             <FinanceCharts entries={rows} currency={currency} rates={rates} />
           </Suspense>
@@ -92,6 +98,11 @@ export function FinancePage() {
             <BudgetsCard entries={rows} currency={currency} rates={rates} />
             <GoalsCard currency={currency} />
           </div>
+
+          {/* Couple Finance appears only once the journey has actually reached marriage. */}
+          {marriedMatchId ? (
+            <SharedFinanceCard matchId={marriedMatchId} currency={currency} rates={rates} />
+          ) : null}
 
           {/* AI insights need a funded key; the setting stays off until there is one,
               and we say so rather than showing a button that always fails. */}

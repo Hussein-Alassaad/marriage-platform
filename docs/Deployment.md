@@ -247,6 +247,24 @@ exist — so no fake checkout screen can take a payment that goes nowhere. Deplo
 `20260711130000_payment_settings.sql` migration applied (`supabase db push`).
 Payment instructions, claim expiry, and period lengths are admin-editable settings.
 
+**`finance`** handles **only** shared (couple) finance. Personal finance never goes
+through it: income, expenses, budgets and goals are owner-only rows under RLS and the
+client writes them directly — and there is deliberately **no admin read policy** on those
+tables, so an admin can never open a member's spending. Shared finance is different
+because it crosses two people: `shared_finance` is a **consent record**, and a client
+write would let one spouse consent on the other's behalf. Actions: `shared-status`,
+`shared-consent` (activates only when the match is in the **Married** stage, **both**
+have consented, and **both** hold at least `basic_shared_finance_tier` — one spouse
+cannot buy the tier on the other's behalf), `shared-disconnect` (either side, alone, no
+counter-signature — leaving is never harder than joining), and `shared-summary`, which
+returns **monthly totals only, never individual entries**, and re-checks the gate on
+every call so a disconnect takes effect immediately. Terminating a match disconnects
+shared finance too (in `stage-transition`, per Decision #13). Deploy:
+`supabase functions deploy finance` and re-deploy `stage-transition`. Needs
+`20260714130000_finance_settings.sql` + `20260714140000_shared_finance_guard.sql`
+(`supabase db push`). No AI key required; `finance_ai_insights_enabled` (default false)
+keeps AI insights hidden until one is funded.
+
 **`compute-compatibility`** scores eligible candidates from profile data
 (deterministic, no AI key), upserts `compatibility_scores`, and rebuilds the
 caller's ranked `daily_recommendations` for today — which `matchmaking.discover`
