@@ -114,7 +114,37 @@
     "moderationUnavailable": "Safety review is temporarily unavailable, so your message wasn't sent. Please try again shortly.",
     "sendError": "Couldn't send. Please try again.",
     "notAvailable": "Messaging isn't available for this connection yet.",
-    "thePerson": "them"
+    "thePerson": "them",
+    "suggest": {
+      "title": "Ideas for what to say",
+      "refresh": "New ideas",
+      "fallback": {
+        "introduction": [
+          "Assalamu alaikum. What first made you consider marriage at this point in your life?",
+          "How would you describe your family, and how involved are they in your decisions?",
+          "What does practising your faith look like day to day for you?",
+          "What are you hoping to build with a spouse in the first few years?"
+        ],
+        "serious_communication": [
+          "How do you picture our responsibilities being shared in a household?",
+          "What are your thoughts on children — how many, and when?",
+          "How do you handle disagreement when you feel strongly about something?",
+          "Where would you want us to live, and how would your family feel about it?"
+        ],
+        "family": [
+          "When would be a good time for our families to speak with each other?",
+          "How do you and your family usually approach the mahr and the wedding?",
+          "What would you like my family to know about you first?",
+          "Shall we plan a meeting with our families present, insha'Allah?"
+        ],
+        "married": [
+          "What are our goals for this year, insha'Allah?",
+          "How should we plan our finances together?",
+          "What can I do to make things easier for you this week?",
+          "How do you want us to handle disagreements when they come?"
+        ]
+      }
+    }
   },
   "voice": {
     "record": "Record voice",

@@ -130,6 +130,20 @@ export const chatService = {
     return sendMedia('send-image-message', matchId, 'image', image);
   },
 
+  /**
+   * AI-suggested things to say next, grounded in both profiles and what has already
+   * been said. Returns [] when the AI is unavailable — the caller shows a curated
+   * fallback rather than an error, because a suggestion is a convenience, not a gate.
+   */
+  async getSuggestions(matchId: string, locale: string): Promise<string[]> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('suggest-questions', {
+      body: { matchId, locale },
+    });
+    if (error) return [];
+    return (data?.suggestions ?? []) as string[];
+  },
+
   /** A short-lived signed URL for one media message (participants only). */
   async getMediaUrl(messageId: string): Promise<string> {
     const supabase = requireSupabaseClient();

@@ -190,6 +190,14 @@ sampling into Claude vision, or a video-capable provider) and what to flip; noth
 else in the messaging system needs to change. Deploy it so the rejection is served
 server-side: `supabase functions deploy send-video-message`.
 
+**`suggest-questions`** offers the member a few things they could say next —
+stage-aware (Part D), grounded in both profiles and in the recent conversation so it
+goes deeper instead of repeating. Unlike the senders it does **not** fail closed: with
+no `ANTHROPIC_API_KEY`, or on an error, it returns an empty list and the client shows a
+curated per-stage set from i18n. That is safe because a suggestion is not a delivery —
+picking one only fills the composer, and sending it still passes the full moderation
+gate. Deploy: `supabase functions deploy suggest-questions`.
+
 **`chat-media`** issues short-lived signed URLs for chat media. It signs **only**
 media whose `media_status` is `approved` — i.e. media that actually passed moderation
 before it was stored — which is the invariant a future video release plugs into. The `chat-voice` /

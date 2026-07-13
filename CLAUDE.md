@@ -24,7 +24,17 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   which is what unlocks the Family-stage requirement.
 - **Phase 10 — Communication stages: complete for the MVP.** Text, voice (Serious) and
   photos (Family) are fully functional; **video is "Coming Soon" (disabled)**.
+- **Conversation suggestions: complete** — the AI proposes what to ask next, per stage.
 - **Next: Phase 11 — Marriage Assistant** (see `docs/Roadmap.md`).
+
+Suggestions delivered: `suggest-questions` — stage-aware ideas for what to say next,
+grounded in both profiles and the last ~14 messages so it deepens the conversation
+rather than repeating it. Rendered as chips above the composer; **picking one fills the
+box, it never sends** — the member edits and sends in their own words, and the message
+still passes the full moderation gate (a suggestion is never a bypass). This surface
+deliberately does *not* fail closed: with no key or on error it returns `[]` and the
+client falls back to a curated per-stage set in i18n, so the feature degrades to
+"slightly less clever" instead of "broken".
 
 Family photos delivered: `send-image-message` — Claude **vision** moderates the image
 before it is stored (no moderator, an unreachable one, or a violation ⇒ never

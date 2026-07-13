@@ -29,6 +29,7 @@ import { VoiceRecorder } from '@/features/chat/VoiceRecorder';
 import { VoiceBubble } from '@/features/chat/VoiceBubble';
 import { MediaComposer } from '@/features/chat/MediaComposer';
 import { MediaBubble } from '@/features/chat/MediaBubble';
+import { SuggestionChips } from '@/features/chat/SuggestionChips';
 
 const MESSAGING_STAGES = new Set(['introduction', 'serious_communication', 'family', 'married']);
 /** Introduction is text only; voice arrives with the Serious stage (Part D). */
@@ -59,6 +60,7 @@ export function ConversationPage() {
   const [text, setText] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -223,9 +225,23 @@ export function ConversationPage() {
             </div>
           ) : null}
 
+          {/* Ideas for what to say next. Picking one fills the box — it never sends. */}
+          {canMessage ? (
+            <SuggestionChips
+              matchId={matchId}
+              stage={stage}
+              messageCount={messages?.length ?? 0}
+              onPick={(s) => {
+                setText(s);
+                composerRef.current?.focus();
+              }}
+            />
+          ) : null}
+
           {canMessage ? (
             <div className="flex items-end gap-2">
               <textarea
+                ref={composerRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {

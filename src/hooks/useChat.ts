@@ -83,6 +83,20 @@ export function useMediaUrl(messageId: string, enabled: boolean) {
   });
 }
 
+/**
+ * Suggested things to say next. Kept fresh against the conversation length so the
+ * ideas move on as the conversation does, but not re-fetched on every render.
+ */
+export function useSuggestions(matchId: string, locale: string, messageCount: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['suggestions', matchId, locale, messageCount],
+    queryFn: () => chatService.getSuggestions(matchId, locale),
+    enabled: enabled && Boolean(matchId),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+}
+
 /** Journey state — polled so a partner's consent shows up without a refresh. */
 export function useStageStatus(matchId: string) {
   return useQuery({
