@@ -141,8 +141,10 @@ Deno.serve(async (req: Request) => {
     }
     if (!transcript) return json({ blocked: true, category: 'empty_transcript' });
 
-    // 2. Moderate the transcript — the same Part D gate the text sender uses.
-    const verdict = await moderate(transcript, stage, anthropicKey);
+    // 2. Moderate the transcript — the same Part D gate the text sender uses, including
+    //    the admin switch for the AI layer (see send-text-message).
+    const aiEnabled = (await setting(admin, 'moderation_ai_enabled', true)) !== false;
+    const verdict = await moderate(transcript, stage, aiEnabled ? anthropicKey : null);
     if (verdict.blocked) {
       await audit({
         verdict: 'blocked',

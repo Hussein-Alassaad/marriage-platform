@@ -126,6 +126,12 @@ Deno.serve(async (req: Request) => {
       });
 
     // Moderate the pixels before they are ever written anywhere.
+    //
+    // NOTE: the `moderation_ai_enabled` switch does NOT apply here. Text has a key-free
+    // pre-filter to fall back on; pixels have nothing. With no working AI moderator an
+    // image cannot be judged at all, so it is refused — an unreviewed photo between two
+    // strangers is exactly the thing this platform must never deliver. Keep the
+    // `media_enabled` setting off until the API key is funded.
     const bytes = new Uint8Array(await image.arrayBuffer());
     const verdict = await moderateImage(toBase64(bytes), type, anthropicKey);
     if (verdict.blocked) {

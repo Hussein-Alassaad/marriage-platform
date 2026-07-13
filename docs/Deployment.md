@@ -130,14 +130,28 @@ social handles and premature romance before the Family stage — Decisions Part 
 and an **AI moderator (Claude)** that judges intent. Deploy: `supabase functions
 deploy send-text-message`. Voice/image/video senders arrive with their stages.
 
-> The AI moderator needs one secret — set it once, and **never** put it in the
-> frontend or in `.env`:
+> **Two moderation modes.**
+>
+> **AI mode (the target).** Set the key once — never in the frontend, never in `.env`:
 > ```
 > supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 > ```
-> It is **fail-closed**: if the key is set and the moderator errors or times out,
-> the message is not delivered. If the key is absent the function still runs, but
-> on the local pre-filter alone.
+> The API key must be **funded** (Console → Plans & Billing). A Claude Pro/Max chat
+> subscription does **not** fund the API — they are separate products with separate
+> balances. In this mode the gate is **fail-closed**: if the moderator errors or times
+> out, the message is not delivered. Roughly $0.0003 per message on Haiku, so $5 of
+> credit moderates ~15,000 messages.
+>
+> **Local-only mode (what runs without a funded key).** Either leave
+> `ANTHROPIC_API_KEY` unset, or set `moderation_ai_enabled = false`. The key-free
+> pre-filter is then the only moderator: it blocks phone numbers, emails, links,
+> `@handles`, the named platforms, requests to move off-platform ("send me your
+> number", "video call"), and romance including obfuscated spellings ("love u",
+> "l0ve  u", "ily"). **It matches patterns, not intent** — a cleverly worded hint at a
+> handle will get through. This is a deliberate, recorded trade-off, not a fail-open;
+> flip `moderation_ai_enabled` back to `true` the moment the key is funded (no redeploy
+> needed). **Photos have no key-free fallback** — pixels cannot be judged by a wordlist —
+> so `send-image-message` refuses them in this mode; keep `media_enabled` off.
 
 **`stage-transition`** is the only writer of `matches.stage`. Actions: `status`
 (current + next stage, both consents, unmet requirements), `consent` / `withdraw`

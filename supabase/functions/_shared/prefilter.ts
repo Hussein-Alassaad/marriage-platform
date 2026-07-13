@@ -34,6 +34,14 @@ const CONTACT_PHRASES = [
   'add me on', 'dm me', 'text me on', 'call me on', 'find me on', 'my handle',
   'my username', 'my number is', 'my email is', 'reach me on', 'message me on',
   'lets talk on', 'let us talk on', 'follow me on', 'give me your number',
+  // Asking for a way out of the platform, not just offering one.
+  'your number', 'your phone', 'your email', 'your account', 'your username',
+  'send me your', 'give me your', 'what is your number', 'whats your number',
+  'outside the app', 'outside this app', 'off the app', 'another app', 'other app',
+  'contact you directly', 'talk privately', 'private chat', 'chat outside',
+  // Meeting alone before the family stage (haram_meeting, caught without the AI).
+  'meet alone', 'meet you alone', 'meet privately', 'come to my place',
+  'come to my house', 'video call', 'voice call', 'call you',
 ];
 
 const EMAIL_RE = /[a-z0-9._%+-]+\s*(?:@|\(at\)|\[at\])\s*[a-z0-9.-]+\s*(?:\.|\(dot\))\s*[a-z]{2,}/i;

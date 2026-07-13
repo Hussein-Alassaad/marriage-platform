@@ -95,8 +95,18 @@ Deno.serve(async (req: Request) => {
         ...row,
       });
 
-    // Pre-filter + AI moderator (fail-closed).
-    const verdict = await moderate(text, stage, anthropicKey);
+    // The AI layer can be switched off by an admin (e.g. no funded API key). That is an
+    // explicit, recorded decision — NOT a silent fail-open: with it off the local
+    // pre-filter is the moderator, and it cannot read intent. When it is ON and the AI
+    // is unreachable, we still fail closed and nothing is delivered.
+    const { data: aiSetting } = await admin
+      .from('settings')
+      .select('value')
+      .eq('key', 'moderation_ai_enabled')
+      .maybeSingle();
+    const aiEnabled = aiSetting?.value !== false;
+
+    const verdict = await moderate(text, stage, aiEnabled ? anthropicKey : null);
     if (verdict.blocked) {
       await audit({
         verdict: 'blocked',

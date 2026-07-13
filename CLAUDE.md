@@ -100,7 +100,17 @@ as a `JourneyPanel` above the conversation showing both consents, the unmet
 requirements (never a silent disabled button), and End connection. Deploy:
 `supabase db push` then `supabase functions deploy stage-transition`.
 
-Chat moderation is now two layers: an evasion-resistant local pre-filter (normalizes
+**Moderation mode (important).** The AI layer needs a *funded* Anthropic API key (a Claude
+Pro chat subscription does not fund the API). Until there is one, the platform runs in
+**local-only mode**: leave `ANTHROPIC_API_KEY` unset, or set `moderation_ai_enabled = false`.
+The key-free pre-filter is then the only moderator — it blocks numbers, emails, links,
+handles, named platforms, off-platform requests and obfuscated romance, but **matches
+patterns, not intent**, so a cleverly worded hint gets through. That is a recorded
+trade-off, not a fail-open. Flip the setting back to `true` when the key is funded (no
+redeploy). Photos have **no** key-free fallback, so `send-image-message` refuses them in
+this mode — keep `media_enabled` off. AI moderation stays fully wired for that day.
+
+Chat moderation is two layers: an evasion-resistant local pre-filter (normalizes
 accents/leetspeak/stretched letters/separators/chat shorthand, so "l0ve u", "ily" and
 "i n s t a g r a m" are all caught; detects handles, URLs, emails and phone numbers)
 and an **AI moderator (Claude)** that judges intent against the Part D stage rules.

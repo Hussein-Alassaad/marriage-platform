@@ -58,6 +58,12 @@ describe('moderation pre-filter', () => {
       expect(intro('check https://example.com')?.category).toBe('contact_info');
       expect(intro('write to me at hussein@gmail.com')?.category).toBe('contact_info');
     });
+    it('blocks asking to move off the platform', () => {
+      expect(intro('can you send me your number?')?.category).toBe('contact_info');
+      expect(intro('lets talk outside the app')?.category).toBe('contact_info');
+      expect(intro('can we do a video call tonight?')?.category).toBe('contact_info');
+      expect(intro('what is your account')?.category).toBe('contact_info');
+    });
     it('blocks premature romance, including evasions', () => {
       expect(intro('love you')?.category).toBe('too_soon');
       expect(intro('love u')?.category).toBe('too_soon');
