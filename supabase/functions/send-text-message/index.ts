@@ -105,7 +105,9 @@ Deno.serve(async (req: Request) => {
         model: verdict.model,
         prompt_version: verdict.promptVersion,
       });
-      return json({ blocked: true, category: verdict.category });
+      // `detail` is only present when the moderator itself failed — it tells you
+      // whether the key, the model access, or the network is the problem.
+      return json({ blocked: true, category: verdict.category, detail: verdict.detail });
     }
 
     // Introduction per-person quota — read cap + counter once, in parallel.

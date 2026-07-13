@@ -14,127 +14,49 @@
 
 import Anthropic from 'npm:@anthropic-ai/sdk@0.68.0';
 
-/** Contact info and romance are forbidden until the Family stage (Part D). */
-const PRE_FAMILY = new Set(['introduction', 'serious_communication']);
+import { prefilter, type Block } from './prefilter.ts';
 
-const PROFANITY = ['fuck', 'fucking', 'fuk', 'fck', 'shit', 'bitch', 'asshole', 'ass', 'cunt', 'dick', 'pussy', 'bastard', 'slut', 'whore', 'piss', 'motherfucker'];
-const SEXUAL = ['sex', 'sexy', 'nude', 'nudes', 'naked', 'horny', 'boobs', 'porn', 'xxx', 'hookup', 'sext'];
-const ROMANTIC = [
-  'i love you', 'love you', 'love u', 'luv you', 'luv u', 'ily', 'ilu', 'ilysm',
-  'in love with you', 'my love', 'my heart', 'my queen', 'my king',
-  'babe', 'baby', 'sweetheart', 'sweetie', 'honey', 'darling', 'cutie', 'gorgeous',
-  'kiss', 'kisses', 'hug you', 'miss you', 'miss u', 'marry me', 'xoxo',
-  'beautiful eyes', 'you are beautiful', 'ur beautiful', 'you are gorgeous',
-];
-const PLATFORMS = [
-  'instagram', 'insta', 'ig', 'snapchat', 'snap', 'whatsapp', 'whats app', 'wa',
-  'telegram', 'tg', 'tiktok', 'facebook', 'fb', 'messenger', 'twitter', 'x com',
-  'discord', 'skype', 'viber', 'signal', 'linkedin', 'youtube', 'email', 'gmail', 'phone', 'number',
-];
-const CONTACT_PHRASES = [
-  'add me', 'dm me', 'text me', 'call me', 'find me on', 'my handle', 'my username',
-  'my account is', 'my number is', 'my name on', 'reach me on', 'message me on',
-  'lets talk on', 'let us talk on', 'here is my', 'follow me',
-];
-
-const EMAIL_RE = /[a-z0-9._%+-]+\s*(?:@|\(at\)|\[at\]|\sat\s)\s*[a-z0-9.-]+\s*(?:\.|\(dot\)|\sdot\s)\s*[a-z]{2,}/i;
-const HANDLE_RE = /(^|[\s(])@[a-z0-9._]{3,}/i;
-const URL_RE = /(https?:\/\/|www\.)\S+/i;
-
-const LEET: Record<string, string> = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b', '@': 'a', '$': 's', '!': 'i', '|': 'i' };
-const ABBREV: Record<string, string> = { u: 'you', ur: 'your', r: 'are', luv: 'love', lov: 'love', b: 'be', pls: 'please', plz: 'please', bby: 'baby', bae: 'babe' };
-
-/** Strips accents, leetspeak and punctuation; expands chat shorthand. */
-function normalize(input: string): string {
-  const deaccented = input.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  const deleet = [...deaccented].map((c) => LEET[c] ?? c).join('');
-  const words = deleet
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w.replace(/(.)\1{2,}/g, '$1$1')) // "loooove" -> "loove"
-    .map((w) => ABBREV[w] ?? w);
-  return ` ${words.join(' ')} `;
-}
-
-/** All separators removed — defeats "i n s t a g r a m" and "l.o.v.e.u". */
-function squash(input: string): string {
-  return normalize(input).replace(/[^a-z0-9]/g, '');
-}
-
-const hasWord = (norm: string, words: string[]) => words.some((w) => norm.includes(` ${w} `));
-const hasPhrase = (norm: string, sq: string, phrases: string[]) =>
-  phrases.some((p) => norm.includes(` ${p} `) || sq.includes(p.replace(/[^a-z0-9]/g, '')));
-const digitCount = (s: string) => (s.match(/\d/g) ?? []).length;
-
-export interface Block {
-  category: string;
-  reason: string;
-}
-
-export function prefilter(text: string, stage: string): Block | null {
-  const norm = normalize(text);
-  const sq = squash(text);
-
-  if (hasWord(norm, PROFANITY) || hasWord(norm, SEXUAL)) {
-    return { category: 'inappropriate', reason: 'profanity_or_sexual' };
-  }
-  if (!PRE_FAMILY.has(stage)) return null;
-
-  if (EMAIL_RE.test(text) || URL_RE.test(text) || HANDLE_RE.test(text)) {
-    return { category: 'contact_info', reason: 'email_url_or_handle' };
-  }
-  if (/\d[\d\s.\-()]{5,}\d/.test(text) && digitCount(text) >= 7) {
-    return { category: 'contact_info', reason: 'phone_number' };
-  }
-  if (hasWord(norm, PLATFORMS) || hasPhrase(norm, sq, PLATFORMS) || hasPhrase(norm, sq, CONTACT_PHRASES)) {
-    return { category: 'contact_info', reason: 'platform_or_handle_sharing' };
-  }
-  if (hasPhrase(norm, sq, ROMANTIC)) {
-    return { category: 'too_soon', reason: 'premature_romance' };
-  }
-  return null;
-}
+export { prefilter, type Block };
 
 export const MODEL = 'claude-opus-4-8';
-export const PROMPT_VERSION = 'mithaq-mod-v1';
-export const POLICY_VERSION = 'partD-v3';
+export const PROMPT_VERSION = 'mithaq-mod-v2'; // v2: allow-by-default, explicit marriage whitelist
+export const POLICY_VERSION = 'partD-v4';
 
-const SYSTEM = `You are the moderation gate for Mithaq, an Islamic marriage platform (NOT a dating app). Couples progress through supervised stages: introduction -> serious_communication -> family -> married.
+const SYSTEM = `You are the moderation gate for Mithaq, an Islamic marriage platform (NOT a dating app). Two people who are considering marriage are getting to know each other under supervision. They progress through stages: introduction -> serious_communication -> family -> married.
 
-You judge ONE message from one participant. Be STRICT and treat every attempt to work around the rules as a violation, including misspellings, abbreviations, spacing tricks, leetspeak, transliteration, emoji substitution, other languages (Arabic, Franco-Arabic/Arabizi, etc.), coded hints, and anything phrased as a question or a joke. Intent counts, not literal wording: "how can I reach you outside this app?" and "my name on the app with the camera logo is X" are both contact sharing.
+Your DEFAULT is to ALLOW. These people are supposed to be talking. Block only a clear violation of the rules below. When a message is ordinary, ambiguous, or merely awkward, ALLOW it.
 
-Block the message if ANY of these apply:
+## ALWAYS ALLOW (never block these)
 
-1. contact_info — the sender shares, hints at, or asks for any way to communicate off-platform, at the "introduction" or "serious_communication" stage. This covers phone numbers, emails, links, usernames/handles, and any social or messaging platform (Instagram, Snapchat, WhatsApp, Telegram, TikTok, Facebook, Discord, X/Twitter, etc.), however obliquely referenced — including "add me", "find me", "same name there", or spelling a handle out. Contact info is ONLY permitted at the "family" and "married" stages.
+- Islamic and cultural greetings in any spelling or transliteration: "salam", "salam 3lykom", "assalamu alaikum", "السلام عليكم", "wa alaikum assalam", "jazak Allah khayr", "insha'Allah", "masha'Allah", "alhamdulillah".
+- Direct, practical questions and answers about marriage suitability — this is the entire purpose of the conversation:
+  age ("my age is 18", "how old are you?"), education, degrees, school, university, work, job, career, income range, financial expectations,
+  children ("how many children do you want?", "do you want kids?", "I'd like three children"), family, parents, siblings, living with family,
+  religion, prayer, madhhab, hijab, practice, values, ethics, expectations of a spouse,
+  city, country, relocation, housing, future plans, timeline for marriage, health, languages, hobbies, cooking, sports.
+- Ordinary numbers used in that conversation: ages, number of children, years of study, salary ranges, dates, quantities. A number is only a violation when it is plainly a way to CONTACT someone (a phone number, a WhatsApp number, an account ID).
+- Ordinary courtesy and warmth: "nice to meet you", "thank you", "I appreciate your reply", "may Allah bless you", "I found your profile respectful".
+- Saying they are interested in marriage, or that they think the two of them may be compatible. That is not romance — that is the point of the platform.
+- Arabic, Franco-Arabic/Arabizi, French, or any other language, and messages with typos or transcription errors. Judge the evident meaning, not the spelling.
 
-2. too_soon — romantic, flirtatious, or physically intimate language before the "family" stage: declarations of love ("love you", "love u", "ily"), pet names (babe, baby, honey, darling, sweetheart), compliments on the body or appearance beyond ordinary courtesy, talk of kissing/touching/missing them, or excessive emotional intensity inappropriate for a supervised introduction.
+## BLOCK ONLY THESE
 
-3. inappropriate — sexual content, profanity, insults, harassment, threats, hate speech, or anything degrading.
+1. contact_info — the sender shares, hints at, or asks for a way to communicate OFF the platform, at the "introduction" or "serious_communication" stage. Phone/WhatsApp numbers, emails, links, QR codes, usernames/handles, or any social or messaging platform (Instagram, Snapchat, WhatsApp, Telegram, TikTok, Facebook, Discord, X/Twitter…), however obliquely referenced — including "add me", "find me there", "same name on the app with the camera logo", or spelling a handle out letter by letter. Contact info is permitted ONLY at the "family" and "married" stages.
 
-4. haram_meeting — proposing a private, unchaperoned meeting or call before the family stage.
+2. too_soon — romantic, flirtatious, or physically intimate language before the "family" stage: declarations of love ("I love you", "love u", "ily"), pet names (babe, honey, darling, sweetheart, my love), compliments on the body or looks beyond ordinary courtesy ("you're so hot", "beautiful eyes"), talk of kissing/touching/missing them, or intense emotional attachment inappropriate for a supervised introduction. NOTE: discussing wanting children, or wanting to marry, is NOT romance — allow it.
 
-5. scam — requests for money, financial details, external payments, or off-platform "verification".
+3. inappropriate — sexual content, profanity, insults, harassment, threats, hate speech, or degrading language.
 
-Otherwise allow. Respectful getting-to-know-you conversation about faith, values, family, education, work, and marriage goals is exactly what this stage is for — do not block it.
+4. haram_meeting — proposing a private, unchaperoned meeting or phone/video call before the family stage. (Discussing a future meeting WITH the families present is allowed.)
 
-The message may be a transcript of a voice note; transcription errors are not violations on their own — judge the evident meaning.
+5. scam — requests for money, bank/financial details, external payments, or off-platform "verification".
 
-Return ONLY the JSON object. No prose.`;
+Treat deliberate evasion of rules 1–5 as a violation: misspellings, spacing tricks, leetspeak, emoji substitution, coded hints, or phrasing it as a joke or a question. But do not invent violations that are not there — an innocent message with a typo is still innocent.
 
-const SCHEMA = {
-  type: 'object',
-  properties: {
-    verdict: { type: 'string', enum: ['allowed', 'blocked'] },
-    category: {
-      type: 'string',
-      enum: ['none', 'contact_info', 'too_soon', 'inappropriate', 'haram_meeting', 'scam'],
-    },
-    reason: { type: 'string', description: 'Short explanation, max 15 words.' },
-  },
-  required: ['verdict', 'category', 'reason'],
-  additionalProperties: false,
-} as const;
+Return ONLY the JSON object, nothing else.`;
+
+const OUTPUT_SHAPE = `Respond with exactly this JSON and nothing else:
+{"verdict": "allowed" | "blocked", "category": "none" | "contact_info" | "too_soon" | "inappropriate" | "haram_meeting" | "scam", "reason": "<max 15 words>"}`;
 
 export interface Verdict {
   verdict: 'allowed' | 'blocked';
@@ -142,20 +64,53 @@ export interface Verdict {
   reason: string;
 }
 
+/** Pull the JSON object out of a reply, tolerating code fences or a stray sentence. */
+function parseVerdict(raw: string): Verdict {
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start === -1 || end <= start) throw new Error(`moderator_bad_output: ${raw.slice(0, 120)}`);
+  const parsed = JSON.parse(raw.slice(start, end + 1)) as Partial<Verdict>;
+  if (parsed.verdict !== 'allowed' && parsed.verdict !== 'blocked') {
+    throw new Error(`moderator_bad_verdict: ${raw.slice(0, 120)}`);
+  }
+  return { verdict: parsed.verdict, category: parsed.category ?? 'none', reason: parsed.reason ?? '' };
+}
+
+/**
+ * Models to try, in order. The first is the intended moderator; the others are
+ * fallbacks for an account/key that cannot reach it, so a model-access problem
+ * degrades to a working moderator instead of blocking every message on the platform.
+ * Override the primary with the MODERATION_MODEL secret.
+ */
+function models(): string[] {
+  const primary = Deno.env.get('MODERATION_MODEL') ?? MODEL;
+  return [...new Set([primary, 'claude-sonnet-5', 'claude-haiku-4-5'])];
+}
+
 async function aiModerate(apiKey: string, text: string, stage: string): Promise<Verdict> {
   const client = new Anthropic({ apiKey, maxRetries: 1, timeout: 15_000 });
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 200,
-    system: SYSTEM,
-    output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
-    messages: [
-      { role: 'user', content: `Journey stage: ${stage}\n\nMessage to moderate:\n"""\n${text}\n"""` },
-    ],
-  });
-  const block = response.content.find((b) => b.type === 'text');
-  if (!block || block.type !== 'text') throw new Error('moderator_no_output');
-  return JSON.parse(block.text) as Verdict;
+  const errors: string[] = [];
+
+  for (const model of models()) {
+    try {
+      const response = await client.messages.create({
+        model,
+        max_tokens: 200,
+        system: `${SYSTEM}\n\n${OUTPUT_SHAPE}`,
+        messages: [
+          { role: 'user', content: `Journey stage: ${stage}\n\nMessage to moderate:\n"""\n${text}\n"""` },
+        ],
+      });
+      const block = response.content.find((b) => b.type === 'text');
+      if (!block || block.type !== 'text') throw new Error('moderator_no_output');
+      return parseVerdict(block.text);
+    } catch (err) {
+      // Keep the real reason — a silent block that nobody can explain is the worst
+      // possible failure mode for a moderation gate.
+      errors.push(`${model}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  throw new Error(errors.join(' | '));
 }
 
 /**
@@ -178,16 +133,8 @@ Allow ordinary, modest photographs a family would be comfortable seeing: faces, 
 
 Return ONLY the JSON object. No prose.`;
 
-const IMAGE_SCHEMA = {
-  type: 'object',
-  properties: {
-    verdict: { type: 'string', enum: ['allowed', 'blocked'] },
-    category: { type: 'string', enum: ['none', 'inappropriate', 'contact_info', 'unsafe'] },
-    reason: { type: 'string', description: 'Short explanation, max 15 words.' },
-  },
-  required: ['verdict', 'category', 'reason'],
-  additionalProperties: false,
-} as const;
+const IMAGE_OUTPUT_SHAPE = `Respond with exactly this JSON and nothing else:
+{"verdict": "allowed" | "blocked", "category": "none" | "inappropriate" | "contact_info" | "unsafe", "reason": "<max 15 words>"}`;
 
 export interface ModerationResult {
   blocked: boolean;
@@ -195,6 +142,8 @@ export interface ModerationResult {
   provider: string;
   model: string;
   promptVersion: string;
+  /** Only set when category is 'unavailable' — the real reason, for the logs. */
+  detail?: string;
 }
 
 export async function moderateImage(
@@ -206,35 +155,41 @@ export async function moderateImage(
   // No moderator ⇒ no judgement ⇒ no delivery. Pixels have no local pre-filter.
   if (!apiKey) return { blocked: true, category: 'unavailable', ...ai };
 
-  try {
-    const client = new Anthropic({ apiKey, maxRetries: 1, timeout: 20_000 });
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 200,
-      system: IMAGE_SYSTEM,
-      output_config: { effort: 'low', format: { type: 'json_schema', schema: IMAGE_SCHEMA } },
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: 'Moderate this image.' },
-          ],
-        },
-      ],
-    });
-    const block = response.content.find((b) => b.type === 'text');
-    if (!block || block.type !== 'text') throw new Error('moderator_no_output');
-    const verdict = JSON.parse(block.text) as Verdict;
-    return {
-      blocked: verdict.verdict === 'blocked',
-      category: verdict.verdict === 'blocked' ? verdict.category : null,
-      ...ai,
-    };
-  } catch (err) {
-    console.error('image_moderation_unavailable', err);
-    return { blocked: true, category: 'unavailable', ...ai };
+  const client = new Anthropic({ apiKey, maxRetries: 1, timeout: 20_000 });
+  const errors: string[] = [];
+
+  for (const model of models()) {
+    try {
+      const response = await client.messages.create({
+        model,
+        max_tokens: 200,
+        system: `${IMAGE_SYSTEM}\n\n${IMAGE_OUTPUT_SHAPE}`,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+              { type: 'text', text: 'Moderate this image.' },
+            ],
+          },
+        ],
+      });
+      const block = response.content.find((b) => b.type === 'text');
+      if (!block || block.type !== 'text') throw new Error('moderator_no_output');
+      const verdict = parseVerdict(block.text);
+      return {
+        blocked: verdict.verdict === 'blocked',
+        category: verdict.verdict === 'blocked' ? verdict.category : null,
+        ...ai,
+      };
+    } catch (err) {
+      errors.push(`${model}: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
+
+  const detail = errors.join(' | ');
+  console.error('image_moderation_unavailable', detail);
+  return { blocked: true, category: 'unavailable', detail, ...ai };
 }
 
 /**
@@ -242,7 +197,7 @@ export async function moderateImage(
  * be reached — the caller MUST treat that as blocked (fail-closed), not as allowed.
  */
 export async function moderate(text: string, stage: string, apiKey?: string | null): Promise<ModerationResult> {
-  const local = { provider: 'local', model: 'prefilter', promptVersion: 'prefilter-v2' };
+  const local = { provider: 'local', model: 'prefilter', promptVersion: 'prefilter-v3' };
 
   const pre = prefilter(text, stage);
   if (pre) return { blocked: true, category: pre.category, ...local };
@@ -257,7 +212,8 @@ export async function moderate(text: string, stage: string, apiKey?: string | nu
       ...ai,
     };
   } catch (err) {
-    console.error('moderation_unavailable', err);
-    return { blocked: true, category: 'unavailable', ...ai };
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error('moderation_unavailable', detail);
+    return { blocked: true, category: 'unavailable', detail, ...ai };
   }
 }
