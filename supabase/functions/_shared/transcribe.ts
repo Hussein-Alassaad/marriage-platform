@@ -11,6 +11,8 @@
 // Until a provider is configured, `isConfigured()` is false and the voice sender
 // refuses to store anything — an un-moderatable voice note must never be delivered.
 
+import { secret } from './env.ts';
+
 export interface SttConfig {
   provider: string;
   apiKey: string;
@@ -19,8 +21,8 @@ export interface SttConfig {
 }
 
 export function sttConfig(): SttConfig | null {
-  const provider = (Deno.env.get('STT_PROVIDER') ?? '').toLowerCase();
-  const apiKey = Deno.env.get('STT_API_KEY') ?? '';
+  const provider = (secret('STT_PROVIDER') ?? '').toLowerCase();
+  const apiKey = secret('STT_API_KEY') ?? '';
   if (!provider || !apiKey) return null;
 
   if (provider === 'openai') {

@@ -14,6 +14,7 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 import { moderateImage, POLICY_VERSION } from '../_shared/moderation.ts';
+import { secret } from '../_shared/env.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -47,7 +48,7 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get('SUPABASE_URL')!;
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+  const anthropicKey = secret('ANTHROPIC_API_KEY');
   const authHeader = req.headers.get('Authorization') ?? '';
 
   const asUser = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } } });
