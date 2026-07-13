@@ -17,16 +17,6 @@ export interface SendResult {
   category?: string;
   remaining?: number | null;
   conversationId?: string;
-  /** Video only: stored, but awaiting human review before the other person can open it. */
-  pending?: boolean;
-}
-
-export interface PendingMedia {
-  id: string;
-  type: 'image' | 'video';
-  senderName: string | null;
-  createdAt: string;
-  url: string | null;
 }
 
 export interface StageRequirement {
@@ -138,33 +128,6 @@ export const chatService = {
   /** Family stage: an image, moderated by the AI before it is ever stored. */
   async sendImage(matchId: string, image: File): Promise<SendResult> {
     return sendMedia('send-image-message', matchId, 'image', image);
-  },
-
-  /**
-   * Family stage: a video. No model can watch a video, so it is stored as `pending`
-   * and stays unopenable by the other person until an admin approves it.
-   */
-  async sendVideo(matchId: string, video: File): Promise<SendResult> {
-    return sendMedia('send-video-message', matchId, 'video', video);
-  },
-
-  /** Admin: media awaiting human review. */
-  async listPendingMedia(): Promise<PendingMedia[]> {
-    const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.functions.invoke('chat-media', { body: { action: 'pending-media' } });
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
-    return (data.media ?? []) as PendingMedia[];
-  },
-
-  /** Admin: approve (the recipient can now open it) or reject (the file is deleted). */
-  async reviewMedia(messageId: string, decision: 'approved' | 'rejected'): Promise<void> {
-    const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.functions.invoke('chat-media', {
-      body: { action: 'review-media', messageId, decision },
-    });
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
   },
 
   /** A short-lived signed URL for one media message (participants only). */

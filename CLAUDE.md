@@ -22,20 +22,23 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   (Areeba) still to come; coupons + "can't pay" ticket not built yet.
 - **Guardian (wali) system: complete** — invite → accept → per-connection sharing,
   which is what unlocks the Family-stage requirement.
-- **Phase 10 — Communication stages: complete.** Serious-stage voice (pluggable STT)
-  and Family-stage images/videos. All four stages now carry their own media rules.
+- **Phase 10 — Communication stages: complete for the MVP.** Text, voice (Serious) and
+  photos (Family) are fully functional; **video is "Coming Soon" (disabled)**.
 - **Next: Phase 11 — Marriage Assistant** (see `docs/Roadmap.md`).
 
-Family media delivered: `send-image-message` (Claude **vision** moderates the image
-before it is stored — no moderator or a violation ⇒ never delivered, never stored) and
-`send-video-message`. **No model can watch a video**, so a video is stored as
-`media_status = 'pending'` and is *not openable by the recipient* until a human
-approves it in the admin media queue; `chat-media` refuses to sign anything not
-`approved`, which makes "deliver only after approval" literally true (rejecting deletes
-the file). Per-day caps come from `family_images_per_day` / `family_videos_per_day`
-(Married is uncapped). `media_enabled` (default false) reveals the buttons once
-`ANTHROPIC_API_KEY` exists. UI: a Family-stage attach bar, image/video bubbles with
-lazily-signed URLs, and an "awaiting review" state instead of a broken player.
+Family photos delivered: `send-image-message` — Claude **vision** moderates the image
+before it is stored (no moderator, an unreachable one, or a violation ⇒ never
+delivered, never stored). Per-day cap from `family_images_per_day` (Married uncapped);
+`media_enabled` (default false) reveals the button once `ANTHROPIC_API_KEY` exists,
+after which photos work with no code changes.
+
+**Video is deliberately disabled** for this release: no model can watch a video, so
+there is no scalable way to moderate one, and an unmoderated media channel is not
+acceptable here. `send-video-message` rejects every upload (`501 video_coming_soon`),
+the composer shows the button disabled with a Coming Soon badge, and the earlier
+human-review queue is gone. The function documents exactly where a future moderation
+step slots in; `chat-media` still signs **only** `media_status = 'approved'` media, so
+that invariant is what a video release plugs into — no other part of messaging changes.
 
 Voice delivered: `send-voice-message` — receive → **transcribe** → **moderate the
 transcript** → only then store and deliver. Fail-closed at every step (no STT provider,

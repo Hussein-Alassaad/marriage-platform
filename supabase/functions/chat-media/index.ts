@@ -4,15 +4,12 @@
 // server: it verifies the caller is a participant of the message's conversation,
 // then issues a short-lived signed URL for exactly that one file.
 //
-// Actions (JSON body):
-//   { messageId }                    → { url, expiresIn }   (participants)
-//   { action: 'pending-media' }      → videos awaiting human review (admin)
-//   { action: 'review-media', ... }  → approve / reject one (admin)
+// Action (JSON body): { messageId } → { url, expiresIn }
 //
-// No model can watch a video, so videos land as `media_status = 'pending'` and are
-// NOT signable until a human approves them. That check lives here: this function
-// refuses to sign anything that is not `approved`, which is what makes "deliver only
-// after approval" (Part D §5) true rather than aspirational.
+// It signs ONLY media whose `media_status` is 'approved' — i.e. media that actually
+// passed moderation before it was stored (voice via its transcript, images via Claude
+// vision). That check is the reason an unmoderated file can never be handed to anyone,
+// and it is what a future video moderation step will slot behind.
 //
 // Deploy: `supabase functions deploy chat-media`.
 
@@ -47,89 +44,17 @@ Deno.serve(async (req: Request) => {
   if (!uid) return json({ error: 'unauthorized' }, 401);
 
   const admin = createClient(url, serviceKey);
-  const body = await req.json().catch(() => ({}));
-  const action = String(body.action ?? '');
-  const messageId = body.messageId as string | undefined;
-
-  const isAdmin = async () => {
-    const { data } = await admin.from('user_roles').select('role').eq('user_id', uid);
-    return (data ?? []).some((r: { role: string }) => r.role === 'admin');
-  };
+  const { messageId } = await req.json().catch(() => ({}));
+  if (!messageId) return json({ error: 'message_required' }, 400);
 
   try {
-    // ── Admin: the human review queue for videos ────────────────────────────
-    if (action === 'pending-media') {
-      if (!(await isAdmin())) return json({ error: 'forbidden' }, 403);
-      const { data: messages } = await admin
-        .from('messages')
-        .select('id, conversation_id, sender_id, type, media_path, created_at')
-        .eq('media_status', 'pending')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: true })
-        .limit(50);
-
-      const senderIds = (messages ?? []).map((m: { sender_id: string }) => m.sender_id);
-      const { data: profs } = await admin.from('profiles').select('id, display_name').in('id', senderIds);
-      const nameById = new Map(
-        ((profs ?? []) as { id: string; display_name: string | null }[]).map((p) => [p.id, p.display_name]),
-      );
-
-      const rows = await Promise.all(
-        (messages ?? []).map(async (m: Record<string, unknown>) => {
-          const bucket = BUCKET[String(m.type)];
-          const { data } = await admin.storage.from(bucket).createSignedUrl(String(m.media_path), TTL_SECONDS);
-          return {
-            id: m.id,
-            type: m.type,
-            senderName: nameById.get(String(m.sender_id)) ?? null,
-            createdAt: m.created_at,
-            url: data?.signedUrl ?? null,
-          };
-        }),
-      );
-      return json({ media: rows });
-    }
-
-    if (action === 'review-media') {
-      if (!(await isAdmin())) return json({ error: 'forbidden' }, 403);
-      const decision = String(body.decision ?? '');
-      const id = String(body.messageId ?? '');
-      if (decision !== 'approved' && decision !== 'rejected') return json({ error: 'bad_decision' }, 400);
-
-      const { data: message } = await admin
-        .from('messages')
-        .select('id, conversation_id, sender_id, type, media_path, media_status')
-        .eq('id', id)
-        .maybeSingle();
-      if (!message || message.media_status !== 'pending') return json({ error: 'not_pending' }, 409);
-
-      await admin.from('messages').update({ media_status: decision }).eq('id', id);
-
-      // A rejected video is removed from storage — we don't keep what we won't show.
-      if (decision === 'rejected' && message.media_path) {
-        const bucket = BUCKET[message.type as string];
-        if (bucket) await admin.storage.from(bucket).remove([message.media_path]);
-      }
-
-      await admin.from('audit_logs').insert({
-        actor_id: uid,
-        action: `media.${decision}`,
-        entity_type: 'message',
-        entity_id: id,
-        reason: typeof body.reason === 'string' ? body.reason.slice(0, 300) : null,
-      });
-      return json({ ok: true, status: decision });
-    }
-
-    // ── Participant: a signed URL for one approved file ─────────────────────
-    if (!messageId) return json({ error: 'message_required' }, 400);
-
     const { data: message } = await admin
       .from('messages')
       .select('id, conversation_id, type, media_path, media_status, deleted_at')
       .eq('id', messageId)
       .maybeSingle();
     if (!message || message.deleted_at || !message.media_path) return json({ error: 'not_found' }, 404);
+    // Anything that did not pass moderation is not signable, full stop.
     if (message.media_status !== 'approved') return json({ error: 'not_available' }, 409);
 
     // Participation is the whole permission check — including guardians, who are

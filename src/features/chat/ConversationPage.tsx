@@ -19,7 +19,7 @@ import { chatService, type ChatMessage } from '@/services/chatService';
 import {
   useConversationId,
   useMessages,
-  useSendMedia,
+  useSendImage,
   useSendText,
   useSendVoice,
   useSentCount,
@@ -54,7 +54,7 @@ export function ConversationPage() {
   const { data: sentCount } = useSentCount(conversationId);
   const send = useSendText(matchId);
   const sendVoice = useSendVoice(matchId);
-  const sendMedia = useSendMedia(matchId);
+  const sendImage = useSendImage(matchId);
 
   const [text, setText] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
@@ -78,11 +78,10 @@ export function ConversationPage() {
     if (r.blocked) setNotice(blockedNotice(r.category));
   };
 
-  const onSendMedia = async (file: File, kind: 'image' | 'video') => {
+  const onSendImage = async (file: File) => {
     setNotice(null);
-    const r = await sendMedia.mutateAsync({ file, kind });
+    const r = await sendImage.mutateAsync(file);
     if (r.blocked) setNotice(blockedNotice(r.category));
-    else if (r.pending) setNotice(t('media.pendingNotice'));
   };
 
   const blockedNotice = (category?: string) => {
@@ -195,7 +194,7 @@ export function ConversationPage() {
                     {m.type === 'voice' ? (
                       <VoiceBubble messageId={m.id} transcript={m.transcript} />
                     ) : m.type === 'image' || m.type === 'video' ? (
-                      <MediaBubble messageId={m.id} kind={m.type} mine={mine} />
+                      <MediaBubble messageId={m.id} kind={m.type} />
                     ) : (
                       m.body
                     )}
@@ -220,7 +219,7 @@ export function ConversationPage() {
 
           {canMessage && mediaAllowed ? (
             <div className="mb-3 border-b border-line pb-3">
-              <MediaComposer onSend={onSendMedia} disabled={sendMedia.isPending} />
+              <MediaComposer onSendImage={onSendImage} disabled={sendImage.isPending} />
             </div>
           ) : null}
 

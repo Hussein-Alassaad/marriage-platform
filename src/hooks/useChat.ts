@@ -58,36 +58,17 @@ export function useSendVoice(matchId: string) {
   });
 }
 
-export function useSendMedia(matchId: string) {
+/** Images only for now — video is disabled until it can be moderated at scale. */
+export function useSendImage(matchId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { file: File; kind: 'image' | 'video' }) =>
-      input.kind === 'image'
-        ? chatService.sendImage(matchId, input.file)
-        : chatService.sendVideo(matchId, input.file),
+    mutationFn: (file: File) => chatService.sendImage(matchId, file),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['conversation', matchId] });
       if (result.conversationId) {
         queryClient.invalidateQueries({ queryKey: ['messages', result.conversationId] });
       }
     },
-  });
-}
-
-export function usePendingMedia(enabled: boolean) {
-  return useQuery({
-    queryKey: ['pending-media'],
-    queryFn: () => chatService.listPendingMedia(),
-    enabled,
-  });
-}
-
-export function useReviewMedia() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: { messageId: string; decision: 'approved' | 'rejected' }) =>
-      chatService.reviewMedia(input.messageId, input.decision),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pending-media'] }),
   });
 }
 

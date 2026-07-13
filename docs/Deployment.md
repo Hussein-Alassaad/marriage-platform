@@ -171,23 +171,28 @@ is UX only — the server refuses voice regardless while STT is unconfigured. Ca
 `supabase/functions/_shared/moderation.ts` and is shared with `send-text-message` —
 text and voice transcripts pass through exactly the same gate.
 
-**`send-image-message`** / **`send-video-message`** deliver Family-stage media (Part D
-§3), capped per day from settings (`family_images_per_day`, `family_videos_per_day`;
-Married is uncapped). **Images** are moderated by Claude's vision *before* they are
-stored — no moderator, an unreachable one, or a violation means the image is not
-delivered and never reaches storage (there is no local pre-filter for pixels, so an
-unconfigured `ANTHROPIC_API_KEY` blocks images rather than letting an unreviewed one
-through). **Videos cannot be watched by any model**, so they are stored as
-`media_status = 'pending'` and are **not openable by the recipient** until a human
-approves them in the admin media queue — `chat-media` refuses to sign anything not
-`approved`, which makes "deliver only after approval" literally true. Rejecting a video
-deletes the file. Turn on the `media_enabled` setting once `ANTHROPIC_API_KEY` is set.
-Deploy: `supabase functions deploy send-image-message` and
-`supabase functions deploy send-video-message`. Needs
+**`send-image-message`** delivers Family-stage photos (Part D §3), capped per day from
+`family_images_per_day` (Married is uncapped). Claude's **vision** moderates the image
+*before* it is stored — no moderator, an unreachable one, or a violation means the
+image is not delivered and never reaches storage (there is no local pre-filter for
+pixels, so an unconfigured `ANTHROPIC_API_KEY` blocks images rather than letting an
+unreviewed one through). Turn on `media_enabled` once `ANTHROPIC_API_KEY` is set, and
+photos work with no further changes. Deploy:
+`supabase functions deploy send-image-message`. Needs
 `20260711160000_media_settings.sql` (`supabase db push`).
 
-**`chat-media`** issues short-lived signed URLs for chat media, and carries the admin
-video-review actions (`pending-media`, `review-media`). The `chat-voice` /
+**`send-video-message`** — **video is disabled for this release ("Coming Soon").** No
+model can watch a video, so there is no scalable way to moderate one, and an
+unmoderated media channel is not acceptable here. The endpoint rejects every upload
+(`501 video_coming_soon`) and the UI shows the button disabled with a Coming Soon
+badge. The function documents exactly where a future moderation step slots in (frame
+sampling into Claude vision, or a video-capable provider) and what to flip; nothing
+else in the messaging system needs to change. Deploy it so the rejection is served
+server-side: `supabase functions deploy send-video-message`.
+
+**`chat-media`** issues short-lived signed URLs for chat media. It signs **only**
+media whose `media_status` is `approved` — i.e. media that actually passed moderation
+before it was stored — which is the invariant a future video release plugs into. The `chat-voice` /
 `chat-images` / `chat-videos` buckets have **no client policies at all** — privacy is
 enforced by which file the server hands you — so this function verifies the caller is
 a participant of the message's conversation, then signs that one file for 10 minutes.
