@@ -33,13 +33,13 @@ function HeroHeadline({ text }: { text: string }) {
   return (
     <motion.h1
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
-      className="mt-5 text-3xl font-semibold tracking-tight text-ink sm:text-[2.5rem] sm:leading-[1.1]"
+      className="text-ink mt-5 text-3xl font-semibold tracking-tight sm:text-[2.5rem] sm:leading-[1.1]"
     >
       {words.map((word, i) => (
         <span
           key={i}
           className={`inline-block overflow-hidden pb-[0.08em] align-bottom${
-            i < words.length - 1 ? ' me-[0.28em]' : ''
+            i < words.length - 1 ? 'me-[0.28em]' : ''
           }`}
         >
           <motion.span
@@ -90,10 +90,13 @@ export function HomeHero() {
     <motion.section
       initial="hidden"
       animate="visible"
-      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+      }}
       onPointerMove={parallaxOn ? handleMove : undefined}
       onPointerLeave={parallaxOn ? handleLeave : undefined}
-      className="relative overflow-hidden rounded-card border border-line bg-surface [box-shadow:var(--shadow-card),var(--inner-hi)]"
+      className="rounded-card border-line bg-surface relative overflow-hidden border [box-shadow:var(--shadow-card),var(--inner-hi)]"
     >
       {/* Layer order (back→front): surface → hero wash (parallax) → aurora drift
           → geometric veil → content. */}
@@ -109,7 +112,7 @@ export function HomeHero() {
         <div className="max-w-2xl">
           <motion.span
             variants={revealVariants}
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-wash px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-[color:var(--color-border-accent)] backdrop-blur"
+            className="bg-brand-wash text-brand-700 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-[color:var(--color-border-accent)] backdrop-blur ring-inset"
           >
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {t('page.home.eyebrow')}
@@ -121,7 +124,7 @@ export function HomeHero() {
 
           <motion.p
             variants={revealVariants}
-            className="mt-3 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg"
+            className="text-ink-soft mt-3 max-w-xl text-base leading-relaxed sm:text-lg"
           >
             {t('page.home.subtitle')}
           </motion.p>
@@ -142,14 +145,14 @@ export function HomeHero() {
 
           <motion.div
             variants={revealVariants}
-            className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2.5 text-sm text-muted"
+            className="text-muted mt-7 flex flex-wrap items-center gap-x-5 gap-y-2.5 text-sm"
           >
             <span className="inline-flex items-center gap-1.5">
-              <BadgeCheck className="h-[1.05rem] w-[1.05rem] text-brand-600" aria-hidden />
+              <BadgeCheck className="text-brand-600 h-[1.05rem] w-[1.05rem]" aria-hidden />
               {t('page.home.trustVerified')}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="h-[1.05rem] w-[1.05rem] text-brand-600" aria-hidden />
+              <ShieldCheck className="text-brand-600 h-[1.05rem] w-[1.05rem]" aria-hidden />
               {t('page.home.trustPrivate')}
             </span>
             <BackendStatus />

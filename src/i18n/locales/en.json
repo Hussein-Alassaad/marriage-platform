@@ -766,5 +766,124 @@
       "title": "Page not found",
       "subtitle": "The page you're looking for doesn't exist or has moved."
     }
+  },
+  "notifications": {
+    "eyebrow": "Notifications",
+    "title": "Notifications",
+    "subtitle": "The next important step — never noise.",
+    "preferences": "Preferences",
+    "markAllRead": "Mark all read",
+    "markRead": "Mark as read",
+    "dismiss": "Dismiss",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "unreadAria": "{{count}} unread notifications",
+    "empty": {
+      "title": "Nothing new",
+      "body": "When something needs your attention, it will appear here."
+    },
+    "category": {
+      "all": "All",
+      "match": "Match",
+      "chat": "Messages",
+      "family": "Family",
+      "subscription": "Membership",
+      "verification": "Verification",
+      "finance": "Finance",
+      "system": "System"
+    },
+    "prefs": {
+      "title": "Notification preferences",
+      "categories": "What you hear about",
+      "digest": "How often",
+      "quietHours": "Quiet hours",
+      "quietEnabled": "Hold notifications during quiet hours",
+      "quietHint": "Nothing is lost — anything that arrives during quiet hours is delivered when they end.",
+      "from": "From",
+      "to": "Until",
+      "save": "Save preferences",
+      "digestMode": {
+        "immediate": "As it happens",
+        "daily": "Once a day",
+        "weekly": "Once a week",
+        "none": "Do not notify me"
+      },
+      "digestHint": {
+        "immediate": "You are told as soon as something happens.",
+        "daily": "Everything is held and delivered each morning.",
+        "weekly": "Everything is held and delivered on Monday morning.",
+        "none": "Nothing is delivered. You can still open this page any time."
+      }
+    },
+    "type": {
+      "interest.received": {
+        "title": "Someone is interested in you",
+        "body": "A member has sent you an interest request."
+      },
+      "interest.accepted": {
+        "title": "Your interest was accepted",
+        "body": "You can now begin the Introduction stage."
+      },
+      "interest.declined": {
+        "title": "Interest declined",
+        "body": "This connection will not continue."
+      },
+      "message.received": {
+        "title": "New message",
+        "body": "You have a new message waiting."
+      },
+      "moderation.blocked": {
+        "title": "Message not delivered",
+        "body": "Your message did not pass the safety review."
+      },
+      "stage.advanced": {
+        "title": "Your journey moved forward",
+        "body": "You have both agreed to continue."
+      },
+      "stage.terminated": {
+        "title": "A connection ended",
+        "body": "This connection has been ended."
+      },
+      "guardian.invited": {
+        "title": "Guardian invitation",
+        "body": "You have been invited as a guardian."
+      },
+      "guardian.accepted": {
+        "title": "Your guardian accepted",
+        "body": "Your guardian has confirmed the relationship."
+      },
+      "guardian.access_granted": {
+        "title": "A connection was shared",
+        "body": "A connection has been shared with you."
+      },
+      "payment.approved": {
+        "title": "Payment approved",
+        "body": "Your membership is now active."
+      },
+      "payment.rejected": {
+        "title": "Payment could not be verified",
+        "body": "Please review your payment details."
+      },
+      "subscription.expiring": {
+        "title": "Your membership expires soon",
+        "body": "It ends in {{daysLeft}} days. Renew to keep your features."
+      },
+      "subscription.expired": {
+        "title": "Your membership has expired",
+        "body": "Your account has returned to the free tier."
+      },
+      "verification.approved": {
+        "title": "You are verified",
+        "body": "Matchmaking is now unlocked."
+      },
+      "verification.rejected": {
+        "title": "Verification needs attention",
+        "body": "Please submit your documents again."
+      },
+      "finance.shared_connected": {
+        "title": "Couple Finance connected",
+        "body": "You and your spouse now share monthly totals."
+      }
+    }
   }
 }

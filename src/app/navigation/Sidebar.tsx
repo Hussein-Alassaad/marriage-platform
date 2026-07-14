@@ -31,7 +31,7 @@ function SidebarLink({ item }: { item: NavItem }) {
               transition={springLayout}
               className="absolute inset-0 z-0 rounded-md border border-[color:var(--color-border-accent)] [background:linear-gradient(90deg,var(--color-brand-wash),transparent)]"
             >
-              <span className="absolute inset-y-3 start-0 w-[3px] rounded-full bg-brand-400" />
+              <span className="bg-brand-400 absolute inset-y-3 start-0 w-[3px] rounded-full" />
             </motion.span>
           ) : null}
           <Icon
@@ -69,7 +69,7 @@ export function Sidebar() {
   const tier = profile?.subscription_tier ?? 'free';
 
   return (
-    <aside className="hidden w-72 shrink-0 flex-col border-e border-line bg-panel md:flex">
+    <aside className="border-line bg-panel hidden w-72 shrink-0 flex-col border-e md:flex">
       <div className="flex h-[72px] items-center px-5">
         <Logo />
       </div>
@@ -81,7 +81,7 @@ export function Sidebar() {
 
         {roleItems.length > 0 ? (
           <>
-            <div className="my-2 border-t border-line" />
+            <div className="border-line my-2 border-t" />
             {roleItems.map((item) => (
               <SidebarLink key={item.key} item={item} />
             ))}
@@ -96,14 +96,14 @@ export function Sidebar() {
         </div>
       </nav>
 
-      <div className="border-t border-line p-3">
+      <div className="border-line border-t p-3">
         <div className="flex items-center gap-3 rounded-xl px-2 py-1.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-sm font-semibold text-brand-800">
+          <span className="from-brand-100 to-brand-200 text-brand-800 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold">
             {initial}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-ink">{name}</p>
-            <p className="truncate text-xs text-faint">{t(`tier.${tier}`)}</p>
+            <p className="text-ink truncate text-sm font-medium">{name}</p>
+            <p className="text-faint truncate text-xs">{t(`tier.${tier}`)}</p>
           </div>
         </div>
       </div>

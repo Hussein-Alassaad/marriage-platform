@@ -15,7 +15,7 @@ function InsightLink({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
-      className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 transition duration-150 hover:gap-2 hover:text-brand-800 active:scale-95"
+      className="text-brand-700 hover:text-brand-800 mt-5 inline-flex items-center gap-1.5 text-sm font-medium transition duration-150 hover:gap-2 active:scale-95"
     >
       {label}
       <ArrowRight className="h-4 w-4 rtl:rotate-180" aria-hidden />
@@ -34,7 +34,7 @@ function MatchPreviewCard() {
     <HoverCard className="flex h-full flex-col">
       <div className="flex items-center justify-between">
         <Badge variant="brand">{t('page.home.match.badge')}</Badge>
-        <span className="inline-flex items-center gap-1 text-xs text-faint">
+        <span className="text-faint inline-flex items-center gap-1 text-xs">
           <Lock className="h-3.5 w-3.5" aria-hidden />
           {t('page.home.match.locked')}
         </span>
@@ -45,14 +45,14 @@ function MatchPreviewCard() {
             <span
               key={i}
               className={cn(
-                'h-11 w-11 rounded-full bg-gradient-to-br ring-2 ring-surface blur-[2px]',
+                'ring-surface h-11 w-11 rounded-full bg-gradient-to-br ring-2 blur-[2px]',
                 tint,
               )}
               aria-hidden
             />
           ))}
         </div>
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-on-brand">
+        <span className="bg-brand-600 text-on-brand flex h-6 w-6 items-center justify-center rounded-full">
           <Lock className="h-3 w-3" aria-hidden />
         </span>
       </div>
@@ -67,7 +67,7 @@ function AssistantCard() {
   const { t } = useTranslation();
   return (
     <HoverCard className="flex h-full flex-col">
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-inset ring-brand-100">
+      <span className="bg-brand-50 text-brand-600 ring-brand-100 flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-inset">
         <MessageCircle className="h-[1.35rem] w-[1.35rem]" aria-hidden />
       </span>
       <CardTitle className="mt-5">{t('page.home.assistant.title')}</CardTitle>
@@ -81,14 +81,14 @@ function FinanceCard() {
   const { t } = useTranslation();
   return (
     <HoverCard className="flex h-full flex-col">
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-inset ring-brand-100">
+      <span className="bg-brand-50 text-brand-600 ring-brand-100 flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-inset">
         <Wallet className="h-[1.35rem] w-[1.35rem]" aria-hidden />
       </span>
       <CardTitle className="mt-5">{t('page.home.finance.title')}</CardTitle>
       <CardDescription>{t('page.home.finance.body')}</CardDescription>
-      <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-bg-4" aria-hidden>
+      <div className="bg-bg-4 mt-5 h-2 w-full overflow-hidden rounded-full" aria-hidden>
         <motion.div
-          className="h-full origin-left rounded-full rtl:origin-right [background:linear-gradient(90deg,var(--color-brand-500),var(--color-brand-300))]"
+          className="h-full origin-left rounded-full [background:linear-gradient(90deg,var(--color-brand-500),var(--color-brand-300))] rtl:origin-right"
           style={{ width: '8%' }}
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}

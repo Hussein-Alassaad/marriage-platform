@@ -71,7 +71,8 @@ export const guardianService = {
   },
 
   /** The invited person redeems the code and declares they are authorised. */
-  accept: (code: string) => call<{ ok: true; wardId: string }>({ action: 'accept', code, confirmed: true }),
+  accept: (code: string) =>
+    call<{ ok: true; wardId: string }>({ action: 'accept', code, confirmed: true }),
 
   setMatchAccess: (matchId: string, guardianUserId: string, granted: boolean) =>
     call<{ ok: true; granted: boolean }>({

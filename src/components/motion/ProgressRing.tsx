@@ -18,7 +18,13 @@ interface ProgressRingProps {
  * Circular progress (§3 ProgressRing): an emerald→mint gradient arc draws in
  * over 1.1s ease-out-expo the first time it enters view. Stroke/opacity only.
  */
-export function ProgressRing({ value, size = 64, stroke = 5, className, children }: ProgressRingProps) {
+export function ProgressRing({
+  value,
+  size = 64,
+  stroke = 5,
+  className,
+  children,
+}: ProgressRingProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   const reduced = useReducedMotion();
@@ -30,7 +36,11 @@ export function ProgressRing({ value, size = 64, stroke = 5, className, children
   const target = circumference * (1 - clamped / 100);
 
   return (
-    <div ref={ref} className={cn('relative inline-grid place-items-center', className)} style={{ width: size, height: size }}>
+    <div
+      ref={ref}
+      className={cn('relative inline-grid place-items-center', className)}
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90" aria-hidden>
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -60,7 +70,9 @@ export function ProgressRing({ value, size = 64, stroke = 5, className, children
           transition={{ duration: 1.1, ease: EASE_EXPO }}
         />
       </svg>
-      {children != null && <div className="absolute inset-0 grid place-items-center">{children}</div>}
+      {children != null && (
+        <div className="absolute inset-0 grid place-items-center">{children}</div>
+      )}
     </div>
   );
 }

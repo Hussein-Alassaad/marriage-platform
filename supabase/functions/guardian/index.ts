@@ -17,6 +17,7 @@
 // Deploy: `supabase functions deploy guardian`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -133,6 +134,8 @@ Deno.serve(async (req: Request) => {
         after: { ward_id: invite.inviter_id, relationship: invite.relationship },
       });
 
+      await emit(admin, 'guardian.accepted', invite.inviter_id, { guardianUserId: uid });
+
       return json({ ok: true, wardId: invite.inviter_id, relationship: invite.relationship });
     }
 
@@ -173,6 +176,7 @@ Deno.serve(async (req: Request) => {
         { guardian_user_id: guardianUserId, match_id: matchId, granted_by: uid, revoked_at: null },
         { onConflict: 'guardian_user_id,match_id' },
       );
+      await emit(admin, 'guardian.access_granted', guardianUserId, { matchId });
       return json({ ok: true, granted: true });
     }
 

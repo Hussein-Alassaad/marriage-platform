@@ -11,6 +11,7 @@
 // Deploy: `supabase functions deploy matchmaking`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -248,6 +249,7 @@ Deno.serve(async (req: Request) => {
         .insert({ sender_id: uid, recipient_id: recipientId, status: 'sent', note, match_id: match.id });
       if (iErr) return json({ error: iErr.message }, 400);
       await admin.from('stage_history').insert({ match_id: match.id, from_stage: null, to_stage: 'interest_sent', changed_by: uid });
+      await emit(admin, 'interest.received', recipientId, { matchId: match.id });
       return json({ ok: true });
     }
 
@@ -257,20 +259,24 @@ Deno.serve(async (req: Request) => {
       if (decision !== 'accepted' && decision !== 'declined') return json({ error: 'bad_decision' }, 400);
       const { data: interest } = await admin
         .from('interests')
-        .select('id, recipient_id, status, match_id')
+        .select('id, sender_id, recipient_id, status, match_id')
         .eq('id', interestId)
         .maybeSingle();
       if (!interest || interest.recipient_id !== uid || interest.status !== 'sent') return json({ error: 'not_actionable' }, 400);
 
+      const senderId = interest.sender_id as string;
       await admin.from('interests').update({ status: decision, responded_at: new Date().toISOString() }).eq('id', interestId);
       if (interest.match_id) {
         if (decision === 'accepted') {
           await admin.from('matches').update({ stage: 'introduction' }).eq('id', interest.match_id);
           await admin.from('stage_history').insert({ match_id: interest.match_id, from_stage: 'interest_sent', to_stage: 'introduction', changed_by: uid });
+          // The sender is the one waiting on an answer — they are who we tell.
+          await emit(admin, 'interest.accepted', senderId, { matchId: interest.match_id });
         } else {
           const cooldown = new Date(Date.now() + 30 * 864e5).toISOString();
           await admin.from('matches').update({ stage: 'terminated', terminated_at: new Date().toISOString(), terminated_by: uid, cooldown_until: cooldown, deleted_at: new Date().toISOString(), deleted_by: uid }).eq('id', interest.match_id);
           await admin.from('stage_history').insert({ match_id: interest.match_id, from_stage: 'interest_sent', to_stage: 'terminated', changed_by: uid });
+          await emit(admin, 'interest.declined', senderId, { matchId: interest.match_id });
         }
       }
       return json({ ok: true });

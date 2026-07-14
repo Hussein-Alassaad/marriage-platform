@@ -47,17 +47,20 @@ export function SuggestionChips({ matchId, stage, messageCount, onPick }: Sugges
   };
 
   return (
-    <div className="mb-3 border-b border-line pb-3">
+    <div className="border-line mb-3 border-b pb-3">
       <div className="mb-2 flex items-center gap-2">
-        <Sparkles className="h-3.5 w-3.5 text-brand-500" aria-hidden />
+        <Sparkles className="text-brand-500 h-3.5 w-3.5" aria-hidden />
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-1 text-xs font-medium text-muted transition-colors hover:text-ink"
+          className="text-muted hover:text-ink flex items-center gap-1 text-xs font-medium transition-colors"
           aria-expanded={open}
         >
           {t('chat.suggest.title')}
-          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} aria-hidden />
+          <ChevronDown
+            className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')}
+            aria-hidden
+          />
         </button>
 
         {data?.length ? (
@@ -66,7 +69,7 @@ export function SuggestionChips({ matchId, stage, messageCount, onPick }: Sugges
             onClick={refresh}
             disabled={isFetching}
             aria-label={t('chat.suggest.refresh')}
-            className="ms-auto text-muted transition-colors hover:text-ink disabled:opacity-50"
+            className="text-muted hover:text-ink ms-auto transition-colors disabled:opacity-50"
           >
             <RefreshCw className={cn('h-3.5 w-3.5', isFetching && 'animate-spin')} aria-hidden />
           </button>
@@ -91,7 +94,7 @@ export function SuggestionChips({ matchId, stage, messageCount, onPick }: Sugges
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, ease: EASE_OUT, delay: i * 0.04 }}
                 whileTap={{ scale: 0.97 }}
-                className="max-w-full rounded-full border border-line bg-surface px-3.5 py-2 text-start text-[13px] leading-snug text-ink-soft transition-colors hover:border-brand-400 hover:bg-brand-wash hover:text-ink"
+                className="border-line bg-surface text-ink-soft hover:border-brand-400 hover:bg-brand-wash hover:text-ink max-w-full rounded-full border px-3.5 py-2 text-start text-[13px] leading-snug transition-colors"
               >
                 {s}
               </motion.button>

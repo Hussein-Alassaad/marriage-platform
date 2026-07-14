@@ -32,8 +32,8 @@ export function AuthCallbackPage() {
           <Logo />
         </div>
         <Card className="text-center">
-          <h1 className="text-lg font-semibold text-ink">{t('page.authCallback.title')}</h1>
-          <p className="mt-2 text-sm text-muted">{t('page.authCallback.body')}</p>
+          <h1 className="text-ink text-lg font-semibold">{t('page.authCallback.title')}</h1>
+          <p className="text-muted mt-2 text-sm">{t('page.authCallback.body')}</p>
           <Link to={ROUTES.login} className="mt-6 inline-block">
             <Button>{t('page.authCallback.cta')}</Button>
           </Link>

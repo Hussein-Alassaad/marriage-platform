@@ -38,14 +38,22 @@ export function GuardiansPage() {
 
   return (
     <div>
-      <PageHeader title={t('guardians.title')} subtitle={t('guardians.subtitle')} eyebrow={t('guardians.eyebrow')} />
+      <PageHeader
+        title={t('guardians.title')}
+        subtitle={t('guardians.subtitle')}
+        eyebrow={t('guardians.eyebrow')}
+      />
 
       {!isWoman ? (
-        <EmptyState icon={ShieldCheck} title={t('guardians.notEligibleTitle')} description={t('guardians.notEligibleBody')} />
+        <EmptyState
+          icon={ShieldCheck}
+          title={t('guardians.notEligibleTitle')}
+          description={t('guardians.notEligibleBody')}
+        />
       ) : isLoading ? (
         <div className="space-y-4">
-          <Skeleton className="h-40 rounded-card" />
-          <Skeleton className="h-32 rounded-card" />
+          <Skeleton className="rounded-card h-40" />
+          <Skeleton className="rounded-card h-32" />
         </div>
       ) : (
         <div className="space-y-6">
@@ -97,10 +105,12 @@ function InviteForm() {
   return (
     <Card className="p-6">
       <div className="mb-4 flex items-center gap-2">
-        <UserPlus className="h-4 w-4 text-brand-600" aria-hidden />
-        <h2 className="font-display text-base font-semibold text-ink">{t('guardians.inviteTitle')}</h2>
+        <UserPlus className="text-brand-600 h-4 w-4" aria-hidden />
+        <h2 className="font-display text-ink text-base font-semibold">
+          {t('guardians.inviteTitle')}
+        </h2>
       </div>
-      <p className="mb-5 text-sm leading-relaxed text-muted">{t('guardians.inviteBody')}</p>
+      <p className="text-muted mb-5 text-sm leading-relaxed">{t('guardians.inviteBody')}</p>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField label={t('guardians.relationship')} htmlFor="relationship">
@@ -136,7 +146,7 @@ function InviteForm() {
         </div>
       </div>
 
-      {error ? <p className="mt-4 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="text-danger mt-4 text-xs">{error}</p> : null}
 
       <div className="mt-6">
         <Button onClick={submit} disabled={invite.isPending}>
@@ -161,15 +171,25 @@ function InvitationCard({ code, name }: { code: string; name: string | null }) {
   return (
     <Card className="p-6">
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="font-display text-base font-semibold text-ink">{t('guardians.pendingTitle')}</h2>
+        <h2 className="font-display text-ink text-base font-semibold">
+          {t('guardians.pendingTitle')}
+        </h2>
         <Badge variant="warning">{t('guardians.pending')}</Badge>
       </div>
-      <p className="mb-5 text-sm leading-relaxed text-muted">{t('guardians.pendingBody', { name: name ?? t('guardians.yourGuardian') })}</p>
+      <p className="text-muted mb-5 text-sm leading-relaxed">
+        {t('guardians.pendingBody', { name: name ?? t('guardians.yourGuardian') })}
+      </p>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-xl bg-bg-3 p-4">
-        <span className="font-mono text-lg font-semibold uppercase tracking-[0.2em] text-ink">{code}</span>
+      <div className="bg-bg-3 flex flex-wrap items-center gap-3 rounded-xl p-4">
+        <span className="text-ink font-mono text-lg font-semibold tracking-[0.2em] uppercase">
+          {code}
+        </span>
         <Button variant="outline" onClick={copy}>
-          {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
+          {copied ? (
+            <Check className="h-4 w-4" aria-hidden />
+          ) : (
+            <Copy className="h-4 w-4" aria-hidden />
+          )}
           {copied ? t('guardians.copied') : t('guardians.copy')}
         </Button>
       </div>
@@ -177,27 +197,44 @@ function InvitationCard({ code, name }: { code: string; name: string | null }) {
   );
 }
 
-function GuardianList({ guardians }: { guardians: { userId: string; displayName: string | null; relationship: string; confirmed: boolean }[] }) {
+function GuardianList({
+  guardians,
+}: {
+  guardians: {
+    userId: string;
+    displayName: string | null;
+    relationship: string;
+    confirmed: boolean;
+  }[];
+}) {
   const { t } = useTranslation();
   return (
     <Card className="p-6">
-      <h2 className="mb-4 font-display text-base font-semibold text-ink">{t('guardians.yourGuardians')}</h2>
+      <h2 className="font-display text-ink mb-4 text-base font-semibold">
+        {t('guardians.yourGuardians')}
+      </h2>
       <ul className="space-y-3">
         {guardians.map((g) => (
           <li key={g.userId} className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-sm font-semibold text-brand-800">
+            <span className="from-brand-100 to-brand-200 text-brand-800 grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br text-sm font-semibold">
               {(g.displayName?.[0] ?? '·').toUpperCase()}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-ink">{g.displayName ?? t('guardians.yourGuardian')}</p>
-              <p className="text-xs text-muted">{t(`guardians.rel.${g.relationship}`, { defaultValue: g.relationship })}</p>
+              <p className="text-ink truncate text-sm font-medium">
+                {g.displayName ?? t('guardians.yourGuardian')}
+              </p>
+              <p className="text-muted text-xs">
+                {t(`guardians.rel.${g.relationship}`, { defaultValue: g.relationship })}
+              </p>
             </div>
             {g.confirmed ? <Badge variant="success">{t('guardians.confirmed')}</Badge> : null}
           </li>
         ))}
       </ul>
       {/* Decisions §9: the platform must never claim to have verified the relationship. */}
-      <p className="mt-4 border-t border-line pt-4 text-xs leading-relaxed text-faint">{t('guardians.disclaimer')}</p>
+      <p className="border-line text-faint mt-4 border-t pt-4 text-xs leading-relaxed">
+        {t('guardians.disclaimer')}
+      </p>
     </Card>
   );
 }
@@ -229,13 +266,15 @@ function SharingList({
 
   return (
     <Card className="p-6">
-      <h2 className="mb-1 font-display text-base font-semibold text-ink">{t('guardians.sharingTitle')}</h2>
-      <p className="mb-5 text-sm leading-relaxed text-muted">
+      <h2 className="font-display text-ink mb-1 text-base font-semibold">
+        {t('guardians.sharingTitle')}
+      </h2>
+      <p className="text-muted mb-5 text-sm leading-relaxed">
         {t('guardians.sharingBody', { name: guardianName ?? t('guardians.yourGuardian') })}
       </p>
 
       {matches.length === 0 ? (
-        <p className="text-sm text-muted">{t('guardians.noConnections')}</p>
+        <p className="text-muted text-sm">{t('guardians.noConnections')}</p>
       ) : (
         <ul className="space-y-2">
           {matches.map((m, i) => {
@@ -246,11 +285,15 @@ function SharingList({
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.24, ease: EASE_OUT, delay: i * 0.04 }}
-                className="flex items-center gap-3 rounded-xl border border-line p-3"
+                className="border-line flex items-center gap-3 rounded-xl border p-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink">{m.person?.displayName ?? '—'}</p>
-                  <p className="text-xs text-muted">{t(`match.stage.${m.stage}`, { defaultValue: m.stage })}</p>
+                  <p className="text-ink truncate text-sm font-medium">
+                    {m.person?.displayName ?? '—'}
+                  </p>
+                  <p className="text-muted text-xs">
+                    {t(`match.stage.${m.stage}`, { defaultValue: m.stage })}
+                  </p>
                 </div>
                 <Button
                   variant={on ? 'ghost' : 'outline'}

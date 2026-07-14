@@ -55,7 +55,7 @@ function StageNode({ stage, index }: { stage: Stage; index: number }) {
         className={cn(
           'relative flex h-11 w-11 items-center justify-center rounded-full border',
           done && 'border-brand-400 bg-brand-wash text-brand-600',
-          current && 'border-2 border-brand-400 bg-bg-3 text-brand-600',
+          current && 'border-brand-400 bg-bg-3 text-brand-600 border-2',
           !done && !current && 'border-line-strong bg-surface text-faint',
         )}
         // Signature "heartbeat": the active node pulses once, right after the
@@ -73,10 +73,14 @@ function StageNode({ stage, index }: { stage: Stage; index: number }) {
         {current ? (
           <span
             aria-hidden
-            className="absolute inset-0 rounded-full border-2 border-brand-400 [animation:breathe_2.4s_ease-in-out_infinite]"
+            className="border-brand-400 absolute inset-0 [animation:breathe_2.4s_ease-in-out_infinite] rounded-full border-2"
           />
         ) : null}
-        {done ? <Check className="h-5 w-5" aria-hidden /> : <Icon className="h-5 w-5" aria-hidden />}
+        {done ? (
+          <Check className="h-5 w-5" aria-hidden />
+        ) : (
+          <Icon className="h-5 w-5" aria-hidden />
+        )}
       </motion.span>
       <span className={cn('text-xs font-medium', current ? 'text-ink' : 'text-muted')}>
         {t(`page.home.journey.stages.${stage.key}`)}
@@ -92,20 +96,20 @@ export function JourneyCard() {
   const traceEnd = nodeCenter(CURRENT_INDEX);
 
   return (
-    <section className="rounded-card border border-line bg-surface p-6 [box-shadow:var(--shadow-card),var(--inner-hi)] sm:p-8">
+    <section className="rounded-card border-line bg-surface border p-6 [box-shadow:var(--shadow-card),var(--inner-hi)] sm:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">
+          <p className="text-brand-700 text-xs font-semibold tracking-wider uppercase">
             {t('page.home.journey.eyebrow')}
           </p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-ink sm:text-2xl">
+          <h2 className="text-ink mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
             {t('page.home.journey.title')}
           </h2>
-          <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">
+          <p className="text-muted mt-1.5 max-w-xl text-sm leading-relaxed">
             {t('page.home.journey.subtitle')}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-gold-wash px-3 py-1 text-xs font-semibold text-gold-400 ring-1 ring-inset ring-gold-500/30">
+        <span className="bg-gold-wash text-gold-400 ring-gold-500/30 shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset">
           {t('page.home.journey.stepOf', { current: CURRENT_INDEX + 1, total: STAGES.length })}
         </span>
       </div>
@@ -115,12 +119,12 @@ export function JourneyCard() {
       <div className="relative mt-7">
         <div
           aria-hidden
-          className="absolute top-[21px] z-0 h-0.5 rounded bg-line-strong"
+          className="bg-line-strong absolute top-[21px] z-0 h-0.5 rounded"
           style={{ insetInlineStart: `${railStart}%`, insetInlineEnd: `${100 - railEnd}%` }}
         />
         <motion.div
           aria-hidden
-          className="absolute top-[21px] z-0 h-0.5 origin-left rounded bg-brand-500 rtl:origin-right"
+          className="bg-brand-500 absolute top-[21px] z-0 h-0.5 origin-left rounded rtl:origin-right"
           style={{ insetInlineStart: `${railStart}%`, width: `${traceEnd - railStart}%` }}
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -138,16 +142,16 @@ export function JourneyCard() {
       </div>
 
       {/* Next-step callout. */}
-      <div className="mt-7 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50/50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+      <div className="border-brand-100 bg-brand-50/50 mt-7 flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface text-brand-600 ring-1 ring-inset ring-brand-100">
+          <span className="bg-surface text-brand-600 ring-brand-100 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset">
             <ShieldCheck className="h-5 w-5" aria-hidden />
           </span>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">
+            <p className="text-brand-700 text-xs font-semibold tracking-wider uppercase">
               {t('page.home.journey.next')}
             </p>
-            <p className="mt-0.5 text-sm leading-relaxed text-ink-soft">
+            <p className="text-ink-soft mt-0.5 text-sm leading-relaxed">
               {t('page.home.journey.nextDetail')}
             </p>
           </div>

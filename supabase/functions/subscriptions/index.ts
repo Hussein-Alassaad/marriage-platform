@@ -18,6 +18,7 @@
 // Deploy: `supabase functions deploy subscriptions`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -267,6 +268,8 @@ Deno.serve(async (req: Request) => {
         after: { tier, period, expiresAt, subscriptionId: sub.id },
         reason,
       });
+
+      await emit(admin, 'payment.approved', claim.user_id, { tier, expiresAt });
 
       return json({ ok: true, status: 'activated', tier, expiresAt });
     }

@@ -26,12 +26,14 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div className="mx-auto max-w-lg rounded-card border border-line bg-surface p-6 [box-shadow:var(--shadow-card),var(--inner-hi)]">
-          <h2 className="font-display text-lg font-semibold text-ink">Something went wrong on this page</h2>
-          <p className="mt-2 text-sm text-muted">
+        <div className="rounded-card border-line bg-surface mx-auto max-w-lg border p-6 [box-shadow:var(--shadow-card),var(--inner-hi)]">
+          <h2 className="font-display text-ink text-lg font-semibold">
+            Something went wrong on this page
+          </h2>
+          <p className="text-muted mt-2 text-sm">
             The rest of the app is fine. Try again, or head back home.
           </p>
-          <pre className="mt-4 max-h-40 overflow-auto rounded-md bg-bg-3 p-3 text-xs text-danger">
+          <pre className="bg-bg-3 text-danger mt-4 max-h-40 overflow-auto rounded-md p-3 text-xs">
             {this.state.error.message}
           </pre>
           <div className="mt-5 flex gap-2">
@@ -44,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </button>
             <a
               href="/"
-              className="rounded-md border border-line-strong px-4 py-2 text-sm font-medium text-ink"
+              className="border-line-strong text-ink rounded-md border px-4 py-2 text-sm font-medium"
             >
               Back home
             </a>

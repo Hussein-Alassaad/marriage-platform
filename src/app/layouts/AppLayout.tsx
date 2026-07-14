@@ -18,7 +18,7 @@ export function AppLayout() {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main className="flex-1 px-4 pb-28 pt-8 md:px-8 md:pb-12">
+        <main className="flex-1 px-4 pt-8 pb-28 md:px-8 md:pb-12">
           <div className="mx-auto w-full max-w-6xl">
             <PageTransition pathname={location.pathname}>
               <ErrorBoundary key={location.pathname}>

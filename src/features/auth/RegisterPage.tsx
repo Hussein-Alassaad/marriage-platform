@@ -96,8 +96,8 @@ export function RegisterPage() {
 
   return (
     <Card>
-      <h1 className="text-xl font-semibold text-ink">{t('page.register.title')}</h1>
-      <p className="mt-1 text-sm text-muted">{t('page.register.subtitle')}</p>
+      <h1 className="text-ink text-xl font-semibold">{t('page.register.title')}</h1>
+      <p className="text-muted mt-1 text-sm">{t('page.register.subtitle')}</p>
 
       <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
         {formError ? <Alert>{formError}</Alert> : null}
@@ -110,7 +110,11 @@ export function RegisterPage() {
           <Input id="displayName" autoComplete="name" {...register('displayName')} />
         </FormField>
 
-        <FormField label={t('page.register.email')} htmlFor="email" error={errors.email && t('validation.email')}>
+        <FormField
+          label={t('page.register.email')}
+          htmlFor="email"
+          error={errors.email && t('validation.email')}
+        >
           <Input id="email" type="email" autoComplete="email" {...register('email')} />
         </FormField>
 
@@ -119,7 +123,12 @@ export function RegisterPage() {
           htmlFor="password"
           error={errors.password && t('validation.password')}
         >
-          <Input id="password" type="password" autoComplete="new-password" {...register('password')} />
+          <Input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            {...register('password')}
+          />
         </FormField>
 
         <div className="grid grid-cols-2 gap-3">
@@ -146,16 +155,16 @@ export function RegisterPage() {
           </FormField>
         </div>
 
-        <p className="text-xs text-muted">{t('page.register.genderNote')}</p>
+        <p className="text-muted text-xs">{t('page.register.genderNote')}</p>
 
         <Button size="lg" type="submit" disabled={isSubmitting}>
           {isSubmitting ? t('common.pleaseWait') : t('page.register.submit')}
         </Button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-muted">
+      <p className="text-muted mt-4 text-center text-sm">
         {t('page.register.hasAccount')}{' '}
-        <Link to={ROUTES.login} className="font-medium text-brand-700 hover:text-brand-800">
+        <Link to={ROUTES.login} className="text-brand-700 hover:text-brand-800 font-medium">
           {t('page.register.loginLink')}
         </Link>
       </p>

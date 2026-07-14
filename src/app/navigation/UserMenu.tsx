@@ -49,7 +49,7 @@ export function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t('nav.profile')}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-sm font-semibold text-brand-800 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+        className="from-brand-100 to-brand-200 text-brand-800 focus-visible:outline-brand-600 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-95"
       >
         {initial}
       </button>
@@ -62,21 +62,38 @@ export function UserMenu() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.15, ease: EASE_OUT_EXPO }}
-            className="absolute end-0 top-11 z-30 w-52 rounded-xl border border-line bg-raised p-1.5 shadow-elevated"
+            className="border-line bg-raised shadow-elevated absolute end-0 top-11 z-30 w-52 rounded-xl border p-1.5"
           >
             {profile?.display_name ? (
-              <p className="truncate px-2.5 pb-1.5 pt-1 text-xs text-faint">{profile.display_name}</p>
+              <p className="text-faint truncate px-2.5 pt-1 pb-1.5 text-xs">
+                {profile.display_name}
+              </p>
             ) : null}
-            <NavLink to={ROUTES.profile} className={itemClass} onClick={() => setOpen(false)} role="menuitem">
-              <User className="h-4 w-4 text-muted" aria-hidden />
+            <NavLink
+              to={ROUTES.profile}
+              className={itemClass}
+              onClick={() => setOpen(false)}
+              role="menuitem"
+            >
+              <User className="text-muted h-4 w-4" aria-hidden />
               {t('nav.profile')}
             </NavLink>
-            <NavLink to={ROUTES.settings} className={itemClass} onClick={() => setOpen(false)} role="menuitem">
-              <Settings className="h-4 w-4 text-muted" aria-hidden />
+            <NavLink
+              to={ROUTES.settings}
+              className={itemClass}
+              onClick={() => setOpen(false)}
+              role="menuitem"
+            >
+              <Settings className="text-muted h-4 w-4" aria-hidden />
               {t('nav.settings')}
             </NavLink>
-            <div className="my-1 border-t border-line" />
-            <button type="button" onClick={handleSignOut} className={cn(itemClass, 'text-danger')} role="menuitem">
+            <div className="border-line my-1 border-t" />
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className={cn(itemClass, 'text-danger')}
+              role="menuitem"
+            >
               <LogOut className="h-4 w-4" aria-hidden />
               {t('auth.signOut')}
             </button>

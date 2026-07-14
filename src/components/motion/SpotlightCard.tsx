@@ -37,7 +37,7 @@ export const SpotlightCard = forwardRef<HTMLDivElement, SpotlightCardProps>(func
       onPointerEnter={() => setActive(true)}
       onPointerLeave={() => setActive(false)}
       className={cn(
-        'relative overflow-hidden rounded-card border border-line bg-surface p-6',
+        'rounded-card border-line bg-surface relative overflow-hidden border p-6',
         'shadow-card [box-shadow:var(--shadow-card),var(--inner-hi)]',
         className,
       )}

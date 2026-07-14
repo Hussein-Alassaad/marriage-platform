@@ -25,14 +25,14 @@ export function LanguageSwitcher() {
       type="button"
       onClick={toggleLanguage}
       aria-label={t('common.switchLanguage')}
-      className="relative inline-flex items-center gap-0.5 rounded-md border border-line bg-bg-3 p-0.5 transition duration-150 hover:border-line-strong active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+      className="border-line bg-bg-3 hover:border-line-strong focus-visible:outline-brand-500 relative inline-flex items-center gap-0.5 rounded-md border p-0.5 transition duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-95"
     >
       <span className={segment(language === 'en')}>
         {language === 'en' ? (
           <motion.span
             layoutId="lang-thumb"
             transition={SPRING_SNAPPY}
-            className="absolute inset-0 -z-10 rounded-md bg-surface shadow-xs"
+            className="bg-surface absolute inset-0 -z-10 rounded-md shadow-xs"
           />
         ) : null}
         EN
@@ -42,7 +42,7 @@ export function LanguageSwitcher() {
           <motion.span
             layoutId="lang-thumb"
             transition={SPRING_SNAPPY}
-            className="absolute inset-0 -z-10 rounded-md bg-surface shadow-xs"
+            className="bg-surface absolute inset-0 -z-10 rounded-md shadow-xs"
           />
         ) : null}
         ع

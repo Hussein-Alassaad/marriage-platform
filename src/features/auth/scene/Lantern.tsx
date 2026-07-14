@@ -21,8 +21,10 @@ export function Lantern({ className }: { className?: string }) {
       >
         {/* warm glow */}
         <motion.span
-          className="absolute left-1/2 top-10 h-24 w-24 -translate-x-1/2 rounded-full"
-          style={{ background: 'radial-gradient(closest-side, rgba(227,197,103,0.45), transparent 70%)' }}
+          className="absolute top-10 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full"
+          style={{
+            background: 'radial-gradient(closest-side, rgba(227,197,103,0.45), transparent 70%)',
+          }}
           animate={reduced ? undefined : { opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2.4, ease: EASE_INOUT, repeat: Infinity }}
         />

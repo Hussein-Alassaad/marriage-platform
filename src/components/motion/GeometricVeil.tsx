@@ -20,7 +20,7 @@ export function GeometricVeil({ className, tile = 96 }: GeometricVeilProps) {
     <div
       aria-hidden
       className={cn(
-        'pointer-events-none absolute inset-0 text-ink opacity-[0.04] dark:opacity-[0.03]',
+        'text-ink pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.03]',
         className,
       )}
       style={{

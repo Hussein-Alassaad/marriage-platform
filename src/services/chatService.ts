@@ -47,7 +47,13 @@ export interface MatchRow {
 }
 
 /** Shared multipart path for voice/image/video. A non-2xx carries its reason in the body. */
-async function sendMedia(fn: string, matchId: string, field: string, file: Blob, extra?: Record<string, string>) {
+async function sendMedia(
+  fn: string,
+  matchId: string,
+  field: string,
+  file: Blob,
+  extra?: Record<string, string>,
+) {
   const supabase = requireSupabaseClient();
   const form = new FormData();
   form.append('matchId', matchId);
@@ -115,7 +121,9 @@ export const chatService = {
 
   async sendText(matchId: string, body: string): Promise<SendResult> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.functions.invoke('send-text-message', { body: { matchId, body } });
+    const { data, error } = await supabase.functions.invoke('send-text-message', {
+      body: { matchId, body },
+    });
     if (error) throw error;
     return data as SendResult;
   },
@@ -162,7 +170,9 @@ export const chatService = {
   /** Journey state for this match: next stage, both consents, unmet requirements. */
   async getStageStatus(matchId: string): Promise<StageStatus> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.functions.invoke('stage-transition', { body: { action: 'status', matchId } });
+    const { data, error } = await supabase.functions.invoke('stage-transition', {
+      body: { action: 'status', matchId },
+    });
     if (error) throw error;
     return data as StageStatus;
   },
@@ -179,7 +189,9 @@ export const chatService = {
 
   async endConnection(matchId: string): Promise<void> {
     const supabase = requireSupabaseClient();
-    const { error } = await supabase.functions.invoke('stage-transition', { body: { action: 'terminate', matchId } });
+    const { error } = await supabase.functions.invoke('stage-transition', {
+      body: { action: 'terminate', matchId },
+    });
     if (error) throw error;
   },
 };

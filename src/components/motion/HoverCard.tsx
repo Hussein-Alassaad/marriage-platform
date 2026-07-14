@@ -20,7 +20,7 @@ export const HoverCard = forwardRef<HTMLDivElement, HoverCardProps>(function Hov
     <motion.div
       ref={ref}
       className={cn(
-        'rounded-card border border-line bg-surface p-6 shadow-card',
+        'rounded-card border-line bg-surface shadow-card border p-6',
         'transition-[box-shadow,border-color] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]',
         'hover:border-line-strong hover:shadow-elevated',
         className,

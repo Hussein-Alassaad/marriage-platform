@@ -81,7 +81,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setRoles([]);
   }, []);
 
-  const hasRole = useCallback((...wanted: AppRole[]) => wanted.some((r) => roles.includes(r)), [roles]);
+  const hasRole = useCallback(
+    (...wanted: AppRole[]) => wanted.some((r) => roles.includes(r)),
+    [roles],
+  );
 
   const value = useMemo<SessionContextValue>(
     () => ({

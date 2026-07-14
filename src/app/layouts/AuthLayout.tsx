@@ -85,7 +85,7 @@ export function AuthLayout() {
       <motion.div
         aria-hidden
         style={parallax ? { x: archX, y: archY } : undefined}
-        className="absolute left-1/2 top-1/2 z-0 hidden h-[94vh] w-[64vh] -translate-x-1/2 -translate-y-1/2 opacity-80 lg:block"
+        className="absolute top-1/2 left-1/2 z-0 hidden h-[94vh] w-[64vh] -translate-x-1/2 -translate-y-1/2 opacity-80 lg:block"
       >
         <ArchedWindow className="inset-0 h-full w-full" />
       </motion.div>
@@ -105,9 +105,9 @@ export function AuthLayout() {
       </motion.div>
 
       {/* Trust pill (top-start) */}
-      <div className="glass absolute top-4 z-30 hidden items-center gap-2 rounded-full border border-line px-3.5 py-2 sm:flex ltr:left-4 rtl:right-4">
-        <Users className="h-4 w-4 text-gold-400" aria-hidden />
-        <span className="text-xs font-medium text-ink-soft">{t('auth.trustedBy')}</span>
+      <div className="glass border-line absolute top-4 z-30 hidden items-center gap-2 rounded-full border px-3.5 py-2 sm:flex ltr:left-4 rtl:right-4">
+        <Users className="text-gold-400 h-4 w-4" aria-hidden />
+        <span className="text-ink-soft text-xs font-medium">{t('auth.trustedBy')}</span>
       </div>
 
       {/* Top-end controls */}
@@ -117,8 +117,11 @@ export function AuthLayout() {
       </div>
 
       {/* Card — the focal point */}
-      <div className="relative z-20 flex flex-1 items-center justify-center px-4 pb-6 pt-16 sm:pt-12">
-        <motion.div style={parallax ? { x: cardX, y: cardY } : undefined} className="relative w-[min(560px,92vw)]">
+      <div className="relative z-20 flex flex-1 items-center justify-center px-4 pt-16 pb-6 sm:pt-12">
+        <motion.div
+          style={parallax ? { x: cardX, y: cardY } : undefined}
+          className="relative w-[min(560px,92vw)]"
+        >
           {/* Soft gold + emerald glow pooled behind the card. */}
           <div
             aria-hidden
@@ -132,12 +135,12 @@ export function AuthLayout() {
             initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE_EXPO, delay: 0.5 }}
-            className="auth-card-glass relative overflow-hidden rounded-[40px_40px_24px_24px] border border-line [box-shadow:0_24px_80px_rgba(0,0,0,0.5),var(--inner-hi)]"
+            className="auth-card-glass border-line relative overflow-hidden rounded-[40px_40px_24px_24px] border [box-shadow:0_24px_80px_rgba(0,0,0,0.5),var(--inner-hi)]"
           >
             {/* Gold hairline along the arched top. */}
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/50 to-transparent"
+              className="via-gold-400/50 pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent"
             />
             <PageTransition pathname={location.pathname}>
               <Outlet />

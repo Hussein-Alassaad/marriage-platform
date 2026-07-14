@@ -26,7 +26,9 @@ export interface Profile {
 function client() {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+    throw new Error(
+      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+    );
   }
   return supabase;
 }
@@ -77,7 +79,9 @@ export const authService = {
   },
 
   requestPasswordReset(email: string) {
-    return client().auth.resetPasswordForEmail(email, { redirectTo: redirectTo('/reset-password') });
+    return client().auth.resetPasswordForEmail(email, {
+      redirectTo: redirectTo('/reset-password'),
+    });
   },
 
   updatePassword(password: string) {
@@ -94,13 +98,17 @@ export const authService = {
   },
 
   /** Load the signed-in user's profile + roles (RLS restricts these to self). */
-  async fetchProfileAndRoles(userId: string): Promise<{ profile: Profile | null; roles: AppRole[] }> {
+  async fetchProfileAndRoles(
+    userId: string,
+  ): Promise<{ profile: Profile | null; roles: AppRole[] }> {
     const supabase = getSupabaseClient();
     if (!supabase) return { profile: null, roles: [] };
     const [{ data: profile }, { data: roleRows }] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id, display_name, gender, gender_locked, dob, verification_status, subscription_tier')
+        .select(
+          'id, display_name, gender, gender_locked, dob, verification_status, subscription_tier',
+        )
         .eq('id', userId)
         .maybeSingle(),
       supabase.from('user_roles').select('role').eq('user_id', userId),

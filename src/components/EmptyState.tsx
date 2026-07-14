@@ -15,18 +15,18 @@ export function EmptyState({ icon: Icon, title, description, action, className }
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-card border border-line bg-surface px-6 py-16 text-center [box-shadow:var(--shadow-card),var(--inner-hi)]',
+        'rounded-card border-line bg-surface flex flex-col items-center justify-center border px-6 py-16 text-center [box-shadow:var(--shadow-card),var(--inner-hi)]',
         className,
       )}
     >
       {Icon ? (
-        <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-wash text-brand-600 ring-1 ring-inset ring-[color:var(--color-border-accent)] [animation:breathe-float_4s_ease-in-out_infinite]">
+        <span className="bg-brand-wash text-brand-600 mb-5 flex h-14 w-14 [animation:breathe-float_4s_ease-in-out_infinite] items-center justify-center rounded-2xl ring-1 ring-[color:var(--color-border-accent)] ring-inset">
           <Icon className="h-6 w-6" aria-hidden />
         </span>
       ) : null}
-      <h3 className="text-base font-semibold text-ink">{title}</h3>
+      <h3 className="text-ink text-base font-semibold">{title}</h3>
       {description ? (
-        <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted">{description}</p>
+        <p className="text-muted mt-2 max-w-sm text-sm leading-relaxed">{description}</p>
       ) : null}
       {action ? <div className="mt-6">{action}</div> : null}
     </div>

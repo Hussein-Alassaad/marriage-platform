@@ -51,20 +51,20 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
       <Card className="mb-4 p-4">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 text-sm font-medium text-ink">
+            <p className="text-ink flex items-center gap-2 text-sm font-medium">
               {stage === 'married' ? (
-                <Heart className="h-4 w-4 text-gold-500" aria-hidden />
+                <Heart className="text-gold-500 h-4 w-4" aria-hidden />
               ) : (
-                <Circle className="h-3 w-3 fill-brand-500 text-brand-500" aria-hidden />
+                <Circle className="fill-brand-500 text-brand-500 h-3 w-3" aria-hidden />
               )}
               {t(`match.stage.${stage}`, { defaultValue: stage })}
             </p>
             {next ? (
-              <p className="mt-1 text-xs leading-relaxed text-muted">
+              <p className="text-muted mt-1 text-xs leading-relaxed">
                 {t('journey.explain', { next: t(`match.stage.${next}`, { defaultValue: next }) })}
               </p>
             ) : (
-              <p className="mt-1 text-xs text-muted">{t('journey.finalStage')}</p>
+              <p className="text-muted mt-1 text-xs">{t('journey.finalStage')}</p>
             )}
           </div>
 
@@ -76,12 +76,21 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
                 <ConsentDot on={theyConsented} label={who} />
               </div>
               {youConsented ? (
-                <Button variant="ghost" onClick={() => consent.mutate(false)} disabled={consent.isPending}>
+                <Button
+                  variant="ghost"
+                  onClick={() => consent.mutate(false)}
+                  disabled={consent.isPending}
+                >
                   {t('journey.withdraw')}
                 </Button>
               ) : (
-                <Button onClick={() => consent.mutate(true)} disabled={consent.isPending || blocked}>
-                  {t('journey.continueTo', { next: t(`match.stage.${next}`, { defaultValue: next }) })}
+                <Button
+                  onClick={() => consent.mutate(true)}
+                  disabled={consent.isPending || blocked}
+                >
+                  {t('journey.continueTo', {
+                    next: t(`match.stage.${next}`, { defaultValue: next }),
+                  })}
                 </Button>
               )}
             </div>
@@ -98,21 +107,27 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.24, ease: EASE_OUT }}
-            className="mt-3 space-y-1.5 border-t border-line pt-3"
+            className="border-line mt-3 space-y-1.5 border-t pt-3"
           >
             {unmet.map((r) => (
-              <li key={r.key} className="flex items-start gap-2 text-xs text-muted">
-                <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" aria-hidden />
+              <li key={r.key} className="text-muted flex items-start gap-2 text-xs">
+                <Lock className="text-faint mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
                 <span>
                   {t(`journey.req.${r.key}`, { name: who })}
                   {r.key === 'you_paid' ? (
-                    <Link to={ROUTES.plans} className="ms-1.5 font-medium text-brand-700 underline-offset-4 hover:underline">
+                    <Link
+                      to={ROUTES.plans}
+                      className="text-brand-700 ms-1.5 font-medium underline-offset-4 hover:underline"
+                    >
                       {t('journey.viewPlans')}
                     </Link>
                   ) : null}
                   {/* Only she can invite her guardian — don't send him somewhere he can't act. */}
                   {r.key === 'guardian_ready' && profile?.gender === 'woman' ? (
-                    <Link to={ROUTES.guardians} className="ms-1.5 font-medium text-brand-700 underline-offset-4 hover:underline">
+                    <Link
+                      to={ROUTES.guardians}
+                      className="text-brand-700 ms-1.5 font-medium underline-offset-4 hover:underline"
+                    >
                       {t('journey.inviteGuardian')}
                     </Link>
                   ) : null}
@@ -123,19 +138,21 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
         ) : null}
 
         {next && !blocked && youConsented && !theyConsented ? (
-          <p className="mt-3 border-t border-line pt-3 text-xs text-muted">{t('journey.waiting', { name: who })}</p>
+          <p className="border-line text-muted mt-3 border-t pt-3 text-xs">
+            {t('journey.waiting', { name: who })}
+          </p>
         ) : null}
 
         {stage === 'serious_communication' ? (
-          <p className="mt-3 flex items-start gap-2 border-t border-line pt-3 text-xs text-muted">
-            <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-faint" aria-hidden />
+          <p className="border-line text-muted mt-3 flex items-start gap-2 border-t pt-3 text-xs">
+            <ShieldAlert className="text-faint mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             {t('journey.seriousNotice')}
           </p>
         ) : null}
       </Card>
 
       <Modal open={confirmEnd} onClose={() => setConfirmEnd(false)} title={t('journey.endTitle')}>
-        <p className="text-sm leading-relaxed text-muted">{t('journey.endBody', { name: who })}</p>
+        <p className="text-muted text-sm leading-relaxed">{t('journey.endBody', { name: who })}</p>
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setConfirmEnd(false)}>
             {t('common.cancel')}
@@ -151,10 +168,10 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
 
 function ConsentDot({ on, label }: { on: boolean; label: string }) {
   return (
-    <span className="flex items-center gap-1.5 text-xs text-muted">
+    <span className="text-muted flex items-center gap-1.5 text-xs">
       <span
         className={cn(
-          'grid h-4 w-4 place-items-center rounded-full ring-1 ring-inset transition-colors',
+          'grid h-4 w-4 place-items-center rounded-full ring-1 transition-colors ring-inset',
           on ? 'bg-brand-500 text-on-brand ring-brand-500' : 'bg-bg-3 text-faint ring-line',
         )}
       >

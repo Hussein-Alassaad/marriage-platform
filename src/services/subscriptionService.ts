@@ -96,7 +96,9 @@ export const subscriptionService = {
     const supabase = requireSupabaseClient();
     const { data, error } = await supabase
       .from('payment_claims')
-      .select('id, method, reference_code, amount, currency, status, receipt_path, submitted_at, expires_at')
+      .select(
+        'id, method, reference_code, amount, currency, status, receipt_path, submitted_at, expires_at',
+      )
       .eq('user_id', userId)
       .order('submitted_at', { ascending: false })
       .limit(1)
@@ -106,7 +108,11 @@ export const subscriptionService = {
   },
 
   /** Start a manual payment: the server sets the amount from the plan catalog. */
-  async createClaim(tier: Tier, method: ManualMethod, period: BillingPeriod): Promise<PaymentClaim> {
+  async createClaim(
+    tier: Tier,
+    method: ManualMethod,
+    period: BillingPeriod,
+  ): Promise<PaymentClaim> {
     const supabase = requireSupabaseClient();
     const { data, error } = await supabase.functions.invoke('subscriptions', {
       body: { action: 'create-claim', tier, method, period },
@@ -135,14 +141,20 @@ export const subscriptionService = {
   /** Admin: the review queue, with short-lived signed receipt URLs. */
   async listPendingClaims(): Promise<AdminClaim[]> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.functions.invoke('subscriptions', { body: { action: 'pending-claims' } });
+    const { data, error } = await supabase.functions.invoke('subscriptions', {
+      body: { action: 'pending-claims' },
+    });
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
     return (data.claims ?? []) as AdminClaim[];
   },
 
   /** Admin: approve (activates the tier) or reject a claim. */
-  async reviewClaim(claimId: string, decision: 'approved' | 'rejected', reason?: string): Promise<void> {
+  async reviewClaim(
+    claimId: string,
+    decision: 'approved' | 'rejected',
+    reason?: string,
+  ): Promise<void> {
     const supabase = requireSupabaseClient();
     const { data, error } = await supabase.functions.invoke('subscriptions', {
       body: { action: 'review', claimId, decision, reason },

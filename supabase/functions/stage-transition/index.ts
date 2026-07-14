@@ -19,6 +19,7 @@
 // Deploy: `supabase functions deploy stage-transition`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -151,6 +152,10 @@ Deno.serve(async (req: Request) => {
         .update({ active: false, user_a_consent: false, user_b_consent: false, disconnected_at: now })
         .eq('match_id', matchId);
 
+      // The other person finds out here — not by noticing the chat is gone.
+      const other = match.user_a === uid ? match.user_b : match.user_a;
+      await emit(admin, 'stage.terminated', other, { matchId });
+
       return json({ ok: true, stage: 'terminated' });
     }
 
@@ -216,6 +221,9 @@ Deno.serve(async (req: Request) => {
         changed_by: uid,
         reason: 'mutual_consent',
       });
+      // Both of them agreed, so both of them are told.
+      await emit(admin, 'stage.advanced', match.user_a, { matchId, stage: next });
+      await emit(admin, 'stage.advanced', match.user_b, { matchId, stage: next });
       return json({ ...(await buildStatus(next)), advanced: true });
     }
 

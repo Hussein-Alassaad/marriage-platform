@@ -33,18 +33,18 @@ export function VoiceBubble({ messageId, transcript }: VoiceBubbleProps) {
         <button
           type="button"
           onClick={() => setLoad(true)}
-          className="flex w-full items-center gap-2 rounded-full bg-bg-4 px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-bg-3"
+          className="bg-bg-4 text-ink hover:bg-bg-3 flex w-full items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors"
         >
-          <Play className="h-4 w-4 text-brand-600" aria-hidden />
+          <Play className="text-brand-600 h-4 w-4" aria-hidden />
           {t('voice.play')}
         </button>
       )}
 
-      {isError ? <p className="text-xs text-danger">{t('voice.playError')}</p> : null}
+      {isError ? <p className="text-danger text-xs">{t('voice.playError')}</p> : null}
 
       {transcript ? (
-        <p className="text-xs leading-relaxed text-muted">
-          <span className="font-medium text-faint">{t('voice.transcript')}: </span>
+        <p className="text-muted text-xs leading-relaxed">
+          <span className="text-faint font-medium">{t('voice.transcript')}: </span>
           {transcript}
         </p>
       ) : null}

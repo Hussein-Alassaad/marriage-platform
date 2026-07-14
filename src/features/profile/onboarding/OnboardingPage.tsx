@@ -34,7 +34,12 @@ import { EASE_EXPO, SPRING_SNAPPY } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useSettings } from '@/hooks/useSettings';
-import { computeCompletion, type JsonMap, type ProfilePatch, type ProfileRecord } from '@/services/profileService';
+import {
+  computeCompletion,
+  type JsonMap,
+  type ProfilePatch,
+  type ProfileRecord,
+} from '@/services/profileService';
 
 const STEP_ICONS: LucideIcon[] = [User, GraduationCap, HeartHandshake, Sparkles, PenLine, Camera];
 
@@ -65,30 +70,63 @@ interface FormState {
 }
 
 const EMPTY: FormState = {
-  display_name: '', dob: '', gender: '', nationality: '', country: '', city: '', languages: [],
-  education_level: '', university: '', major: '', graduation_year: '', occupation: '', industry: '',
-  employment_status: '', mg_timeline: '', mg_children: '', mg_relocate: '', ls_religiosity: '',
-  ls_smoking: '', fv_involvement: '', fr_savings: '', bio: '', photo_privacy_mode: '2',
+  display_name: '',
+  dob: '',
+  gender: '',
+  nationality: '',
+  country: '',
+  city: '',
+  languages: [],
+  education_level: '',
+  university: '',
+  major: '',
+  graduation_year: '',
+  occupation: '',
+  industry: '',
+  employment_status: '',
+  mg_timeline: '',
+  mg_children: '',
+  mg_relocate: '',
+  ls_religiosity: '',
+  ls_smoking: '',
+  fv_involvement: '',
+  fr_savings: '',
+  bio: '',
+  photo_privacy_mode: '2',
 };
 
 function fromProfile(p: ProfileRecord): FormState {
   const s = (v: unknown) => (v == null ? '' : String(v));
   const j = (m: JsonMap, k: string) => (m && m[k] ? m[k] : '');
   return {
-    display_name: s(p.display_name), dob: s(p.dob), gender: s(p.gender), nationality: s(p.nationality),
-    country: s(p.country), city: s(p.city), languages: p.languages ?? [],
-    education_level: s(p.education_level), university: s(p.university), major: s(p.major),
-    graduation_year: s(p.graduation_year), occupation: s(p.occupation), industry: s(p.industry),
+    display_name: s(p.display_name),
+    dob: s(p.dob),
+    gender: s(p.gender),
+    nationality: s(p.nationality),
+    country: s(p.country),
+    city: s(p.city),
+    languages: p.languages ?? [],
+    education_level: s(p.education_level),
+    university: s(p.university),
+    major: s(p.major),
+    graduation_year: s(p.graduation_year),
+    occupation: s(p.occupation),
+    industry: s(p.industry),
     employment_status: s(p.employment_status),
-    mg_timeline: j(p.marriage_goals, 'timeline'), mg_children: j(p.marriage_goals, 'children'),
-    mg_relocate: j(p.marriage_goals, 'relocate'), ls_religiosity: j(p.lifestyle, 'religiosity'),
-    ls_smoking: j(p.lifestyle, 'smoking'), fv_involvement: j(p.family_values, 'involvement'),
-    fr_savings: j(p.financial_readiness, 'savings'), bio: s(p.bio),
+    mg_timeline: j(p.marriage_goals, 'timeline'),
+    mg_children: j(p.marriage_goals, 'children'),
+    mg_relocate: j(p.marriage_goals, 'relocate'),
+    ls_religiosity: j(p.lifestyle, 'religiosity'),
+    ls_smoking: j(p.lifestyle, 'smoking'),
+    fv_involvement: j(p.family_values, 'involvement'),
+    fr_savings: j(p.financial_readiness, 'savings'),
+    bio: s(p.bio),
     photo_privacy_mode: s(p.photo_privacy_mode || 2),
   };
 }
 
-const clean = (m: JsonMap): JsonMap => Object.fromEntries(Object.entries(m).filter(([, v]) => v !== ''));
+const clean = (m: JsonMap): JsonMap =>
+  Object.fromEntries(Object.entries(m).filter(([, v]) => v !== ''));
 
 function toPatch(f: FormState, lockedGender: boolean): ProfilePatch {
   const patch: ProfilePatch = {
@@ -104,7 +142,11 @@ function toPatch(f: FormState, lockedGender: boolean): ProfilePatch {
     occupation: f.occupation || null,
     industry: f.industry || null,
     employment_status: f.employment_status || null,
-    marriage_goals: clean({ timeline: f.mg_timeline, children: f.mg_children, relocate: f.mg_relocate }),
+    marriage_goals: clean({
+      timeline: f.mg_timeline,
+      children: f.mg_children,
+      relocate: f.mg_relocate,
+    }),
     lifestyle: clean({ religiosity: f.ls_religiosity, smoking: f.ls_smoking }),
     family_values: clean({ involvement: f.fv_involvement }),
     financial_readiness: clean({ savings: f.fr_savings }),
@@ -131,7 +173,11 @@ function formCompletion(f: FormState): number {
     occupation: f.occupation || null,
     employment_status: f.employment_status || null,
     bio: f.bio || null,
-    marriage_goals: clean({ timeline: f.mg_timeline, children: f.mg_children, relocate: f.mg_relocate }),
+    marriage_goals: clean({
+      timeline: f.mg_timeline,
+      children: f.mg_children,
+      relocate: f.mg_relocate,
+    }),
     lifestyle: clean({ religiosity: f.ls_religiosity, smoking: f.ls_smoking }),
     family_values: clean({ involvement: f.fv_involvement }),
     financial_readiness: clean({ savings: f.fr_savings }),
@@ -227,7 +273,12 @@ export function OnboardingPage() {
 
   if (isLoading || !initialized) return <FullScreenLoader />;
   if (finished)
-    return <OnboardingDone completion={liveCompletion} onGo={() => navigate(ROUTES.profile, { replace: true })} />;
+    return (
+      <OnboardingDone
+        completion={liveCompletion}
+        onGo={() => navigate(ROUTES.profile, { replace: true })}
+      />
+    );
 
   const slide = 44 * (rtl ? -1 : 1);
 
@@ -237,16 +288,18 @@ export function OnboardingPage() {
       <div className="relative mb-6">
         <div className="flex items-center gap-4">
           <ProgressRing value={liveCompletion} size={64} stroke={5}>
-            <span className="text-[13px] font-bold text-ink">
+            <span className="text-ink text-[13px] font-bold">
               <CountUp value={liveCompletion} suffix="%" />
             </span>
           </ProgressRing>
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">{t('onboarding.eyebrow')}</p>
-            <h1 className="font-display text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+            <p className="text-brand-700 text-xs font-semibold tracking-wider uppercase">
+              {t('onboarding.eyebrow')}
+            </p>
+            <h1 className="font-display text-ink text-2xl leading-tight font-semibold sm:text-3xl">
               {steps[step].title}
             </h1>
-            <p className="mt-0.5 text-xs text-muted">
+            <p className="text-muted mt-0.5 text-xs">
               {t('onboarding.stepOf', { current: step + 1, total: steps.length })}
             </p>
           </div>
@@ -273,7 +326,11 @@ export function OnboardingPage() {
             {step === 0 ? (
               <>
                 <FormField label={t('profile.fields.displayName')} htmlFor="display_name">
-                  <Input id="display_name" value={form.display_name} onChange={(e) => set('display_name', e.target.value)} />
+                  <Input
+                    id="display_name"
+                    value={form.display_name}
+                    onChange={(e) => set('display_name', e.target.value)}
+                  />
                 </FormField>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FormField label={t('profile.fields.gender')} htmlFor="gender">
@@ -284,19 +341,40 @@ export function OnboardingPage() {
                     )}
                   </FormField>
                   <FormField label={t('profile.fields.dob')} htmlFor="dob">
-                    <Input id="dob" type="date" value={form.dob} onChange={(e) => set('dob', e.target.value)} readOnly={dobSet} disabled={dobSet} />
+                    <Input
+                      id="dob"
+                      type="date"
+                      value={form.dob}
+                      onChange={(e) => set('dob', e.target.value)}
+                      readOnly={dobSet}
+                      disabled={dobSet}
+                    />
                   </FormField>
                 </div>
-                {genderSet ? <p className="text-xs text-muted">{t('profile.genderLockedNote')}</p> : null}
+                {genderSet ? (
+                  <p className="text-muted text-xs">{t('profile.genderLockedNote')}</p>
+                ) : null}
                 <div className="grid gap-4 sm:grid-cols-3">
                   <FormField label={t('profile.fields.nationality')} htmlFor="nationality">
-                    <Input id="nationality" value={form.nationality} onChange={(e) => set('nationality', e.target.value)} />
+                    <Input
+                      id="nationality"
+                      value={form.nationality}
+                      onChange={(e) => set('nationality', e.target.value)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.country')} htmlFor="country">
-                    <Input id="country" value={form.country} onChange={(e) => set('country', e.target.value)} />
+                    <Input
+                      id="country"
+                      value={form.country}
+                      onChange={(e) => set('country', e.target.value)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.city')} htmlFor="city">
-                    <Input id="city" value={form.city} onChange={(e) => set('city', e.target.value)} />
+                    <Input
+                      id="city"
+                      value={form.city}
+                      onChange={(e) => set('city', e.target.value)}
+                    />
                   </FormField>
                 </div>
                 <FormField label={t('profile.fields.languages')} htmlFor="languages">
@@ -309,25 +387,60 @@ export function OnboardingPage() {
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FormField label={t('profile.fields.educationLevel')} htmlFor="education_level">
-                    <OptionSelect id="education_level" group="education" value={form.education_level} onChange={(v) => set('education_level', v)} />
+                    <OptionSelect
+                      id="education_level"
+                      group="education"
+                      value={form.education_level}
+                      onChange={(v) => set('education_level', v)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.graduationYear')} htmlFor="graduation_year">
-                    <Input id="graduation_year" type="number" inputMode="numeric" value={form.graduation_year} onChange={(e) => set('graduation_year', e.target.value)} />
+                    <Input
+                      id="graduation_year"
+                      type="number"
+                      inputMode="numeric"
+                      value={form.graduation_year}
+                      onChange={(e) => set('graduation_year', e.target.value)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.university')} htmlFor="university">
-                    <Input id="university" value={form.university} onChange={(e) => set('university', e.target.value)} />
+                    <Input
+                      id="university"
+                      value={form.university}
+                      onChange={(e) => set('university', e.target.value)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.major')} htmlFor="major">
-                    <Input id="major" value={form.major} onChange={(e) => set('major', e.target.value)} />
+                    <Input
+                      id="major"
+                      value={form.major}
+                      onChange={(e) => set('major', e.target.value)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.occupation')} htmlFor="occupation">
-                    <Input id="occupation" value={form.occupation} onChange={(e) => set('occupation', e.target.value)} />
+                    <Input
+                      id="occupation"
+                      value={form.occupation}
+                      onChange={(e) => set('occupation', e.target.value)}
+                    />
                   </FormField>
                   <FormField label={t('profile.fields.industry')} htmlFor="industry">
-                    <Input id="industry" value={form.industry} onChange={(e) => set('industry', e.target.value)} />
+                    <Input
+                      id="industry"
+                      value={form.industry}
+                      onChange={(e) => set('industry', e.target.value)}
+                    />
                   </FormField>
-                  <FormField label={t('profile.fields.employmentStatus')} htmlFor="employment_status">
-                    <OptionSelect id="employment_status" group="employment" value={form.employment_status} onChange={(v) => set('employment_status', v)} />
+                  <FormField
+                    label={t('profile.fields.employmentStatus')}
+                    htmlFor="employment_status"
+                  >
+                    <OptionSelect
+                      id="employment_status"
+                      group="employment"
+                      value={form.employment_status}
+                      onChange={(v) => set('employment_status', v)}
+                    />
                   </FormField>
                 </div>
               </>
@@ -336,13 +449,28 @@ export function OnboardingPage() {
             {step === 2 ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField label={t('profile.fields.timeline')} htmlFor="mg_timeline">
-                  <OptionSelect id="mg_timeline" group="timeline" value={form.mg_timeline} onChange={(v) => set('mg_timeline', v)} />
+                  <OptionSelect
+                    id="mg_timeline"
+                    group="timeline"
+                    value={form.mg_timeline}
+                    onChange={(v) => set('mg_timeline', v)}
+                  />
                 </FormField>
                 <FormField label={t('profile.fields.children')} htmlFor="mg_children">
-                  <OptionSelect id="mg_children" group="children" value={form.mg_children} onChange={(v) => set('mg_children', v)} />
+                  <OptionSelect
+                    id="mg_children"
+                    group="children"
+                    value={form.mg_children}
+                    onChange={(v) => set('mg_children', v)}
+                  />
                 </FormField>
                 <FormField label={t('profile.fields.relocate')} htmlFor="mg_relocate">
-                  <OptionSelect id="mg_relocate" group="relocate" value={form.mg_relocate} onChange={(v) => set('mg_relocate', v)} />
+                  <OptionSelect
+                    id="mg_relocate"
+                    group="relocate"
+                    value={form.mg_relocate}
+                    onChange={(v) => set('mg_relocate', v)}
+                  />
                 </FormField>
               </div>
             ) : null}
@@ -350,16 +478,36 @@ export function OnboardingPage() {
             {step === 3 ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField label={t('profile.fields.religiosity')} htmlFor="ls_religiosity">
-                  <OptionSelect id="ls_religiosity" group="religiosity" value={form.ls_religiosity} onChange={(v) => set('ls_religiosity', v)} />
+                  <OptionSelect
+                    id="ls_religiosity"
+                    group="religiosity"
+                    value={form.ls_religiosity}
+                    onChange={(v) => set('ls_religiosity', v)}
+                  />
                 </FormField>
                 <FormField label={t('profile.fields.smoking')} htmlFor="ls_smoking">
-                  <OptionSelect id="ls_smoking" group="smoking" value={form.ls_smoking} onChange={(v) => set('ls_smoking', v)} />
+                  <OptionSelect
+                    id="ls_smoking"
+                    group="smoking"
+                    value={form.ls_smoking}
+                    onChange={(v) => set('ls_smoking', v)}
+                  />
                 </FormField>
                 <FormField label={t('profile.fields.familyInvolvement')} htmlFor="fv_involvement">
-                  <OptionSelect id="fv_involvement" group="family" value={form.fv_involvement} onChange={(v) => set('fv_involvement', v)} />
+                  <OptionSelect
+                    id="fv_involvement"
+                    group="family"
+                    value={form.fv_involvement}
+                    onChange={(v) => set('fv_involvement', v)}
+                  />
                 </FormField>
                 <FormField label={t('profile.fields.savings')} htmlFor="fr_savings">
-                  <OptionSelect id="fr_savings" group="savings" value={form.fr_savings} onChange={(v) => set('fr_savings', v)} />
+                  <OptionSelect
+                    id="fr_savings"
+                    group="savings"
+                    value={form.fr_savings}
+                    onChange={(v) => set('fr_savings', v)}
+                  />
                 </FormField>
               </div>
             ) : null}
@@ -372,7 +520,7 @@ export function OnboardingPage() {
                   onChange={(e) => set('bio', e.target.value)}
                   rows={6}
                   maxLength={600}
-                  className="w-full rounded-md border border-line bg-surface p-3.5 text-[15px] text-ink placeholder:text-faint focus-visible:border-brand-400 focus-visible:outline-none focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)]"
+                  className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
                   placeholder={t('profile.fields.bioPlaceholder')}
                 />
               </FormField>
@@ -382,7 +530,12 @@ export function OnboardingPage() {
               <div className="flex flex-col gap-5">
                 <PhotoManager profile={profile ?? null} />
                 <FormField label={t('profile.fields.photoPrivacy')} htmlFor="photo_privacy_mode">
-                  <OptionSelect id="photo_privacy_mode" group="photoPrivacy" value={form.photo_privacy_mode} onChange={(v) => set('photo_privacy_mode', v)} />
+                  <OptionSelect
+                    id="photo_privacy_mode"
+                    group="photoPrivacy"
+                    value={form.photo_privacy_mode}
+                    onChange={(v) => set('photo_privacy_mode', v)}
+                  />
                 </FormField>
               </div>
             ) : null}
@@ -430,10 +583,10 @@ function StepRail({ steps, step }: { steps: { key: string; title: string }[]; st
   const pct = steps.length > 1 ? step / (steps.length - 1) : 0;
   return (
     <div className="relative mt-6">
-      <div aria-hidden className="absolute inset-x-5 top-5 h-0.5 rounded bg-line-strong" />
+      <div aria-hidden className="bg-line-strong absolute inset-x-5 top-5 h-0.5 rounded" />
       <motion.div
         aria-hidden
-        className="absolute inset-x-5 top-5 h-0.5 origin-left rounded bg-brand-500 rtl:origin-right"
+        className="bg-brand-500 absolute inset-x-5 top-5 h-0.5 origin-left rounded rtl:origin-right"
         initial={false}
         animate={{ scaleX: pct }}
         transition={SPRING_SNAPPY}
@@ -449,17 +602,21 @@ function StepRail({ steps, step }: { steps: { key: string; title: string }[]; st
                 className={cn(
                   'relative grid h-10 w-10 place-items-center rounded-full border transition-colors',
                   done && 'border-brand-400 bg-brand-500 text-on-brand',
-                  current && 'border-2 border-brand-400 bg-bg-3 text-brand-600',
+                  current && 'border-brand-400 bg-bg-3 text-brand-600 border-2',
                   !done && !current && 'border-line-strong bg-surface text-faint',
                 )}
               >
                 {current ? (
                   <span
                     aria-hidden
-                    className="absolute inset-0 rounded-full border-2 border-brand-400 [animation:breathe_2.4s_ease-in-out_infinite]"
+                    className="border-brand-400 absolute inset-0 [animation:breathe_2.4s_ease-in-out_infinite] rounded-full border-2"
                   />
                 ) : null}
-                {done ? <Check className="h-5 w-5" aria-hidden /> : <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />}
+                {done ? (
+                  <Check className="h-5 w-5" aria-hidden />
+                ) : (
+                  <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />
+                )}
               </span>
             </li>
           );
@@ -483,11 +640,15 @@ function OnboardingDone({ completion, onGo }: { completion: number; onGo: () => 
         <Card className="relative overflow-hidden text-center [box-shadow:var(--shadow-elevated),var(--inner-hi)]">
           <ConfettiBurst active />
           <div className="relative flex flex-col items-center">
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-brand-wash text-brand-500 ring-1 ring-inset ring-[color:var(--color-border-accent)]">
+            <span className="bg-brand-wash text-brand-500 grid h-16 w-16 place-items-center rounded-full ring-1 ring-[color:var(--color-border-accent)] ring-inset">
               <AnimatedCheck size={34} strokeWidth={2.5} />
             </span>
-            <h1 className="mt-5 font-display text-2xl font-semibold text-ink">{t('onboarding.doneTitle')}</h1>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{t('onboarding.doneBody', { completion })}</p>
+            <h1 className="font-display text-ink mt-5 text-2xl font-semibold">
+              {t('onboarding.doneTitle')}
+            </h1>
+            <p className="text-muted mt-2 text-sm leading-relaxed">
+              {t('onboarding.doneBody', { completion })}
+            </p>
             <div className="mt-6">
               <Button onClick={onGo} magnetic>
                 {t('onboarding.goToProfile')}

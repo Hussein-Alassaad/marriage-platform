@@ -9,7 +9,11 @@ import {
 } from '@/services/subscriptionService';
 
 export function usePlans() {
-  return useQuery({ queryKey: ['plans'], queryFn: () => subscriptionService.listPlans(), staleTime: 5 * 60_000 });
+  return useQuery({
+    queryKey: ['plans'],
+    queryFn: () => subscriptionService.listPlans(),
+    staleTime: 5 * 60_000,
+  });
 }
 
 export function useMySubscription() {

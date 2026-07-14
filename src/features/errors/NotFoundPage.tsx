@@ -10,7 +10,7 @@ import { ROUTES } from '@/app/routes';
 export function NotFoundPage() {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-canvas px-4">
+    <div className="bg-canvas flex min-h-screen flex-col items-center justify-center gap-8 px-4">
       <Logo />
       <EmptyState
         icon={Compass}

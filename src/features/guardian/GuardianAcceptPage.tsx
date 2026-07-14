@@ -59,21 +59,23 @@ export function GuardianAcceptPage() {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder={t('guardians.accept.codePlaceholder')}
-            className="font-mono uppercase tracking-[0.2em]"
+            className="font-mono tracking-[0.2em] uppercase"
           />
         </FormField>
 
-        <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl bg-bg-3 p-4">
+        <label className="bg-bg-3 mt-5 flex cursor-pointer items-start gap-3 rounded-xl p-4">
           <input
             type="checkbox"
             checked={declared}
             onChange={(e) => setDeclared(e.target.checked)}
             className="mt-0.5 h-4 w-4 shrink-0 accent-[color:var(--color-brand-500)]"
           />
-          <span className="text-sm leading-relaxed text-ink-soft">{t('guardians.accept.declaration')}</span>
+          <span className="text-ink-soft text-sm leading-relaxed">
+            {t('guardians.accept.declaration')}
+          </span>
         </label>
 
-        {error ? <p className="mt-4 text-xs text-danger">{error}</p> : null}
+        {error ? <p className="text-danger mt-4 text-xs">{error}</p> : null}
 
         <Button
           className="mt-6"

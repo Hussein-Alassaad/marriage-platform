@@ -13,7 +13,13 @@ import { cn } from '@/utils/cn';
 import { EASE_OUT } from '@/lib/motion';
 import { useSettings } from '@/hooks/useSettings';
 import { useSession } from '@/hooks/useSession';
-import { useCreateClaim, useMyClaim, useMySubscription, usePlans, useUploadReceipt } from '@/hooks/useSubscription';
+import {
+  useCreateClaim,
+  useMyClaim,
+  useMySubscription,
+  usePlans,
+  useUploadReceipt,
+} from '@/hooks/useSubscription';
 import type { BillingPeriod, ManualMethod, Plan, Tier } from '@/services/subscriptionService';
 
 const METHOD_ICONS: Record<ManualMethod, typeof Smartphone> = {
@@ -51,7 +57,7 @@ export function PlansPage() {
         subtitle={t('plans.subtitle')}
         eyebrow={t('plans.eyebrow')}
         actions={
-          <div className="inline-flex rounded-full bg-bg-3 p-1">
+          <div className="bg-bg-3 inline-flex rounded-full p-1">
             {(['monthly', 'yearly'] as BillingPeriod[]).map((p) => (
               <button
                 key={p}
@@ -65,7 +71,7 @@ export function PlansPage() {
                 {period === p ? (
                   <motion.span
                     layoutId="billing-pill"
-                    className="absolute inset-0 rounded-full bg-surface shadow-e1"
+                    className="bg-surface shadow-e1 absolute inset-0 rounded-full"
                     transition={{ duration: 0.28, ease: EASE_OUT }}
                   />
                 ) : null}
@@ -90,7 +96,7 @@ export function PlansPage() {
       ) : null}
 
       {subscription?.expires_at ? (
-        <p className="mb-5 text-sm text-muted">
+        <p className="text-muted mb-5 text-sm">
           {t('plans.activeUntil', {
             tier: t(`plans.tier.${subscription.tier}`),
             date: new Date(subscription.expires_at).toLocaleDateString(),
@@ -101,7 +107,7 @@ export function PlansPage() {
       {isLoading ? (
         <div className="grid gap-5 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-72 rounded-card" />
+            <Skeleton key={i} className="rounded-card h-72" />
           ))}
         </div>
       ) : (
@@ -120,11 +126,11 @@ export function PlansPage() {
                 <Card
                   className={cn(
                     'flex h-full flex-col p-6',
-                    popular && 'ring-1 ring-inset ring-[color:var(--color-border-accent)]',
+                    popular && 'ring-1 ring-[color:var(--color-border-accent)] ring-inset',
                   )}
                 >
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-display text-lg font-semibold text-ink">
+                    <h2 className="font-display text-ink text-lg font-semibold">
                       {t(`plans.tier.${plan.tier}`, { defaultValue: plan.name })}
                     </h2>
                     {isCurrent ? (
@@ -137,22 +143,24 @@ export function PlansPage() {
                   <p className="mb-5">
                     {price != null ? (
                       <>
-                        <span className="font-display text-3xl font-semibold text-ink">
+                        <span className="font-display text-ink text-3xl font-semibold">
                           {price === 0 ? t('plans.free') : `${plan.currency} ${price}`}
                         </span>
                         {price > 0 ? (
-                          <span className="ms-1.5 text-sm text-muted">{t(`plans.per.${period}`)}</span>
+                          <span className="text-muted ms-1.5 text-sm">
+                            {t(`plans.per.${period}`)}
+                          </span>
                         ) : null}
                       </>
                     ) : (
-                      <span className="text-sm text-muted">{t('plans.noYearly')}</span>
+                      <span className="text-muted text-sm">{t('plans.noYearly')}</span>
                     )}
                   </p>
 
                   <ul className="mb-6 flex-1 space-y-2">
                     {featureList(plan).map((key) => (
-                      <li key={key} className="flex items-start gap-2 text-sm text-ink-soft">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" aria-hidden />
+                      <li key={key} className="text-ink-soft flex items-start gap-2 text-sm">
+                        <Check className="text-brand-500 mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                         {t(`plans.feature.${key}`, { defaultValue: key })}
                       </li>
                     ))}
@@ -181,7 +189,7 @@ export function PlansPage() {
 
       {/* Card checkout is deliberately absent until a gateway is configured. */}
       {!bool('card_payments_enabled') ? (
-        <p className="mt-6 flex items-center justify-center gap-2 text-xs text-faint">
+        <p className="text-faint mt-6 flex items-center justify-center gap-2 text-xs">
           <CreditCard className="h-3.5 w-3.5" aria-hidden />
           {t('plans.cardSoon')}
         </p>
@@ -219,7 +227,7 @@ function ChooseMethodModal({
 
   return (
     <Modal open={Boolean(plan)} onClose={onClose} title={t('plans.methodTitle')}>
-      <p className="mb-5 text-sm leading-relaxed text-muted">{t('plans.methodBody')}</p>
+      <p className="text-muted mb-5 text-sm leading-relaxed">{t('plans.methodBody')}</p>
       <div className="space-y-2">
         {METHODS.map((method) => {
           const Icon = METHOD_ICONS[method];
@@ -229,15 +237,15 @@ function ChooseMethodModal({
               type="button"
               disabled={create.isPending}
               onClick={() => start(method)}
-              className="flex w-full items-center gap-3 rounded-xl border border-line bg-surface p-4 text-start transition-colors hover:border-brand-400 hover:bg-brand-wash disabled:opacity-60"
+              className="border-line bg-surface hover:border-brand-400 hover:bg-brand-wash flex w-full items-center gap-3 rounded-xl border p-4 text-start transition-colors disabled:opacity-60"
             >
-              <Icon className="h-5 w-5 text-brand-600" aria-hidden />
-              <span className="text-sm font-medium text-ink">{t(`plans.method.${method}`)}</span>
+              <Icon className="text-brand-600 h-5 w-5" aria-hidden />
+              <span className="text-ink text-sm font-medium">{t(`plans.method.${method}`)}</span>
             </button>
           );
         })}
       </div>
-      {error ? <p className="mt-4 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="text-danger mt-4 text-xs">{error}</p> : null}
     </Modal>
   );
 }
@@ -278,21 +286,25 @@ function PendingClaimCard({
   return (
     <Card className="mb-6 p-5">
       <div className="mb-3 flex items-center gap-2">
-        <Clock className="h-4 w-4 text-gold-500" aria-hidden />
-        <h2 className="font-display text-base font-semibold text-ink">{t('plans.pendingTitle')}</h2>
+        <Clock className="text-gold-500 h-4 w-4" aria-hidden />
+        <h2 className="font-display text-ink text-base font-semibold">{t('plans.pendingTitle')}</h2>
         <Badge variant="warning">{t(`plans.method.${method}`)}</Badge>
       </div>
 
-      <p className="mb-4 text-sm leading-relaxed text-muted">{instructions || t('plans.pendingFallback')}</p>
+      <p className="text-muted mb-4 text-sm leading-relaxed">
+        {instructions || t('plans.pendingFallback')}
+      </p>
 
       <dl className="mb-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-bg-3 p-3">
-          <dt className="text-xs text-muted">{t('plans.reference')}</dt>
-          <dd className="mt-0.5 font-mono text-sm font-semibold uppercase tracking-wider text-ink">{referenceCode}</dd>
+        <div className="bg-bg-3 rounded-xl p-3">
+          <dt className="text-muted text-xs">{t('plans.reference')}</dt>
+          <dd className="text-ink mt-0.5 font-mono text-sm font-semibold tracking-wider uppercase">
+            {referenceCode}
+          </dd>
         </div>
-        <div className="rounded-xl bg-bg-3 p-3">
-          <dt className="text-xs text-muted">{t('plans.amount')}</dt>
-          <dd className="mt-0.5 text-sm font-semibold text-ink">
+        <div className="bg-bg-3 rounded-xl p-3">
+          <dt className="text-muted text-xs">{t('plans.amount')}</dt>
+          <dd className="text-ink mt-0.5 text-sm font-semibold">
             {amount != null ? `${currency} ${amount}` : '—'}
           </dd>
         </div>
@@ -306,13 +318,19 @@ function PendingClaimCard({
           className="hidden"
           onChange={(e) => onFile(e.target.files?.[0])}
         />
-        <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={upload.isPending}>
+        <Button
+          variant="outline"
+          onClick={() => fileRef.current?.click()}
+          disabled={upload.isPending}
+        >
           <Upload className="h-4 w-4" aria-hidden />
           {hasReceipt ? t('plans.replaceReceipt') : t('plans.uploadReceipt')}
         </Button>
-        <p className="text-xs text-muted">{hasReceipt ? t('plans.receiptReceived') : t('plans.receiptNeeded')}</p>
+        <p className="text-muted text-xs">
+          {hasReceipt ? t('plans.receiptReceived') : t('plans.receiptNeeded')}
+        </p>
       </div>
-      {error ? <p className="mt-3 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="text-danger mt-3 text-xs">{error}</p> : null}
     </Card>
   );
 }

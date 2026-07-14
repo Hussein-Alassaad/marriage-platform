@@ -28,7 +28,11 @@ export function Starfield({ className, count = 46 }: { className?: string; count
           style={{ left: s.left, top: s.top, width: s.size, height: s.size }}
           initial={{ opacity: 0.18 }}
           animate={reduced ? { opacity: 0.28 } : { opacity: [0.1, 0.6, 0.1] }}
-          transition={reduced ? undefined : { duration: s.duration, delay: s.delay, ease: 'easeInOut', repeat: Infinity }}
+          transition={
+            reduced
+              ? undefined
+              : { duration: s.duration, delay: s.delay, ease: 'easeInOut', repeat: Infinity }
+          }
         />
       ))}
     </div>

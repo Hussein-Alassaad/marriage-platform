@@ -16,9 +16,9 @@ import type { JsonMap } from '@/services/profileService';
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="flex flex-col gap-0.5 border-b border-line py-3 last:border-0 sm:flex-row sm:justify-between sm:gap-4">
-      <span className="text-sm text-muted">{label}</span>
-      <span className="text-sm font-medium text-ink sm:text-end">{value ? value : '—'}</span>
+    <div className="border-line flex flex-col gap-0.5 border-b py-3 last:border-0 sm:flex-row sm:justify-between sm:gap-4">
+      <span className="text-muted text-sm">{label}</span>
+      <span className="text-ink text-sm font-medium sm:text-end">{value ? value : '—'}</span>
     </div>
   );
 }
@@ -31,8 +31,8 @@ export function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6">
-        <Skeleton className="h-40 w-full rounded-card" />
-        <Skeleton className="h-64 w-full rounded-card" />
+        <Skeleton className="rounded-card h-40 w-full" />
+        <Skeleton className="rounded-card h-64 w-full" />
       </div>
     );
   }
@@ -40,7 +40,10 @@ export function ProfilePage() {
   const completion = profile?.profile_completion ?? 0;
   const initial = (profile?.display_name?.[0] ?? t('common.guestInitial')).toUpperCase();
   const verified = profile?.verification_status === 'verified';
-  const languages = (profile?.languages ?? []).map((l) => label('language', l)).filter(Boolean).join('، ');
+  const languages = (profile?.languages ?? [])
+    .map((l) => label('language', l))
+    .filter(Boolean)
+    .join('، ');
   const mg = (profile?.marriage_goals ?? {}) as JsonMap;
   const ls = (profile?.lifestyle ?? {}) as JsonMap;
   const fv = (profile?.family_values ?? {}) as JsonMap;
@@ -51,13 +54,13 @@ export function ProfilePage() {
       {/* Header */}
       <Card className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-start">
         <ProgressRing value={completion} size={112} stroke={5}>
-          <span className="grid h-[86px] w-[86px] place-items-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-2xl font-semibold text-brand-800">
+          <span className="from-brand-100 to-brand-200 text-brand-800 grid h-[86px] w-[86px] place-items-center rounded-full bg-gradient-to-br text-2xl font-semibold">
             {initial}
           </span>
         </ProgressRing>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-            <h1 className="font-display text-2xl font-semibold text-ink">
+            <h1 className="font-display text-ink text-2xl font-semibold">
               {profile?.display_name ?? t('common.guest')}
             </h1>
             {verified ? (
@@ -75,13 +78,17 @@ export function ProfilePage() {
             )}
             <Badge variant="brand">{t(`tier.${profile?.subscription_tier ?? 'free'}`)}</Badge>
           </div>
-          <p className="mt-1.5 text-sm text-muted">
+          <p className="text-muted mt-1.5 text-sm">
             <CountUp value={completion} suffix="%" /> {t('profile.complete')}
           </p>
           <div className="mt-4 flex justify-center sm:justify-start">
             <Link to={ROUTES.onboarding}>
               <Button variant={completion < 100 ? 'gold' : 'secondary'}>
-                {completion < 100 ? <ShieldCheck className="h-4 w-4" aria-hidden /> : <Pencil className="h-4 w-4" aria-hidden />}
+                {completion < 100 ? (
+                  <ShieldCheck className="h-4 w-4" aria-hidden />
+                ) : (
+                  <Pencil className="h-4 w-4" aria-hidden />
+                )}
                 {completion < 100 ? t('profile.completeCta') : t('profile.editCta')}
               </Button>
             </Link>
@@ -93,7 +100,9 @@ export function ProfilePage() {
       {profile?.bio ? (
         <Card>
           <CardTitle>{t('profile.sections.about')}</CardTitle>
-          <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink-soft">{profile.bio}</p>
+          <p className="text-ink-soft mt-3 text-sm leading-relaxed whitespace-pre-line">
+            {profile.bio}
+          </p>
         </Card>
       ) : null}
 
@@ -102,7 +111,10 @@ export function ProfilePage() {
         <Card>
           <CardTitle>{t('profile.sections.basics')}</CardTitle>
           <div className="mt-2">
-            <Row label={t('profile.fields.gender')} value={profile?.gender ? t(`gender.${profile.gender}`) : null} />
+            <Row
+              label={t('profile.fields.gender')}
+              value={profile?.gender ? t(`gender.${profile.gender}`) : null}
+            />
             <Row label={t('profile.fields.nationality')} value={profile?.nationality} />
             <Row label={t('profile.fields.country')} value={profile?.country} />
             <Row label={t('profile.fields.city')} value={profile?.city} />
@@ -114,11 +126,17 @@ export function ProfilePage() {
         <Card>
           <CardTitle>{t('profile.sections.background')}</CardTitle>
           <div className="mt-2">
-            <Row label={t('profile.fields.educationLevel')} value={label('education', profile?.education_level)} />
+            <Row
+              label={t('profile.fields.educationLevel')}
+              value={label('education', profile?.education_level)}
+            />
             <Row label={t('profile.fields.university')} value={profile?.university} />
             <Row label={t('profile.fields.major')} value={profile?.major} />
             <Row label={t('profile.fields.occupation')} value={profile?.occupation} />
-            <Row label={t('profile.fields.employmentStatus')} value={label('employment', profile?.employment_status)} />
+            <Row
+              label={t('profile.fields.employmentStatus')}
+              value={label('employment', profile?.employment_status)}
+            />
           </div>
         </Card>
 
@@ -136,9 +154,15 @@ export function ProfilePage() {
         <Card>
           <CardTitle>{t('profile.sections.values')}</CardTitle>
           <div className="mt-2">
-            <Row label={t('profile.fields.religiosity')} value={label('religiosity', ls.religiosity)} />
+            <Row
+              label={t('profile.fields.religiosity')}
+              value={label('religiosity', ls.religiosity)}
+            />
             <Row label={t('profile.fields.smoking')} value={label('smoking', ls.smoking)} />
-            <Row label={t('profile.fields.familyInvolvement')} value={label('family', fv.involvement)} />
+            <Row
+              label={t('profile.fields.familyInvolvement')}
+              value={label('family', fv.involvement)}
+            />
             <Row label={t('profile.fields.savings')} value={label('savings', fr.savings)} />
           </div>
         </Card>
@@ -148,7 +172,9 @@ export function ProfilePage() {
       <Card>
         <div className="flex items-center justify-between">
           <CardTitle>{t('profile.sections.photos')}</CardTitle>
-          <Badge variant="neutral">{label('photoPrivacy', String(profile?.photo_privacy_mode ?? 2))}</Badge>
+          <Badge variant="neutral">
+            {label('photoPrivacy', String(profile?.photo_privacy_mode ?? 2))}
+          </Badge>
         </div>
         <div className="mt-4">
           <PhotoManager profile={profile ?? null} />

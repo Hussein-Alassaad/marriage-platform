@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { computeCompletion, profileService, type ProfilePatch, type ProfileRecord } from '@/services/profileService';
+import {
+  computeCompletion,
+  profileService,
+  type ProfilePatch,
+  type ProfileRecord,
+} from '@/services/profileService';
 import { useSession } from '@/hooks/useSession';
 
 /** The signed-in user's full marriage profile (React Query cached). */
@@ -26,10 +31,19 @@ export function useUpdateProfile() {
   const userId = user?.id;
 
   return useMutation({
-    mutationFn: async ({ patch, current }: { patch: ProfilePatch; current: ProfileRecord | null }) => {
+    mutationFn: async ({
+      patch,
+      current,
+    }: {
+      patch: ProfilePatch;
+      current: ProfileRecord | null;
+    }) => {
       if (!userId) throw new Error('Not signed in');
       const merged = { ...(current ?? {}), ...patch } as ProfileRecord;
-      const withCompletion: ProfilePatch = { ...patch, profile_completion: computeCompletion(merged) };
+      const withCompletion: ProfilePatch = {
+        ...patch,
+        profile_completion: computeCompletion(merged),
+      };
       return profileService.updateMyProfile(userId, withCompletion);
     },
     onSuccess: (updated) => {

@@ -4,8 +4,22 @@
  * copy is hardcoded. Free-form fields (name, country, city, university…) stay as
  * text inputs.
  */
-export const EDUCATION_LEVELS = ['high_school', 'diploma', 'bachelor', 'master', 'doctorate', 'other'] as const;
-export const EMPLOYMENT_STATUSES = ['employed', 'self_employed', 'business_owner', 'student', 'seeking', 'other'] as const;
+export const EDUCATION_LEVELS = [
+  'high_school',
+  'diploma',
+  'bachelor',
+  'master',
+  'doctorate',
+  'other',
+] as const;
+export const EMPLOYMENT_STATUSES = [
+  'employed',
+  'self_employed',
+  'business_owner',
+  'student',
+  'seeking',
+  'other',
+] as const;
 export const LANGUAGES = ['ar', 'en', 'fr', 'tr', 'ur', 'fa', 'id', 'ms', 'other'] as const;
 
 // jsonb sub-fields

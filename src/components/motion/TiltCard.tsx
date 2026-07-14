@@ -50,7 +50,7 @@ export const TiltCard = forwardRef<HTMLDivElement, TiltCardProps>(function TiltC
       onPointerLeave={enabled ? reset : undefined}
       style={enabled ? { rotateX, rotateY, scale, transformPerspective: 900 } : undefined}
       className={cn(
-        'rounded-card border border-line bg-surface p-6',
+        'rounded-card border-line bg-surface border p-6',
         '[box-shadow:var(--shadow-card),var(--inner-hi)]',
         className,
       )}

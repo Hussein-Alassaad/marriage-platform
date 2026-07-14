@@ -34,9 +34,7 @@ export function FadeRise({
     : { opacity: 0, y, filter: blur ? 'blur(6px)' : 'blur(0px)' };
   const shown = { opacity: 1, y: 0, filter: 'blur(0px)' };
 
-  const activation = immediate
-    ? { animate: shown }
-    : { whileInView: shown, viewport: inViewOnce };
+  const activation = immediate ? { animate: shown } : { whileInView: shown, viewport: inViewOnce };
 
   return (
     <motion.div

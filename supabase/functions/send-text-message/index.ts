@@ -13,6 +13,7 @@
 // Deploy: supabase functions deploy send-text-message
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 import { moderate, POLICY_VERSION } from '../_shared/moderation.ts';
 import { secret } from '../_shared/env.ts';
@@ -148,6 +149,10 @@ Deno.serve(async (req: Request) => {
       .single();
     if (mErr) return json({ error: mErr.message }, 400);
 
+    // Only the OTHER participant is told. Category `chat` is mutable in preferences,
+    // which is how someone turns message notifications off without leaving the platform.
+    const recipient = match.user_a === uid ? match.user_b : match.user_a;
+
     // Audit + counter + conversation touch run together (don't serialize).
     const after: Promise<unknown>[] = [
       audit({
@@ -158,6 +163,7 @@ Deno.serve(async (req: Request) => {
         prompt_version: verdict.promptVersion,
       }),
       admin.from('conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId),
+      emit(admin, 'message.received', recipient, { matchId, conversationId }),
     ];
     let remaining: number | null = null;
     if (intro) {

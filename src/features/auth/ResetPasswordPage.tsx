@@ -50,8 +50,8 @@ export function ResetPasswordPage() {
 
   return (
     <Card>
-      <h1 className="text-xl font-semibold text-ink">{t('page.reset.title')}</h1>
-      <p className="mt-1 text-sm text-muted">{t('page.reset.subtitle')}</p>
+      <h1 className="text-ink text-xl font-semibold">{t('page.reset.title')}</h1>
+      <p className="text-muted mt-1 text-sm">{t('page.reset.subtitle')}</p>
 
       {done ? (
         <Alert variant="success">{t('page.reset.done')}</Alert>
@@ -63,14 +63,24 @@ export function ResetPasswordPage() {
             htmlFor="password"
             error={errors.password && t('validation.password')}
           >
-            <Input id="password" type="password" autoComplete="new-password" {...register('password')} />
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              {...register('password')}
+            />
           </FormField>
           <FormField
             label={t('page.reset.confirm')}
             htmlFor="confirm"
             error={errors.confirm && t('validation.passwordMatch')}
           >
-            <Input id="confirm" type="password" autoComplete="new-password" {...register('confirm')} />
+            <Input
+              id="confirm"
+              type="password"
+              autoComplete="new-password"
+              {...register('confirm')}
+            />
           </FormField>
           <Button size="lg" type="submit" disabled={isSubmitting}>
             {isSubmitting ? t('common.pleaseWait') : t('page.reset.submit')}

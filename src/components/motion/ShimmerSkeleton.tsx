@@ -14,7 +14,10 @@ export function ShimmerSkeleton({ className }: ShimmerSkeletonProps) {
   return (
     <div
       aria-hidden
-      className={cn('shimmer rounded-md bg-[color-mix(in_srgb,var(--color-text-1)_5%,transparent)]', className)}
+      className={cn(
+        'shimmer rounded-md bg-[color-mix(in_srgb,var(--color-text-1)_5%,transparent)]',
+        className,
+      )}
     />
   );
 }

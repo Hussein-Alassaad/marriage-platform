@@ -19,23 +19,30 @@ export function CalligraphyVerse({ className }: { className?: string }) {
   const word = (text: string, pos: string, dur: number, delay: number) => (
     <motion.span
       dir="rtl"
-      className={cn('absolute select-none whitespace-nowrap text-gold-400', pos)}
+      className={cn('text-gold-400 absolute whitespace-nowrap select-none', pos)}
       style={{ ...AMIRI, fontSize: SIZE }}
       animate={reduced ? undefined : { y: [0, -9, 0] }}
-      transition={reduced ? undefined : { duration: dur, delay, ease: EASE_INOUT, repeat: Infinity }}
+      transition={
+        reduced ? undefined : { duration: dur, delay, ease: EASE_INOUT, repeat: Infinity }
+      }
     >
       {text}
     </motion.span>
   );
 
   return (
-    <div aria-hidden className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}>
+    <div
+      aria-hidden
+      className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}
+    >
       {/* Desktop / laptop: two words left, two words right. */}
       <motion.div
         className="absolute inset-0 hidden lg:block"
         initial={{ opacity: 0 }}
         animate={{ opacity: reduced ? 0.14 : [0.11, 0.16, 0.11] }}
-        transition={reduced ? { duration: 1 } : { duration: 12, ease: EASE_INOUT, repeat: Infinity }}
+        transition={
+          reduced ? { duration: 1 } : { duration: 12, ease: EASE_INOUT, repeat: Infinity }
+        }
       >
         {word('وَجَعَلَ', 'left-[5%] top-[26%]', 11, 0)}
         {word('بَيْنَكُم', 'left-[5%] top-[62%]', 13, 1.2)}
@@ -46,11 +53,13 @@ export function CalligraphyVerse({ className }: { className?: string }) {
       {/* Mobile: two centered lines near the top, smaller and fainter. */}
       <motion.p
         dir="rtl"
-        className="absolute inset-x-0 top-[3.5%] select-none text-center leading-[1.7] text-gold-400 lg:hidden"
+        className="text-gold-400 absolute inset-x-0 top-[3.5%] text-center leading-[1.7] select-none lg:hidden"
         style={{ ...AMIRI, fontSize: 'clamp(1.5rem, 6.5vw, 2rem)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: reduced ? 0.09 : [0.07, 0.11, 0.07] }}
-        transition={reduced ? { duration: 1 } : { duration: 12, ease: EASE_INOUT, repeat: Infinity }}
+        transition={
+          reduced ? { duration: 1 } : { duration: 12, ease: EASE_INOUT, repeat: Infinity }
+        }
       >
         وَجَعَلَ بَيْنَكُم
         <br />

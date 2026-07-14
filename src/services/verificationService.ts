@@ -35,7 +35,10 @@ export const verificationService = {
   /** Verified trust badges (email/phone/identity). */
   async getBadges(userId: string): Promise<string[]> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.from('verification_badges').select('badge').eq('user_id', userId);
+    const { data, error } = await supabase
+      .from('verification_badges')
+      .select('badge')
+      .eq('user_id', userId);
     if (error) throw error;
     return (data ?? []).map((b) => b.badge as string);
   },
@@ -45,7 +48,11 @@ export const verificationService = {
    * the `verify-identity` Edge Function (service role uploads + records). Requires
    * the function to be deployed.
    */
-  async submit({ document, selfie, documentType }: SubmitVerificationInput): Promise<{ status: VerificationStatus }> {
+  async submit({
+    document,
+    selfie,
+    documentType,
+  }: SubmitVerificationInput): Promise<{ status: VerificationStatus }> {
     const supabase = requireSupabaseClient();
     const form = new FormData();
     form.append('document', document);

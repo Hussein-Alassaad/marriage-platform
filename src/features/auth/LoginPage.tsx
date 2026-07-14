@@ -36,7 +36,8 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? ROUTES.home;
+  const from =
+    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? ROUTES.home;
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
     setFormError(null);
@@ -57,8 +58,7 @@ export function LoginPage() {
         aria-hidden
         className="pointer-events-none absolute bottom-0 h-28 w-28 opacity-[0.06] ltr:right-0 rtl:left-0"
         style={{
-          background:
-            'radial-gradient(circle at 70% 70%, var(--color-gold-400), transparent 60%)',
+          background: 'radial-gradient(circle at 70% 70%, var(--color-gold-400), transparent 60%)',
         }}
       />
       <ConfettiBurst active={succeeded} />
@@ -66,16 +66,18 @@ export function LoginPage() {
       {/* In-card header (centered brand lockup) */}
       <div className="flex flex-col items-center text-center">
         <Logo />
-        <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-400">
+        <p className="text-gold-400 mt-1.5 text-[11px] font-semibold tracking-[0.16em] uppercase">
           {t('common.tagline')}
         </p>
       </div>
 
-      <h1 className="mt-5 text-center font-display text-[clamp(30px,4vw,40px)] font-semibold leading-[1.1] text-ink">
+      <h1 className="font-display text-ink mt-5 text-center text-[clamp(30px,4vw,40px)] leading-[1.1] font-semibold">
         <RevealText text={t('page.login.title')} />
       </h1>
       <FadeRise immediate delay={0.25}>
-        <p className="mt-2 text-center text-sm leading-relaxed text-muted">{t('page.login.subtitle')}</p>
+        <p className="text-muted mt-2 text-center text-sm leading-relaxed">
+          {t('page.login.subtitle')}
+        </p>
       </FadeRise>
 
       <form className="mt-7 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
@@ -108,7 +110,7 @@ export function LoginPage() {
         <div className="flex justify-end">
           <Link
             to={ROUTES.forgotPassword}
-            className="text-sm font-medium text-brand-400 underline-offset-4 hover:underline"
+            className="text-brand-400 text-sm font-medium underline-offset-4 hover:underline"
           >
             {t('page.login.forgot')}
           </Link>
@@ -132,9 +134,9 @@ export function LoginPage() {
         </FadeRise>
       </form>
 
-      <p className="mt-5 text-center text-sm text-muted">
+      <p className="text-muted mt-5 text-center text-sm">
         {t('page.login.noAccount')}{' '}
-        <Link to={ROUTES.register} className="font-semibold text-brand-400 hover:text-brand-300">
+        <Link to={ROUTES.register} className="text-brand-400 hover:text-brand-300 font-semibold">
           {t('page.login.registerLink')}
         </Link>
       </p>

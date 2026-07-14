@@ -34,8 +34,13 @@ export function useSendInterest() {
 export function useRespondInterest() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ interestId, decision }: { interestId: string; decision: 'accepted' | 'declined' }) =>
-      matchService.respondInterest(interestId, decision),
+    mutationFn: ({
+      interestId,
+      decision,
+    }: {
+      interestId: string;
+      decision: 'accepted' | 'declined';
+    }) => matchService.respondInterest(interestId, decision),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['connections'] }),
   });
 }
@@ -48,7 +53,9 @@ export function useCandidateActions() {
 
   const save = useMutation({
     mutationFn: ({ candidateId, saved }: { candidateId: string; saved: boolean }) =>
-      saved ? matchService.unsave(uid as string, candidateId) : matchService.save(uid as string, candidateId),
+      saved
+        ? matchService.unsave(uid as string, candidateId)
+        : matchService.save(uid as string, candidateId),
     onSuccess: invalidate,
   });
   const decline = useMutation({

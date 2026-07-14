@@ -14,6 +14,7 @@
 // Secrets used: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -126,6 +127,18 @@ Deno.serve(async (req: Request) => {
         })
         .eq('id', body.id);
       if (error) return json({ error: error.message }, 400);
+
+      const { data: record } = await admin
+        .from('identity_verifications')
+        .select('user_id')
+        .eq('id', body.id)
+        .maybeSingle();
+      await emit(
+        admin,
+        decision === 'verified' ? 'verification.approved' : 'verification.rejected',
+        record?.user_id ?? null,
+        decision === 'rejected' ? { reason: body.reason ?? null } : {},
+      );
       return json({ ok: true });
     }
 

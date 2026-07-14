@@ -67,12 +67,30 @@ export type ProfilePatch = Partial<
 const SELECT =
   'id, display_name, dob, gender, gender_locked, nationality, country, city, languages, education_level, university, major, graduation_year, occupation, industry, employment_status, career_goals, marriage_goals, lifestyle, family_values, financial_readiness, bio, photo_privacy_mode, privacy, profile_completion, verification_status, subscription_tier';
 
-const notEmpty = (m: JsonMap | null | undefined) => !!m && Object.values(m).some((v) => v !== '' && v != null);
+const notEmpty = (m: JsonMap | null | undefined) =>
+  !!m && Object.values(m).some((v) => v !== '' && v != null);
 
 /** Completion checks — pure, so it's unit-testable and stable across the app. */
-export function computeCompletion(p: Pick<ProfileRecord,
-  'display_name' | 'dob' | 'gender' | 'country' | 'city' | 'nationality' | 'languages' | 'education_level' |
-  'occupation' | 'employment_status' | 'bio' | 'marriage_goals' | 'lifestyle' | 'family_values' | 'financial_readiness'>): number {
+export function computeCompletion(
+  p: Pick<
+    ProfileRecord,
+    | 'display_name'
+    | 'dob'
+    | 'gender'
+    | 'country'
+    | 'city'
+    | 'nationality'
+    | 'languages'
+    | 'education_level'
+    | 'occupation'
+    | 'employment_status'
+    | 'bio'
+    | 'marriage_goals'
+    | 'lifestyle'
+    | 'family_values'
+    | 'financial_readiness'
+  >,
+): number {
   const checks = [
     !!p.display_name,
     !!p.dob,
@@ -105,7 +123,11 @@ const BUCKET = 'profile-photos';
 export const profileService = {
   async getMyProfile(userId: string): Promise<ProfileRecord | null> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.from('profiles').select(SELECT).eq('id', userId).maybeSingle();
+    const { data, error } = await supabase
+      .from('profiles')
+      .select(SELECT)
+      .eq('id', userId)
+      .maybeSingle();
     if (error) throw error;
     return (data as ProfileRecord) ?? null;
   },
@@ -125,14 +147,21 @@ export const profileService = {
   /** List the user's photos (own folder) with fresh signed URLs. */
   async listPhotos(userId: string, primaryPath?: string): Promise<ProfilePhoto[]> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.storage.from(BUCKET).list(userId, { sortBy: { column: 'name', order: 'asc' } });
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .list(userId, { sortBy: { column: 'name', order: 'asc' } });
     if (error) throw error;
     const files = (data ?? []).filter((f) => f.id !== null);
     const photos = await Promise.all(
       files.map(async (f) => {
         const path = `${userId}/${f.name}`;
         const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600);
-        return { name: f.name, path, url: signed?.signedUrl ?? '', isPrimary: path === primaryPath };
+        return {
+          name: f.name,
+          path,
+          url: signed?.signedUrl ?? '',
+          isPrimary: path === primaryPath,
+        };
       }),
     );
     return photos;

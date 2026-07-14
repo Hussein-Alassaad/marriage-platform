@@ -1,5 +1,11 @@
 import { forwardRef, useRef, useState, type PointerEvent, type ReactNode } from 'react';
-import { motion, useMotionValue, useReducedMotion, useSpring, type HTMLMotionProps } from 'framer-motion';
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  type HTMLMotionProps,
+} from 'framer-motion';
 
 import { cn } from '@/utils/cn';
 import { EASE_EXPO, SPRING_SNAPPY } from '@/lib/motion';
@@ -24,11 +30,11 @@ const variantClasses: Record<ButtonVariant, string> = {
     'text-on-brand border border-brand-300/40 [background:linear-gradient(135deg,var(--color-brand-500),var(--color-brand-600))] [box-shadow:0_4px_16px_rgba(16,185,129,0.20),var(--inner-hi)] hover:brightness-[1.06] hover:[box-shadow:var(--glow-brand),var(--inner-hi)]',
   secondary:
     'bg-bg-3 text-ink border border-line-strong hover:bg-bg-4 hover:border-[color:var(--color-border-accent)]',
-  outline: 'border border-line-strong bg-surface text-ink hover:border-[color:var(--color-border-accent)] hover:bg-bg-3',
+  outline:
+    'border border-line-strong bg-surface text-ink hover:border-[color:var(--color-border-accent)] hover:bg-bg-3',
   ghost: 'text-muted hover:bg-bg-3 hover:text-ink',
   gold: 'border border-gold-500/40 text-[color:var(--btn-gold-fg)] [background:var(--btn-gold-bg)] [box-shadow:0_4px_16px_rgba(201,162,39,0.24),var(--inner-hi)] hover:brightness-[1.05]',
-  destructive:
-    'bg-danger-wash text-danger border border-danger/25 hover:bg-danger/20',
+  destructive: 'bg-danger-wash text-danger border border-danger/25 hover:bg-danger/20',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -51,7 +57,17 @@ interface Ripple {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant = 'primary', size = 'md', magnetic = false, fullWidth = false, type = 'button', children, onPointerDown, ...props },
+  {
+    className,
+    variant = 'primary',
+    size = 'md',
+    magnetic = false,
+    fullWidth = false,
+    type = 'button',
+    children,
+    onPointerDown,
+    ...props
+  },
   ref,
 ) {
   const reduced = useReducedMotion();
@@ -91,7 +107,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     if (!reduced) {
       const rect = event.currentTarget.getBoundingClientRect();
       const id = rippleId.current++;
-      setRipples((rs) => [...rs, { id, x: event.clientX - rect.left, y: event.clientY - rect.top }]);
+      setRipples((rs) => [
+        ...rs,
+        { id, x: event.clientX - rect.left, y: event.clientY - rect.top },
+      ]);
     }
     onPointerDown?.(event);
   };
@@ -114,7 +133,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           className="pointer-events-none absolute -inset-[2px] -z-0 overflow-hidden rounded-[1rem]"
         >
           <motion.span
-            className="absolute left-1/2 top-1/2 h-[240%] w-[240%] -translate-x-1/2 -translate-y-1/2 opacity-90"
+            className="absolute top-1/2 left-1/2 h-[240%] w-[240%] -translate-x-1/2 -translate-y-1/2 opacity-90"
             style={{ background: glowGradient }}
             animate={reduced ? undefined : { rotate: 360 }}
             transition={{ duration: 4, ease: 'linear', repeat: Infinity }}
@@ -130,7 +149,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           'group relative isolate inline-flex items-center justify-center overflow-hidden rounded-md font-semibold',
           fullWidth && 'w-full',
           'transition-[filter,box-shadow,background-color,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
-          'focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--color-bg-0),0_0_0_4px_var(--color-brand-400)]',
+          'focus-visible:[box-shadow:0_0_0_2px_var(--color-bg-0),0_0_0_4px_var(--color-brand-400)] focus-visible:outline-none',
           'disabled:pointer-events-none disabled:opacity-45',
           variantClasses[variant],
           sizeClasses[size],

@@ -53,7 +53,9 @@ export function VoiceRecorder({ maxSeconds, disabled, onSend }: VoiceRecorderPro
       chunksRef.current = [];
       recorder.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
       recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType.split(';')[0] || 'audio/webm' });
+        const blob = new Blob(chunksRef.current, {
+          type: recorder.mimeType.split(';')[0] || 'audio/webm',
+        });
         const durationMs = Date.now() - startedRef.current;
         stream.getTracks().forEach((track) => track.stop());
         setClip({ blob, durationMs, url: URL.createObjectURL(blob) });
@@ -111,14 +113,20 @@ export function VoiceRecorder({ maxSeconds, disabled, onSend }: VoiceRecorderPro
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <audio src={clip.url} controls className="h-10 flex-1" />
-          <Button variant="ghost" onClick={discard} disabled={sending} aria-label={t('voice.discard')} className="!px-3">
+          <Button
+            variant="ghost"
+            onClick={discard}
+            disabled={sending}
+            aria-label={t('voice.discard')}
+            className="!px-3"
+          >
             <Trash2 className="h-4 w-4" aria-hidden />
           </Button>
           <Button onClick={send} disabled={sending} aria-label={t('voice.send')} className="!px-4">
             <Send className="h-4 w-4 rtl:-scale-x-100" aria-hidden />
           </Button>
         </div>
-        {error ? <p className="px-1 text-xs text-danger">{error}</p> : null}
+        {error ? <p className="text-danger px-1 text-xs">{error}</p> : null}
       </div>
     );
   }
@@ -146,16 +154,18 @@ export function VoiceRecorder({ maxSeconds, disabled, onSend }: VoiceRecorderPro
               transition={{ duration: 0.2, ease: EASE_OUT }}
               className="flex items-center gap-2"
             >
-              <span className="h-2 w-2 animate-pulse rounded-full bg-danger" aria-hidden />
-              <span className="font-mono text-sm tabular-nums text-ink">{mmss(elapsed)}</span>
-              <span className={cn('text-xs', elapsed > maxSeconds - 15 ? 'text-danger' : 'text-faint')}>
+              <span className="bg-danger h-2 w-2 animate-pulse rounded-full" aria-hidden />
+              <span className="text-ink font-mono text-sm tabular-nums">{mmss(elapsed)}</span>
+              <span
+                className={cn('text-xs', elapsed > maxSeconds - 15 ? 'text-danger' : 'text-faint')}
+              >
                 / {mmss(maxSeconds)}
               </span>
             </motion.div>
           ) : null}
         </AnimatePresence>
       </div>
-      {error ? <p className="px-1 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="text-danger px-1 text-xs">{error}</p> : null}
     </div>
   );
 }

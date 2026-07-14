@@ -56,7 +56,11 @@ export function MediaComposer({ onSendImage, disabled }: MediaComposerProps) {
           className="hidden"
           onChange={(e) => pick(e.target.files?.[0])}
         />
-        <Button variant="outline" onClick={() => imageRef.current?.click()} disabled={disabled || busy}>
+        <Button
+          variant="outline"
+          onClick={() => imageRef.current?.click()}
+          disabled={disabled || busy}
+        >
           <ImagePlus className="h-4 w-4" aria-hidden />
           {t('media.sendImage')}
         </Button>
@@ -70,8 +74,8 @@ export function MediaComposer({ onSendImage, disabled }: MediaComposerProps) {
         </span>
       </div>
 
-      <p className="px-1 text-xs text-faint">{t('media.reviewNote')}</p>
-      {notice ? <p className="px-1 text-xs text-danger">{notice}</p> : null}
+      <p className="text-faint px-1 text-xs">{t('media.reviewNote')}</p>
+      {notice ? <p className="text-danger px-1 text-xs">{notice}</p> : null}
     </div>
   );
 }

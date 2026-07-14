@@ -43,7 +43,7 @@ export function AuthField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-ink-soft">
+      <label htmlFor={id} className="text-ink-soft text-[13px] font-medium">
         {label}
       </label>
       <motion.div
@@ -51,7 +51,7 @@ export function AuthField({
         animate={error && !reduced ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
         transition={{ duration: 0.32 }}
       >
-        <span className="pointer-events-none absolute inset-y-0 z-10 grid w-11 place-items-center text-muted transition-colors group-focus-within:text-brand-400 ltr:left-0 rtl:right-0">
+        <span className="text-muted group-focus-within:text-brand-400 pointer-events-none absolute inset-y-0 z-10 grid w-11 place-items-center transition-colors ltr:left-0 rtl:right-0">
           <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />
         </span>
         <input
@@ -60,14 +60,14 @@ export function AuthField({
           autoComplete={autoComplete}
           aria-invalid={error ? true : undefined}
           className={cn(
-            'h-[52px] w-full rounded-xl border bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[15px] text-ink ps-11 pe-11',
+            'text-ink h-[52px] w-full rounded-xl border bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] ps-11 pe-11 text-[15px]',
             'placeholder:text-faint transition-[border-color,box-shadow] duration-200',
             'hover:border-[color-mix(in_srgb,var(--color-ink)_22%,transparent)] focus:outline-none',
             error
               ? 'border-danger/55 focus:[box-shadow:0_0_0_3px_rgba(229,114,106,0.15)]'
               : valid
                 ? 'border-brand-400/40'
-                : 'border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] focus:border-brand-400 focus:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)]',
+                : 'focus:border-brand-400 border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] focus:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)]',
           )}
           {...registration}
         />
@@ -77,7 +77,7 @@ export function AuthField({
               type="button"
               onClick={() => setShow((v) => !v)}
               aria-label={show ? t('auth.hidePassword') : t('auth.showPassword')}
-              className="pointer-events-auto grid h-8 w-8 place-items-center rounded-md text-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400"
+              className="text-muted hover:text-ink focus-visible:outline-brand-400 pointer-events-auto grid h-8 w-8 place-items-center rounded-md transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
@@ -87,7 +87,11 @@ export function AuthField({
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {show ? <EyeOff className="h-[1.1rem] w-[1.1rem]" /> : <Eye className="h-[1.1rem] w-[1.1rem]" />}
+                  {show ? (
+                    <EyeOff className="h-[1.1rem] w-[1.1rem]" />
+                  ) : (
+                    <Eye className="h-[1.1rem] w-[1.1rem]" />
+                  )}
                 </motion.span>
               </AnimatePresence>
             </button>

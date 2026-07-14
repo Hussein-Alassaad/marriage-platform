@@ -47,19 +47,29 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
             aria-modal="true"
             aria-label={title}
             className={cn(
-              'relative z-10 w-full max-w-lg rounded-card bg-surface p-6 shadow-elevated ring-1 ring-line [box-shadow:var(--shadow-elevated),var(--inner-hi)]',
+              'rounded-card bg-surface shadow-elevated ring-line relative z-10 w-full max-w-lg p-6 ring-1 [box-shadow:var(--shadow-elevated),var(--inner-hi)]',
               className,
             )}
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.32, ease: EASE_EXPO } }}
-            exit={{ opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.18, ease: EASE_EXPO } }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { duration: 0.32, ease: EASE_EXPO },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.96,
+              y: 12,
+              transition: { duration: 0.18, ease: EASE_EXPO },
+            }}
           >
-            {title ? <h2 className="mb-4 pe-8 text-lg font-semibold text-ink">{title}</h2> : null}
+            {title ? <h2 className="text-ink mb-4 pe-8 text-lg font-semibold">{title}</h2> : null}
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute end-4 top-4 grid h-9 w-9 place-items-center rounded-md text-muted transition-colors hover:bg-bg-3 hover:text-ink"
+              className="text-muted hover:bg-bg-3 hover:text-ink absolute end-4 top-4 grid h-9 w-9 place-items-center rounded-md transition-colors"
             >
               <X className="h-5 w-5" aria-hidden />
             </button>

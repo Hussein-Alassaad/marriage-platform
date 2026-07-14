@@ -38,17 +38,23 @@ export function PaymentsQueue() {
 
   return (
     <section>
-      <h2 className="mb-4 font-display text-lg font-semibold text-ink">{t('admin.payments.title')}</h2>
+      <h2 className="font-display text-ink mb-4 text-lg font-semibold">
+        {t('admin.payments.title')}
+      </h2>
 
       {isLoading ? (
         <div className="space-y-3">
-          <Skeleton className="h-24 rounded-card" />
-          <Skeleton className="h-24 rounded-card" />
+          <Skeleton className="rounded-card h-24" />
+          <Skeleton className="rounded-card h-24" />
         </div>
       ) : error ? (
-        <Card className="p-5 text-sm text-danger">{t('admin.payments.error')}</Card>
+        <Card className="text-danger p-5 text-sm">{t('admin.payments.error')}</Card>
       ) : (claims ?? []).length === 0 ? (
-        <EmptyState icon={Inbox} title={t('admin.payments.emptyTitle')} description={t('admin.payments.emptyBody')} />
+        <EmptyState
+          icon={Inbox}
+          title={t('admin.payments.emptyTitle')}
+          description={t('admin.payments.emptyBody')}
+        />
       ) : (
         <div className="space-y-3">
           {(claims ?? []).map((c, i) => (
@@ -60,8 +66,10 @@ export function PaymentsQueue() {
             >
               <Card className="flex flex-wrap items-center gap-x-5 gap-y-3 p-5">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-ink">{c.displayName ?? c.userId.slice(0, 8)}</p>
-                  <p className="mt-0.5 text-xs text-muted">
+                  <p className="text-ink truncate font-medium">
+                    {c.displayName ?? c.userId.slice(0, 8)}
+                  </p>
+                  <p className="text-muted mt-0.5 text-xs">
                     {t(`plans.method.${c.method}`)} · {t('admin.payments.ref')}{' '}
                     <span className="font-mono uppercase">{c.referenceCode}</span> ·{' '}
                     {new Date(c.submittedAt).toLocaleDateString()}
@@ -81,13 +89,13 @@ export function PaymentsQueue() {
                     href={c.receiptUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 underline-offset-4 hover:underline"
+                    className="text-brand-700 inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
                   >
                     <ExternalLink className="h-4 w-4" aria-hidden />
                     {t('admin.payments.viewReceipt')}
                   </a>
                 ) : (
-                  <span className="text-xs text-muted">{t('admin.payments.noReceipt')}</span>
+                  <span className="text-muted text-xs">{t('admin.payments.noReceipt')}</span>
                 )}
 
                 <div className="flex gap-2">

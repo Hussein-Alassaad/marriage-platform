@@ -86,7 +86,7 @@ export function LanguagesField({ value, onChange }: LanguagesFieldProps) {
             className={cn(
               'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
               active
-                ? 'border-[color:var(--color-border-accent)] bg-brand-wash text-brand-700'
+                ? 'bg-brand-wash text-brand-700 border-[color:var(--color-border-accent)]'
                 : 'border-line-strong text-muted hover:border-line-strong hover:text-ink',
             )}
           >

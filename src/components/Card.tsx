@@ -15,7 +15,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     <div
       ref={ref}
       className={cn(
-        'rounded-card border border-line bg-surface p-6 [box-shadow:var(--shadow-card),var(--inner-hi)]',
+        'rounded-card border-line bg-surface border p-6 [box-shadow:var(--shadow-card),var(--inner-hi)]',
         interactive && 'lift cursor-default',
         className,
       )}
@@ -25,9 +25,9 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
 });
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-[0.95rem] font-semibold text-ink', className)} {...props} />;
+  return <h3 className={cn('text-ink text-[0.95rem] font-semibold', className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('mt-1 text-sm leading-relaxed text-muted', className)} {...props} />;
+  return <p className={cn('text-muted mt-1 text-sm leading-relaxed', className)} {...props} />;
 }

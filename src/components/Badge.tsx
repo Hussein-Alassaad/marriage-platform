@@ -2,14 +2,7 @@ import { type HTMLAttributes } from 'react';
 
 import { cn } from '@/utils/cn';
 
-export type BadgeVariant =
-  | 'neutral'
-  | 'brand'
-  | 'gold'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'info';
+export type BadgeVariant = 'neutral' | 'brand' | 'gold' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -49,7 +42,7 @@ export function Badge({
       {withDot ? (
         <span className="relative flex h-1.5 w-1.5" aria-hidden>
           {pulse ? (
-            <span className="absolute inline-flex h-full w-full rounded-full bg-current [animation:pulse-ring_2s_ease-out_infinite]" />
+            <span className="absolute inline-flex h-full w-full [animation:pulse-ring_2s_ease-out_infinite] rounded-full bg-current" />
           ) : null}
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-current" />
         </span>

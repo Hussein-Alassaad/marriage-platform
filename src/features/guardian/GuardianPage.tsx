@@ -45,11 +45,15 @@ export function GuardianPage() {
 
       {isLoading ? (
         <div className="space-y-3">
-          <Skeleton className="h-28 rounded-card" />
-          <Skeleton className="h-28 rounded-card" />
+          <Skeleton className="rounded-card h-28" />
+          <Skeleton className="rounded-card h-28" />
         </div>
       ) : (matches ?? []).length === 0 ? (
-        <EmptyState icon={Inbox} title={t('guardianView.emptyTitle')} description={t('guardianView.emptyBody')} />
+        <EmptyState
+          icon={Inbox}
+          title={t('guardianView.emptyTitle')}
+          description={t('guardianView.emptyBody')}
+        />
       ) : (
         <div className="space-y-3">
           {(matches ?? []).map((m, i) => (
@@ -61,20 +65,24 @@ export function GuardianPage() {
             >
               <Card className="p-5">
                 <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-sm text-muted">
+                  <p className="text-muted text-sm">
                     {t('guardianView.connectionOf', { name: m.ward?.display_name ?? '—' })}
                   </p>
-                  <Badge variant="brand">{t(`match.stage.${m.stage}`, { defaultValue: m.stage })}</Badge>
+                  <Badge variant="brand">
+                    {t(`match.stage.${m.stage}`, { defaultValue: m.stage })}
+                  </Badge>
                 </div>
-                <p className="font-display text-lg font-semibold text-ink">{m.candidate?.display_name ?? '—'}</p>
-                <p className="mt-1 text-sm text-muted">{details(m.candidate)}</p>
+                <p className="font-display text-ink text-lg font-semibold">
+                  {m.candidate?.display_name ?? '—'}
+                </p>
+                <p className="text-muted mt-1 text-sm">{details(m.candidate)}</p>
               </Card>
             </motion.div>
           ))}
         </div>
       )}
 
-      <p className="mt-6 text-xs leading-relaxed text-faint">{t('guardianView.privacyNote')}</p>
+      <p className="text-faint mt-6 text-xs leading-relaxed">{t('guardianView.privacyNote')}</p>
     </div>
   );
 }

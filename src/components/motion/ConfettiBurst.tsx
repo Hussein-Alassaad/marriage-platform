@@ -40,7 +40,7 @@ export function ConfettiBurst({ active, onDone }: ConfettiBurstProps) {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-50 overflow-visible">
-      <div className="absolute left-1/2 top-1/2">
+      <div className="absolute top-1/2 left-1/2">
         {particles.map((p) => (
           <motion.span
             key={p.id}

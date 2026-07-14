@@ -39,15 +39,19 @@ export function ForgotPasswordPage() {
 
   return (
     <Card>
-      <h1 className="text-xl font-semibold text-ink">{t('page.forgot.title')}</h1>
-      <p className="mt-1 text-sm text-muted">{t('page.forgot.subtitle')}</p>
+      <h1 className="text-ink text-xl font-semibold">{t('page.forgot.title')}</h1>
+      <p className="text-muted mt-1 text-sm">{t('page.forgot.subtitle')}</p>
 
       {sent ? (
         <Alert variant="success">{t('page.forgot.sent')}</Alert>
       ) : (
         <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
           {formError ? <Alert>{formError}</Alert> : null}
-          <FormField label={t('page.login.email')} htmlFor="email" error={errors.email && t('validation.email')}>
+          <FormField
+            label={t('page.login.email')}
+            htmlFor="email"
+            error={errors.email && t('validation.email')}
+          >
             <Input id="email" type="email" autoComplete="email" {...register('email')} />
           </FormField>
           <Button size="lg" type="submit" disabled={isSubmitting}>
@@ -56,8 +60,8 @@ export function ForgotPasswordPage() {
         </form>
       )}
 
-      <p className="mt-4 text-center text-sm text-muted">
-        <Link to={ROUTES.login} className="font-medium text-brand-700 hover:text-brand-800">
+      <p className="text-muted mt-4 text-center text-sm">
+        <Link to={ROUTES.login} className="text-brand-700 hover:text-brand-800 font-medium">
           {t('page.forgot.backToLogin')}
         </Link>
       </p>

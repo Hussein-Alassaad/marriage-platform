@@ -46,9 +46,14 @@ export function ConversationPage() {
   const { number, bool } = useSettings();
   const queryClient = useQueryClient();
 
-  const person = (location.state as { person?: { displayName?: string | null } } | null)?.person ?? null;
+  const person =
+    (location.state as { person?: { displayName?: string | null } } | null)?.person ?? null;
 
-  const matchQuery = useQuery({ queryKey: ['match', matchId], queryFn: () => chatService.getMatch(matchId), enabled: Boolean(matchId) });
+  const matchQuery = useQuery({
+    queryKey: ['match', matchId],
+    queryFn: () => chatService.getMatch(matchId),
+    enabled: Boolean(matchId),
+  });
   const stage = matchQuery.data?.stage;
   const { data: conversationId } = useConversationId(matchId);
   const { data: messages, isLoading } = useMessages(conversationId);
@@ -117,9 +122,13 @@ export function ConversationPage() {
       created_at: new Date().toISOString(),
     };
     const rollback = () => {
-      if (cid) queryClient.setQueryData<ChatMessage[]>(['messages', cid], (old) => (old ?? []).filter((m) => m.id !== temp.id));
+      if (cid)
+        queryClient.setQueryData<ChatMessage[]>(['messages', cid], (old) =>
+          (old ?? []).filter((m) => m.id !== temp.id),
+        );
     };
-    if (cid) queryClient.setQueryData<ChatMessage[]>(['messages', cid], (old) => [...(old ?? []), temp]);
+    if (cid)
+      queryClient.setQueryData<ChatMessage[]>(['messages', cid], (old) => [...(old ?? []), temp]);
     setText('');
 
     try {
@@ -148,18 +157,22 @@ export function ConversationPage() {
         <Link
           to={ROUTES.match}
           aria-label={t('common.back')}
-          className="grid h-10 w-10 place-items-center rounded-md text-muted transition-colors hover:bg-bg-3 hover:text-ink"
+          className="text-muted hover:bg-bg-3 hover:text-ink grid h-10 w-10 place-items-center rounded-md transition-colors"
         >
           <ArrowLeft className="h-5 w-5 rtl:-scale-x-100" aria-hidden />
         </Link>
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-lg font-semibold text-brand-800">
+        <span className="from-brand-100 to-brand-200 text-brand-800 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br text-lg font-semibold">
           {(person?.displayName?.[0] ?? '·').toUpperCase()}
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-display text-lg font-semibold text-ink">
+          <h1 className="font-display text-ink truncate text-lg font-semibold">
             {person?.displayName ?? t('chat.conversation')}
           </h1>
-          {stage ? <p className="text-xs text-muted">{t(`match.stage.${stage}`, { defaultValue: stage })}</p> : null}
+          {stage ? (
+            <p className="text-muted text-xs">
+              {t(`match.stage.${stage}`, { defaultValue: stage })}
+            </p>
+          ) : null}
         </div>
         {remaining != null ? (
           <Badge variant="gold">{t('chat.messagesLeft', { count: remaining })}</Badge>
@@ -181,7 +194,11 @@ export function ConversationPage() {
               <Skeleton className="ms-auto h-10 w-1/2 rounded-2xl" />
             </>
           ) : (messages ?? []).length === 0 ? (
-            <EmptyState icon={ShieldCheck} title={t('chat.emptyTitle')} description={t('chat.emptyBody')} />
+            <EmptyState
+              icon={ShieldCheck}
+              title={t('chat.emptyTitle')}
+              description={t('chat.emptyBody')}
+            />
           ) : (
             (messages ?? []).map((m) => {
               const mine = m.sender_id === uid;
@@ -195,10 +212,10 @@ export function ConversationPage() {
                 >
                   <span
                     className={cn(
-                      'max-w-[78%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                      'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
                       mine
-                        ? 'rounded-tr-md bg-brand-wash text-ink ring-1 ring-inset ring-[color:var(--color-border-accent)]'
-                        : 'rounded-tl-md bg-bg-3 text-ink-soft',
+                        ? 'bg-brand-wash text-ink rounded-tr-md ring-1 ring-[color:var(--color-border-accent)] ring-inset'
+                        : 'bg-bg-3 text-ink-soft rounded-tl-md',
                     )}
                   >
                     {m.type === 'voice' ? (
@@ -216,12 +233,14 @@ export function ConversationPage() {
         </div>
 
         {/* Composer */}
-        <div className="border-t border-line p-3">
+        <div className="border-line border-t p-3">
           {notice ? (
             <div className="mb-2 px-1">
-              <p className="text-xs text-danger">{notice}</p>
+              <p className="text-danger text-xs">{notice}</p>
               {noticeDetail ? (
-                <p className="mt-0.5 break-all font-mono text-[11px] leading-snug text-faint">{noticeDetail}</p>
+                <p className="text-faint mt-0.5 font-mono text-[11px] leading-snug break-all">
+                  {noticeDetail}
+                </p>
               ) : null}
             </div>
           ) : null}
@@ -229,13 +248,13 @@ export function ConversationPage() {
           {/* Voice unlocks at the Serious stage (Part D) — and only once an STT
               provider is configured, which the admin flag reflects. */}
           {canMessage && voiceAllowed ? (
-            <div className="mb-3 border-b border-line pb-3">
+            <div className="border-line mb-3 border-b pb-3">
               <VoiceRecorder maxSeconds={voiceMaxSeconds} onSend={onSendVoice} />
             </div>
           ) : null}
 
           {canMessage && mediaAllowed ? (
-            <div className="mb-3 border-b border-line pb-3">
+            <div className="border-line mb-3 border-b pb-3">
               <MediaComposer onSendImage={onSendImage} disabled={sendImage.isPending} />
             </div>
           ) : null}
@@ -268,14 +287,19 @@ export function ConversationPage() {
                 rows={1}
                 maxLength={2000}
                 placeholder={t('chat.placeholder')}
-                className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-faint focus-visible:border-brand-400 focus-visible:outline-none focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)]"
+                className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border px-3.5 py-2.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
               />
-              <Button onClick={onSend} disabled={send.isPending || !text.trim()} aria-label={t('chat.send')} className="!px-4">
+              <Button
+                onClick={onSend}
+                disabled={send.isPending || !text.trim()}
+                aria-label={t('chat.send')}
+                className="!px-4"
+              >
                 <Send className="h-4 w-4 rtl:-scale-x-100" aria-hidden />
               </Button>
             </div>
           ) : (
-            <p className="px-1 py-2 text-center text-sm text-muted">{t('chat.notAvailable')}</p>
+            <p className="text-muted px-1 py-2 text-center text-sm">{t('chat.notAvailable')}</p>
           )}
         </div>
       </Card>

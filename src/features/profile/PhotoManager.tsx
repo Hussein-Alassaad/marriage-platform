@@ -41,7 +41,10 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
     mutationFn: (path: string) => profileService.deletePhoto(path),
     onSuccess: (_data, path) => {
       if (path === primaryPath) {
-        void updateProfile.mutateAsync({ patch: { privacy: { ...profile?.privacy, primaryPhoto: null } }, current: profile });
+        void updateProfile.mutateAsync({
+          patch: { privacy: { ...profile?.privacy, primaryPhoto: null } },
+          current: profile,
+        });
       }
       invalidate();
     },
@@ -58,7 +61,10 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
   };
 
   const setPrimary = (path: string) =>
-    updateProfile.mutate({ patch: { privacy: { ...profile?.privacy, primaryPhoto: path } }, current: profile });
+    updateProfile.mutate({
+      patch: { privacy: { ...profile?.privacy, primaryPhoto: path } },
+      current: profile,
+    });
 
   const photos = photosQuery.data ?? [];
 
@@ -68,18 +74,20 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {photosQuery.isLoading
-          ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full rounded-xl" />)
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square w-full rounded-xl" />
+            ))
           : photos.map((photo) => (
               <div
                 key={photo.path}
                 className={cn(
-                  'group relative aspect-square overflow-hidden rounded-xl border bg-bg-3',
+                  'group bg-bg-3 relative aspect-square overflow-hidden rounded-xl border',
                   photo.isPrimary ? 'border-[color:var(--color-border-accent)]' : 'border-line',
                 )}
               >
                 <img src={photo.url} alt="" className="h-full w-full object-cover" />
                 {photo.isPrimary ? (
-                  <span className="absolute start-2 top-2 rounded-full bg-brand-600 px-2 py-0.5 text-[11px] font-semibold text-on-brand">
+                  <span className="bg-brand-600 text-on-brand absolute start-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-semibold">
                     {t('profile.photos.primary')}
                   </span>
                 ) : null}
@@ -98,7 +106,7 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
                     type="button"
                     onClick={() => remove.mutate(photo.path)}
                     aria-label={t('profile.photos.delete')}
-                    className="grid h-8 w-8 place-items-center rounded-md bg-white/15 text-white backdrop-blur hover:bg-danger/70"
+                    className="hover:bg-danger/70 grid h-8 w-8 place-items-center rounded-md bg-white/15 text-white backdrop-blur"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden />
                   </button>
@@ -111,7 +119,7 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={upload.isPending}
-          className="grid aspect-square place-items-center rounded-xl border border-dashed border-line-strong text-muted transition-colors hover:border-[color:var(--color-border-accent)] hover:text-brand-600"
+          className="border-line-strong text-muted hover:text-brand-600 grid aspect-square place-items-center rounded-xl border border-dashed transition-colors hover:border-[color:var(--color-border-accent)]"
         >
           {upload.isPending ? (
             <Loader2 className="h-6 w-6 animate-[spin_0.7s_linear_infinite]" aria-hidden />
@@ -131,7 +139,7 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
         className="hidden"
         onChange={onPick}
       />
-      <p className="text-xs text-muted">{t('profile.photos.hint')}</p>
+      <p className="text-muted text-xs">{t('profile.photos.hint')}</p>
     </div>
   );
 }

@@ -34,7 +34,10 @@ export function AmbientParticles({ className, count = 14 }: AmbientParticlesProp
   if (reduced) return null;
 
   return (
-    <div aria-hidden className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}>
+    <div
+      aria-hidden
+      className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}
+    >
       {motes.map((m) => (
         <motion.span
           key={m.id}
@@ -45,9 +48,7 @@ export function AmbientParticles({ className, count = 14 }: AmbientParticlesProp
             width: m.size,
             height: m.size,
             backgroundColor: m.gold ? 'var(--color-gold-400)' : 'var(--color-brand-400)',
-            boxShadow: m.gold
-              ? '0 0 8px rgba(201,162,39,0.5)'
-              : '0 0 8px rgba(52,211,153,0.5)',
+            boxShadow: m.gold ? '0 0 8px rgba(201,162,39,0.5)' : '0 0 8px rgba(52,211,153,0.5)',
           }}
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: [0, 0.55, 0], y: [0, -m.drift, -m.drift * 1.6] }}

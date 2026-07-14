@@ -24,6 +24,7 @@
 // Deploy: `supabase functions deploy finance`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { emit } from '../_shared/notify.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -184,6 +185,11 @@ Deno.serve(async (req: Request) => {
         .select('id, user_a_consent, user_b_consent, active, activated_at, disconnected_at')
         .single();
       if (error) return json({ error: error.message }, 400);
+
+      if (bothConsent) {
+        await emit(admin, 'finance.shared_connected', uid, { matchId });
+        await emit(admin, 'finance.shared_connected', partnerId, { matchId });
+      }
 
       await admin.from('audit_logs').insert({
         actor_id: uid,

@@ -11,7 +11,7 @@ export function BottomNav() {
   const { t } = useTranslation();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden">
-      <div className="mx-auto flex max-w-md items-stretch justify-around rounded-2xl border border-line bg-surface/90 p-1.5 shadow-elevated backdrop-blur-xl">
+      <div className="border-line bg-surface/90 shadow-elevated mx-auto flex max-w-md items-stretch justify-around rounded-2xl border p-1.5 backdrop-blur-xl">
         {bottomNav.map((item) => {
           const Icon = item.icon;
           const label = item.key === 'assistant' ? t('nav.assistantShort') : t(`nav.${item.key}`);

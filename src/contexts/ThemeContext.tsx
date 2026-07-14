@@ -42,12 +42,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyWithTransition(theme === 'dark' ? 'light' : 'dark');
   }, [theme, applyWithTransition]);
 
-  const setTheme = useCallback(
-    (next: Theme) => applyWithTransition(next),
-    [applyWithTransition],
-  );
+  const setTheme = useCallback((next: Theme) => applyWithTransition(next), [applyWithTransition]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
   );
 }

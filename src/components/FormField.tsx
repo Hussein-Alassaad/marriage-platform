@@ -17,7 +17,7 @@ export function FormField({ label, htmlFor, error, children }: FormFieldProps) {
   const reduced = useReducedMotion();
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-[13px] font-medium text-ink-soft">
+      <label htmlFor={htmlFor} className="text-ink-soft text-[13px] font-medium">
         {label}
       </label>
       <motion.div
@@ -34,7 +34,7 @@ export function FormField({ label, htmlFor, error, children }: FormFieldProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18 }}
-            className="text-xs text-danger"
+            className="text-danger text-xs"
           >
             {error}
           </motion.p>

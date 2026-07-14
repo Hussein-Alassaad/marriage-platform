@@ -12,15 +12,18 @@ interface AuroraBackgroundProps {
  */
 export function AuroraBackground({ className }: AuroraBackgroundProps) {
   return (
-    <div aria-hidden className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}>
+    <div
+      aria-hidden
+      className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}
+    >
       <div
-        className="absolute -top-[15%] start-[-10%] h-[55vw] w-[55vw] rounded-full [animation:aurora-a_18s_ease-in-out_infinite]"
+        className="absolute start-[-10%] -top-[15%] h-[55vw] w-[55vw] [animation:aurora-a_18s_ease-in-out_infinite] rounded-full"
         style={{
           background: 'radial-gradient(closest-side, rgba(16,185,129,0.20), transparent 70%)',
         }}
       />
       <div
-        className="absolute -bottom-[20%] end-[-8%] h-[45vw] w-[45vw] rounded-full [animation:aurora-b_26s_ease-in-out_infinite]"
+        className="absolute end-[-8%] -bottom-[20%] h-[45vw] w-[45vw] [animation:aurora-b_26s_ease-in-out_infinite] rounded-full"
         style={{
           background: 'radial-gradient(closest-side, rgba(201,162,39,0.10), transparent 70%)',
         }}

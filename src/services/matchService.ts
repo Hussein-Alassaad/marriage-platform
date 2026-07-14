@@ -43,7 +43,9 @@ async function invoke<T>(body: Record<string, unknown>): Promise<T> {
 export const matchService = {
   discover: () => invoke<{ candidates: Candidate[]; paid: boolean }>({ action: 'discover' }),
   connections: () =>
-    invoke<{ incoming: InterestEntry[]; outgoing: InterestEntry[]; matches: MatchEntry[] }>({ action: 'connections' }),
+    invoke<{ incoming: InterestEntry[]; outgoing: InterestEntry[]; matches: MatchEntry[] }>({
+      action: 'connections',
+    }),
   sendInterest: (recipientId: string, note?: string) =>
     invoke<{ ok: boolean }>({ action: 'send-interest', recipientId, note }),
   respondInterest: (interestId: string, decision: 'accepted' | 'declined') =>
@@ -52,7 +54,9 @@ export const matchService = {
   /** Rebuild the caller's compatibility scores + today's ranked recommendations. */
   async refreshRecommendations(): Promise<{ count: number }> {
     const supabase = requireSupabaseClient();
-    const { data, error } = await supabase.functions.invoke('compute-compatibility', { body: { action: 'refresh' } });
+    const { data, error } = await supabase.functions.invoke('compute-compatibility', {
+      body: { action: 'refresh' },
+    });
     if (error) throw error;
     return data as { count: number };
   },
@@ -60,7 +64,9 @@ export const matchService = {
   // Personal collections — direct writes allowed by RLS (own rows).
   async save(userId: string, candidateId: string) {
     const supabase = requireSupabaseClient();
-    const { error } = await supabase.from('saved_profiles').insert({ user_id: userId, candidate_id: candidateId });
+    const { error } = await supabase
+      .from('saved_profiles')
+      .insert({ user_id: userId, candidate_id: candidateId });
     if (error) throw error;
   },
   async unsave(userId: string, candidateId: string) {
@@ -74,13 +80,18 @@ export const matchService = {
   },
   async decline(userId: string, candidateId: string) {
     const supabase = requireSupabaseClient();
-    const { error } = await supabase.from('declined_profiles').insert({ user_id: userId, candidate_id: candidateId });
+    const { error } = await supabase
+      .from('declined_profiles')
+      .insert({ user_id: userId, candidate_id: candidateId });
     if (error) throw error;
   },
   async markViewed(userId: string, candidateId: string) {
     const supabase = requireSupabaseClient();
     await supabase
       .from('viewed_profiles')
-      .upsert({ user_id: userId, candidate_id: candidateId }, { onConflict: 'user_id,candidate_id', ignoreDuplicates: true });
+      .upsert(
+        { user_id: userId, candidate_id: candidateId },
+        { onConflict: 'user_id,candidate_id', ignoreDuplicates: true },
+      );
   },
 };

@@ -10,7 +10,13 @@ const variantClasses: Record<AlertVariant, string> = {
   info: 'bg-info-wash text-info ring-info/25',
 };
 
-export function Alert({ variant = 'danger', children }: { variant?: AlertVariant; children: ReactNode }) {
+export function Alert({
+  variant = 'danger',
+  children,
+}: {
+  variant?: AlertVariant;
+  children: ReactNode;
+}) {
   return (
     <div
       className={cn('rounded-md px-3.5 py-2.5 text-sm ring-1 ring-inset', variantClasses[variant])}

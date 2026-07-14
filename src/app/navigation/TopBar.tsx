@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { UserMenu } from './UserMenu';
 import { ROUTES } from '@/app/routes';
 import { cn } from '@/utils/cn';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 const iconLink = cn(
   'relative flex h-10 w-10 items-center justify-center rounded-md text-muted transition duration-150',
@@ -16,20 +17,33 @@ const iconLink = cn(
 
 export function TopBar() {
   const { t } = useTranslation();
+  const unread = useUnreadCount();
   return (
-    <header className="glass sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-line px-4 md:h-[72px] md:px-8">
+    <header className="glass border-line sticky top-0 z-20 flex h-16 items-center gap-2 border-b px-4 md:h-[72px] md:px-8">
       <div className="md:hidden">
         <Logo compact />
       </div>
       <div className="flex-1" />
       <LanguageSwitcher />
       <ThemeToggle />
-      <NavLink to={ROUTES.notifications} className={iconLink} aria-label={t('nav.notifications')}>
+      {/* The dot used to be permanently lit, which taught people to ignore it. It now
+          means exactly one thing: you have unread notifications. */}
+      <NavLink
+        to={ROUTES.notifications}
+        className={iconLink}
+        aria-label={
+          unread ? t('notifications.unreadAria', { count: unread }) : t('nav.notifications')
+        }
+      >
         <Bell className="h-[1.15rem] w-[1.15rem]" aria-hidden />
-        <span className="absolute end-2 top-2 flex h-2 w-2" aria-hidden>
-          <span className="absolute inline-flex h-full w-full rounded-full bg-brand-400 [animation:pulse-ring_2s_ease-out_infinite]" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
-        </span>
+        {unread > 0 ? (
+          <span
+            className="bg-brand-500 text-on-brand absolute end-1.5 top-1.5 flex min-w-[1.05rem] items-center justify-center rounded-full px-1 text-[0.65rem] leading-4 font-semibold"
+            aria-hidden
+          >
+            {unread > 9 ? '9+' : unread}
+          </span>
+        ) : null}
       </NavLink>
       <UserMenu />
     </header>

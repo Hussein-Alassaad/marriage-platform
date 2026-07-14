@@ -57,7 +57,7 @@ export function PhoneVerificationPage() {
       <PageHeader title={t('page.phone.title')} subtitle={t('page.phone.subtitle')} />
       <Card className="max-w-md">
         {step === 'done' ? (
-          <div className="flex items-center gap-3 text-brand-700">
+          <div className="text-brand-700 flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5" aria-hidden />
             <span className="text-sm font-medium">{t('page.phone.verified')}</span>
           </div>

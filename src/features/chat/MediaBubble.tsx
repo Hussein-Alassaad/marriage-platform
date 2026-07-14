@@ -25,19 +25,19 @@ export function MediaBubble({ messageId, kind }: MediaBubbleProps) {
 
   if (isLoading) return <Skeleton className="h-40 w-56 rounded-xl" />;
 
-  if (isError) return <p className="text-xs text-danger">{t('media.unavailable')}</p>;
+  if (isError) return <p className="text-danger text-xs">{t('media.unavailable')}</p>;
 
   if (!url) {
     return (
       <button
         type="button"
         onClick={() => setLoad(true)}
-        className="flex items-center gap-2 rounded-full bg-bg-4 px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-bg-3"
+        className="bg-bg-4 text-ink hover:bg-bg-3 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors"
       >
         {kind === 'image' ? (
-          <ImageIcon className="h-4 w-4 text-brand-600" aria-hidden />
+          <ImageIcon className="text-brand-600 h-4 w-4" aria-hidden />
         ) : (
-          <Film className="h-4 w-4 text-brand-600" aria-hidden />
+          <Film className="text-brand-600 h-4 w-4" aria-hidden />
         )}
         {t(kind === 'image' ? 'media.viewImage' : 'media.playVideo')}
       </button>
