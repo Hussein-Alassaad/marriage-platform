@@ -39,8 +39,12 @@ export function useCreateClaim() {
   const queryClient = useQueryClient();
   const { user } = useSession();
   return useMutation({
-    mutationFn: (input: { tier: Tier; method: ManualMethod; period: BillingPeriod }) =>
-      subscriptionService.createClaim(input.tier, input.method, input.period),
+    mutationFn: (input: {
+      tier: Tier;
+      method: ManualMethod;
+      period: BillingPeriod;
+      coupon?: string;
+    }) => subscriptionService.createClaim(input.tier, input.method, input.period, input.coupon),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payment-claim', user?.id] }),
   });
 }

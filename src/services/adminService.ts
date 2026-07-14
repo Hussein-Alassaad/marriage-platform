@@ -67,6 +67,35 @@ export interface AuditEntry {
   created_at: string;
 }
 
+export interface Analytics {
+  days: number;
+  signupsByDay: Record<string, number>;
+  /** Where connections actually die — the number worth acting on. */
+  funnel: Record<string, number>;
+  revenue: Record<string, number>;
+  moderation: { checked: number; blocked: number };
+  ai: Record<string, { calls: number; errors: number; tokens: number }>;
+  conversion: {
+    total: number;
+    verified: number;
+    paid: number;
+    verifiedRate: number;
+    paidRate: number;
+  };
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  discount_type: 'percent' | 'fixed';
+  discount_value: number;
+  plan_restriction: string | null;
+  expires_at: string | null;
+  usage_limit: number | null;
+  used_count: number;
+  active: boolean;
+}
+
 export interface Ticket {
   id: string;
   user_id: string | null;
@@ -119,6 +148,20 @@ export const adminService = {
   runJob: (name: string) => call<{ result: string }>('job-run', { name }),
   toggleJob: (name: string, enabled: boolean) =>
     call<{ ok: true }>('job-toggle', { name, enabled }),
+
+  analytics: (days: number) => call<Analytics>('analytics', { days }),
+
+  listCoupons: () => call<{ coupons: Coupon[] }>('coupons').then((r) => r.coupons),
+  createCoupon: (input: {
+    code: string;
+    discountType: 'percent' | 'fixed';
+    value: number;
+    tier?: string;
+    usageLimit?: number;
+    expiresAt?: string;
+  }) => call<{ ok: true }>('coupon-create', input),
+  toggleCoupon: (id: string, active: boolean) =>
+    call<{ ok: true }>('coupon-toggle', { id, active }),
 
   auditLog: () => call<{ entries: AuditEntry[] }>('audit').then((r) => r.entries),
 

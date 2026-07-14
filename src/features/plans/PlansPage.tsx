@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
+import { Input } from '@/components/Input';
 import { Skeleton } from '@/components/Skeleton';
 import { Modal } from '@/components/Modal';
 import { cn } from '@/utils/cn';
@@ -20,7 +21,14 @@ import {
   usePlans,
   useUploadReceipt,
 } from '@/hooks/useSubscription';
-import type { BillingPeriod, ManualMethod, Plan, Tier } from '@/services/subscriptionService';
+import { subscriptionService } from '@/services/subscriptionService';
+import type {
+  BillingPeriod,
+  CouponPreview,
+  ManualMethod,
+  Plan,
+  Tier,
+} from '@/services/subscriptionService';
 
 const METHOD_ICONS: Record<ManualMethod, typeof Smartphone> = {
   omt: Receipt,
@@ -213,12 +221,35 @@ function ChooseMethodModal({
   const { t } = useTranslation();
   const create = useCreateClaim();
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [applied, setApplied] = useState<CouponPreview | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  const apply = async () => {
+    if (!plan || !code.trim()) return;
+    setChecking(true);
+    setCouponError(null);
+    try {
+      // A preview only. The code is spent when the claim is created, not now — otherwise a
+      // curious member could exhaust a campaign just by typing in the box.
+      setApplied(await subscriptionService.checkCoupon(code.trim(), plan.tier, period));
+    } catch (e) {
+      const key = e instanceof Error ? e.message : 'coupon_invalid';
+      setCouponError(t(`plans.coupon.${key}`, { defaultValue: t('plans.coupon.coupon_invalid') }));
+      setApplied(null);
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const start = async (method: ManualMethod) => {
     if (!plan) return;
     setError(null);
     try {
-      await create.mutateAsync({ tier: plan.tier, method, period });
+      // The client sends the CODE, never a price. A client-supplied price is a free
+      // membership — the server prices the claim itself.
+      await create.mutateAsync({ tier: plan.tier, method, period, coupon: applied?.code });
       onClose();
     } catch {
       setError(t('plans.claimError'));
@@ -228,6 +259,43 @@ function ChooseMethodModal({
   return (
     <Modal open={Boolean(plan)} onClose={onClose} title={t('plans.methodTitle')}>
       <p className="text-muted mb-5 text-sm leading-relaxed">{t('plans.methodBody')}</p>
+
+      <div className="mb-5">
+        <div className="flex items-end gap-2">
+          <label className="flex-1">
+            <span className="text-ink-soft mb-1.5 block text-sm font-medium">
+              {t('plans.coupon.label')}
+            </span>
+            <Input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder={t('plans.coupon.placeholder')}
+              className="h-10 font-mono"
+            />
+          </label>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10"
+            disabled={!code.trim() || checking}
+            onClick={apply}
+          >
+            {t('plans.coupon.apply')}
+          </Button>
+        </div>
+
+        {applied ? (
+          <p className="text-success mt-2 text-xs">
+            {t('plans.coupon.applied', {
+              code: applied.code,
+              discount: `${applied.currency} ${applied.discount}`,
+              total: `${applied.currency} ${applied.total}`,
+            })}
+          </p>
+        ) : null}
+        {couponError ? <p className="text-danger mt-2 text-xs">{couponError}</p> : null}
+      </div>
+
       <div className="space-y-2">
         {METHODS.map((method) => {
           const Icon = METHOD_ICONS[method];

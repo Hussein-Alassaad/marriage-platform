@@ -11,9 +11,10 @@
 //      audits the fact that documents were viewed, because Decision #15 promises members
 //      that only authorised admins ever see them, and a promise nobody can check is not one.
 //
-// Actions: overview | settings-list | settings-update | users-search | user-status |
-//          verification-queue | verification-review | jobs | job-run | audit | tickets |
-//          ticket-update
+// Actions: overview | health | settings-list | settings-update | users-search |
+//          user-status | verification-queue | verification-review | coupons |
+//          coupon-create | coupon-toggle | analytics | jobs | job-run | job-toggle |
+//          audit | tickets | ticket-update
 //
 // Deploy: `supabase functions deploy admin`.
 
@@ -56,6 +57,11 @@ async function audit(
     after: after ?? null,
     reason: reason ?? null,
   });
+}
+
+async function setting<T>(admin: SupabaseClient, key: string, fallback: T): Promise<T> {
+  const { data } = await admin.from('settings').select('value').eq('key', key).maybeSingle();
+  return (data?.value ?? fallback) as T;
 }
 
 /** Row count without pulling the rows (head: true). */
@@ -391,6 +397,125 @@ Deno.serve(async (req: Request) => {
         decision === 'rejected' ? { reason } : {},
       );
 
+      return json({ ok: true });
+    }
+
+    if (action === 'analytics') {
+      // AGGREGATES ONLY. Note what is absent and cannot be added here without someone
+      // noticing: no message bodies, and no personal finance. Admins get shapes and
+      // counts — "how many people are stuck at Introduction" — never a person's spending
+      // or a person's words. That is a structural promise, not a policy one.
+      const days = Math.min(Math.max(Number(body.days ?? 30), 7), 365);
+      const since = new Date(Date.now() - days * 864e5).toISOString();
+
+      const [{ data: profiles }, { data: matches }, { data: payments }, { data: mods }, { data: ai }] =
+        await Promise.all([
+          admin.from('profiles').select('created_at, verification_status, subscription_tier, gender'),
+          admin.from('matches').select('stage, created_at, deleted_at'),
+          admin.from('payments').select('amount, currency, status, created_at').gte('created_at', since),
+          admin.from('message_moderation').select('verdict, created_at').gte('created_at', since),
+          admin.from('ai_requests').select('feature, status, total_tokens, created_at').gte('created_at', since),
+        ]);
+
+      // Signups per day — the shape of growth, not a list of people.
+      const signupsByDay: Record<string, number> = {};
+      for (const p of (profiles ?? []) as { created_at: string }[]) {
+        const day = p.created_at.slice(0, 10);
+        if (p.created_at >= since) signupsByDay[day] = (signupsByDay[day] ?? 0) + 1;
+      }
+
+      // Where connections actually die. A funnel that only shows the happy path hides the
+      // one number worth acting on: how many people never get past Introduction.
+      const funnel: Record<string, number> = {};
+      for (const m of (matches ?? []) as { stage: string; deleted_at: string | null }[]) {
+        const key = m.deleted_at && m.stage !== 'terminated' ? 'terminated' : m.stage;
+        funnel[key] = (funnel[key] ?? 0) + 1;
+      }
+
+      const revenue: Record<string, number> = {};
+      for (const p of (payments ?? []) as { amount: number; currency: string; status: string }[]) {
+        if (p.status !== 'activated' && p.status !== 'succeeded') continue;
+        revenue[p.currency] = (revenue[p.currency] ?? 0) + Number(p.amount);
+      }
+
+      const checked = (mods ?? []).length;
+      const blocked = ((mods ?? []) as { verdict: string }[]).filter((m) => m.verdict !== 'allowed').length;
+
+      const aiRows = (ai ?? []) as { feature: string; status: string; total_tokens: number | null }[];
+      const aiByFeature: Record<string, { calls: number; errors: number; tokens: number }> = {};
+      for (const r of aiRows) {
+        const f = (aiByFeature[r.feature] ??= { calls: 0, errors: 0, tokens: 0 });
+        f.calls += 1;
+        if (r.status !== 'ok') f.errors += 1;
+        f.tokens += r.total_tokens ?? 0;
+      }
+
+      const verified = ((profiles ?? []) as { verification_status: string }[]).filter(
+        (p) => p.verification_status === 'verified',
+      ).length;
+      const paid = ((profiles ?? []) as { subscription_tier: string }[]).filter(
+        (p) => p.subscription_tier !== 'free',
+      ).length;
+      const total = (profiles ?? []).length;
+
+      return json({
+        days,
+        signupsByDay,
+        funnel,
+        revenue,
+        moderation: { checked, blocked },
+        ai: aiByFeature,
+        conversion: {
+          total,
+          verified,
+          paid,
+          // The two numbers that decide whether this platform works at all.
+          verifiedRate: total ? Math.round((verified / total) * 100) : 0,
+          paidRate: verified ? Math.round((paid / verified) * 100) : 0,
+        },
+      });
+    }
+
+    if (action === 'coupons') {
+      const { data } = await admin
+        .from('coupons')
+        .select('id, code, discount_type, discount_value, plan_restriction, expires_at, usage_limit, used_count, active')
+        .order('created_at', { ascending: false });
+      return json({ coupons: data ?? [] });
+    }
+
+    if (action === 'coupon-create') {
+      const code = String(body.code ?? '').trim().toUpperCase();
+      const discountType = body.discountType === 'fixed' ? 'fixed' : 'percent';
+      const value = Number(body.value ?? 0);
+      if (!code || !Number.isFinite(value) || value <= 0) return json({ error: 'bad_request' }, 400);
+      if (discountType === 'percent' && value > 100) return json({ error: 'percent_over_100' }, 400);
+
+      const { data, error } = await admin
+        .from('coupons')
+        .insert({
+          code,
+          discount_type: discountType,
+          discount_value: value,
+          plan_restriction: body.tier ? String(body.tier) : null,
+          usage_limit: body.usageLimit ? Number(body.usageLimit) : null,
+          expires_at: body.expiresAt ? new Date(String(body.expiresAt)).toISOString() : null,
+        })
+        .select('id')
+        .single();
+      if (error) return json({ error: error.message }, 400);
+
+      await audit(admin, uid, 'coupon.created', 'coupon', data.id, null, { code, discountType, value });
+      return json({ ok: true });
+    }
+
+    if (action === 'coupon-toggle') {
+      const id = String(body.id ?? '');
+      const active = Boolean(body.active);
+      if (!id) return json({ error: 'bad_request' }, 400);
+      // Deactivated, never deleted: a spent coupon is part of the payment record.
+      await admin.from('coupons').update({ active }).eq('id', id);
+      await audit(admin, uid, 'coupon.toggled', 'coupon', id, null, { active });
       return json({ ok: true });
     }
 

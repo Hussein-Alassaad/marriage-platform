@@ -99,6 +99,40 @@ export function useToggleJob() {
   });
 }
 
+export function useAnalytics(days: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['admin-analytics', days],
+    queryFn: () => adminService.analytics(days),
+    enabled,
+  });
+}
+
+export function useCoupons(enabled: boolean) {
+  return useQuery({
+    queryKey: ['admin-coupons'],
+    queryFn: () => adminService.listCoupons(),
+    enabled,
+  });
+}
+
+export function useCreateCoupon() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Parameters<typeof adminService.createCoupon>[0]) =>
+      adminService.createCoupon(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-coupons'] }),
+  });
+}
+
+export function useToggleCoupon() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { id: string; active: boolean }) =>
+      adminService.toggleCoupon(input.id, input.active),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-coupons'] }),
+  });
+}
+
 export function useAuditLog(enabled: boolean) {
   return useQuery({ queryKey: ['admin-audit'], queryFn: () => adminService.auditLog(), enabled });
 }

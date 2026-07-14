@@ -11,9 +11,15 @@
 //                    folder in the private payment-receipts bucket).
 //   pending-claims — admin: the review queue, with signed receipt URLs.
 //   review         — admin: approve (activates the tier) or reject a claim.
+//   check-coupon   — validate a code and return what it would take off the price.
 //   checkout       — card path. Returns `gateway_not_configured` until the Areeba
 //                    credentials + `card_payments_enabled` are actually set, rather
 //                    than pretending to take a payment.
+//
+// COUPONS: the discount is computed HERE, from the coupons table, and never trusted
+// from the client — a client-supplied price is a free membership. `check-coupon` only
+// previews; the redemption (and the used_count increment) happens when the claim is
+// created, so a code cannot be spent by someone merely typing it into the box.
 //
 // Deploy: `supabase functions deploy subscriptions`.
 
@@ -34,6 +40,48 @@ const PAID_TIERS = new Set(['serious', 'marriage_plus']);
 async function setting<T>(admin: SupabaseClient, key: string, fallback: T): Promise<T> {
   const { data } = await admin.from('settings').select('value').eq('key', key).maybeSingle();
   return (data?.value ?? fallback) as T;
+}
+
+interface Coupon {
+  id: string;
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  plan_restriction: string | null;
+  usage_limit: number | null;
+  used_count: number;
+}
+
+/**
+ * Resolve a coupon and price it. Returns the reason it cannot be used rather than a bare
+ * null, because "invalid code" and "this code has expired" are different sentences to the
+ * person typing it.
+ *
+ * The floor is 0: a fixed discount larger than the price makes the membership free, never
+ * negative — a negative amount would become a refund the moment an admin approved it.
+ */
+async function priceWithCoupon(
+  admin: SupabaseClient,
+  code: string,
+  tier: string,
+  amount: number,
+): Promise<{ error: string } | { coupon: Coupon; discount: number; total: number }> {
+  const { data } = await admin
+    .from('coupons')
+    .select('id, code, discount_type, discount_value, plan_restriction, expires_at, usage_limit, used_count, active')
+    .ilike('code', code.trim())
+    .maybeSingle();
+
+  if (!data || !data.active) return { error: 'coupon_invalid' };
+  if (data.expires_at && new Date(data.expires_at) < new Date()) return { error: 'coupon_expired' };
+  if (data.usage_limit != null && data.used_count >= data.usage_limit) return { error: 'coupon_exhausted' };
+  if (data.plan_restriction && data.plan_restriction !== tier) return { error: 'coupon_wrong_plan' };
+
+  const value = Number(data.discount_value);
+  const discount =
+    data.discount_type === 'percent' ? Math.round(amount * (value / 100) * 100) / 100 : Math.min(value, amount);
+
+  return { coupon: data as Coupon, discount, total: Math.max(0, Math.round((amount - discount) * 100) / 100) };
 }
 
 Deno.serve(async (req: Request) => {
@@ -73,8 +121,20 @@ Deno.serve(async (req: Request) => {
         .maybeSingle();
       if (!plan || !plan.active) return json({ error: 'plan_unavailable' }, 400);
 
-      const amount = period === 'yearly' ? plan.yearly_price : plan.monthly_price;
-      if (amount == null) return json({ error: 'period_unavailable' }, 400);
+      const listPrice = period === 'yearly' ? plan.yearly_price : plan.monthly_price;
+      if (listPrice == null) return json({ error: 'period_unavailable' }, 400);
+
+      // The client sends a CODE, never a price. The discount is computed here.
+      let amount = Number(listPrice);
+      let coupon: Coupon | null = null;
+      let discount = 0;
+      if (body.coupon) {
+        const priced = await priceWithCoupon(admin, String(body.coupon), tier, amount);
+        if ('error' in priced) return json({ error: priced.error }, 400);
+        coupon = priced.coupon;
+        discount = priced.discount;
+        amount = priced.total;
+      }
 
       // One open claim at a time — a second one would just confuse the queue.
       const { data: open } = await admin
@@ -100,6 +160,15 @@ Deno.serve(async (req: Request) => {
         .single();
       if (error) return json({ error: error.message }, 400);
 
+      // Spend the code only now — when a claim actually exists. Previewing a coupon must
+      // not consume it, or a curious member exhausts a campaign by typing in the box.
+      if (coupon) {
+        await admin
+          .from('coupons')
+          .update({ used_count: coupon.used_count + 1 })
+          .eq('id', coupon.id);
+      }
+
       // The period the user paid for is recorded on the claim's audit trail; the
       // reviewer activates exactly that period.
       await admin.from('audit_logs').insert({
@@ -107,10 +176,36 @@ Deno.serve(async (req: Request) => {
         action: 'payment_claim.created',
         entity_type: 'payment_claim',
         entity_id: claim.id,
-        after: { tier, period, method, amount },
+        after: { tier, period, method, amount, listPrice, coupon: coupon?.code ?? null, discount },
       });
 
-      return json({ claim, tier, period });
+      return json({ claim, tier, period, discount });
+    }
+
+    if (action === 'check-coupon') {
+      const code = String(body.coupon ?? '').trim();
+      const tier = String(body.tier ?? '');
+      const period = body.period === 'yearly' ? 'yearly' : 'monthly';
+      if (!code || !PAID_TIERS.has(tier)) return json({ error: 'bad_request' }, 400);
+
+      const { data: plan } = await admin
+        .from('subscription_plans')
+        .select('monthly_price, yearly_price, currency')
+        .eq('tier', tier)
+        .maybeSingle();
+      const listPrice = period === 'yearly' ? plan?.yearly_price : plan?.monthly_price;
+      if (listPrice == null) return json({ error: 'plan_unavailable' }, 400);
+
+      const priced = await priceWithCoupon(admin, code, tier, Number(listPrice));
+      if ('error' in priced) return json({ error: priced.error }, 400);
+
+      // A preview. Nothing is spent here.
+      return json({
+        code: priced.coupon.code,
+        discount: priced.discount,
+        total: priced.total,
+        currency: plan?.currency ?? 'USD',
+      });
     }
 
     if (action === 'attach-receipt') {

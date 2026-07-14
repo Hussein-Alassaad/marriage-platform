@@ -22,6 +22,7 @@ import { tierAtLeast } from '@/services/subscriptionService';
 import { BudgetsCard } from './BudgetsCard';
 import { EntryList } from './EntryList';
 import { EntryModal } from './EntryModal';
+import { ExportMenu } from './ExportMenu';
 import { GoalsCard } from './GoalsCard';
 import { SharedFinanceCard } from './SharedFinanceCard';
 import { SummaryCards } from './SummaryCards';
@@ -114,9 +115,12 @@ export function FinancePage() {
           )}
 
           <section>
-            <h2 className="font-display text-ink mb-3 text-base font-semibold">
-              {t('finance.history')}
-            </h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-display text-ink text-base font-semibold">
+                {t('finance.history')}
+              </h2>
+              <ExportMenu entries={rows} currency={currency} rates={rates} />
+            </div>
             <EntryList entries={rows} />
           </section>
         </div>

@@ -38,9 +38,23 @@ Context for every Claude Code session. Read this first. The authoritative specs 
   "not yet" rather than a chat box that errors on every question.
 - **Phase 15/16 (partial): complete.** Data export + account deletion, legal pages,
   Settings page, error telemetry, health checks, `docs/Runbook.md`.
-- **Remaining:** analytics dashboards, monthly AI reports, finance exports (PDF/CSV),
-  card payments (Areeba) + coupons, conversation summaries, a11y/perf audit, and
-  external alerting. See `docs/Runbook.md` §5 for what is deliberately NOT monitored.
+- **Coupons, analytics, finance exports: complete.**
+- **Conversation summaries: DROPPED** (owner's decision, 2026-07-14). Not "unbuilt" —
+  removed, with the setting and the job registry row deleted so nobody switches it on by
+  accident. Summarising a private courtship conversation means a machine reads it and
+  writes down what it thinks two people meant; moderation already reads messages for a
+  safety reason members accept, and a summary is a second intrusion with no such reason.
+- **Remaining:** card payments (Areeba — see below), monthly AI reports, a11y/perf audit,
+  and external alerting. See `docs/Runbook.md` §5 for what is deliberately NOT monitored.
+
+**Card payments are still an honest stub.** `subscriptions.checkout` returns
+`gateway_not_configured` until `card_payments_enabled` **and** the Areeba secrets exist.
+I did not write an Areeba integration: without the merchant credentials and their API
+docs I would be guessing at request shapes and signature formats, and a payment flow that
+*looks* implemented but silently fails is far worse than one that says it is not ready.
+The manual Lebanese family (OMT / Whish / bank transfer) is fully working, and **coupons
+apply to it** — the discount is computed server-side from the coupons table, because a
+client-supplied price is a free membership.
 
 Two holes Phase 14 closed that are worth remembering:
 1. **`verify-identity` had a review action that nothing ever called.** No member could be

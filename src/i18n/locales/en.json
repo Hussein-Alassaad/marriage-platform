@@ -221,7 +221,17 @@
     "replaceReceipt": "Replace receipt",
     "receiptNeeded": "We can't activate your membership until we see the receipt.",
     "receiptReceived": "Receipt received — an admin will review it shortly.",
-    "uploadError": "Couldn't upload that file. Use a JPG, PNG, WebP or PDF up to 5 MB."
+    "uploadError": "Couldn't upload that file. Use a JPG, PNG, WebP or PDF up to 5 MB.",
+    "coupon": {
+      "label": "Coupon code",
+      "placeholder": "Optional",
+      "apply": "Apply",
+      "applied": "{{code}} applied — {{discount}} off. You pay {{total}}.",
+      "coupon_invalid": "That code is not valid.",
+      "coupon_expired": "That code has expired.",
+      "coupon_exhausted": "That code has been fully used.",
+      "coupon_wrong_plan": "That code does not apply to this membership."
+    }
   },
   "admin": {
     "payments": {
@@ -243,7 +253,9 @@
       "settings": "Settings",
       "jobs": "Jobs",
       "support": "Support",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "analytics": "Analytics",
+      "coupons": "Coupons"
     },
     "overview": {
       "members": "Members",
@@ -353,6 +365,43 @@
         "all running": "All running.",
         "never fetched": "Never fetched — finance figures may be converting at seeded rates."
       }
+    },
+    "analytics": {
+      "days": "Last {{count}} days",
+      "export": "Export CSV",
+      "members": "Members",
+      "verifiedRate": "Verified",
+      "verifiedHint": "Of everyone who signed up.",
+      "paidRate": "Paid",
+      "paidHint": "Of everyone who verified.",
+      "blockRate": "Messages blocked",
+      "funnel": "Journey funnel",
+      "funnelHint": "Where connections actually stop. The number worth acting on is the one that drops.",
+      "signups": "Signups",
+      "noSignups": "No signups in this period.",
+      "revenue": "Revenue",
+      "noRevenue": "No payments in this period.",
+      "ai": "AI usage",
+      "aiStats": "{{calls}} calls · {{errors}} errors · {{tokens}} tokens",
+      "noAi": "No AI calls in this period."
+    },
+    "coupons": {
+      "add": "New coupon",
+      "create": "Create",
+      "code": "Code",
+      "type": "Type",
+      "percent": "Percent off",
+      "fixed": "Fixed amount off",
+      "value": "Value",
+      "limit": "Usage limit",
+      "expires": "Expires",
+      "used": "used {{used}} / {{limit}}",
+      "until": "until {{date}}",
+      "inactive": "Inactive",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "empty": "No coupons yet.",
+      "error": "Could not create this coupon."
     }
   },
   "guardians": {
@@ -732,6 +781,18 @@
       "you": "You",
       "household": "Household",
       "error": "Something went wrong. Please try again."
+    },
+    "export": {
+      "csv": "CSV",
+      "pdf": "Print / PDF",
+      "date": "Date",
+      "kind": "Type",
+      "label": "Category",
+      "amount": "Amount",
+      "currency": "Currency",
+      "converted": "In {{currency}}",
+      "noRate": "no rate",
+      "reportTitle": "Monthly finance report"
     }
   },
   "nav": {

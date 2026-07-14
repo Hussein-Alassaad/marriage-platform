@@ -373,8 +373,10 @@ update public.scheduled_jobs set enabled = true, schedule = '0 5 * * *' where na
 
 -- Deliberately still disabled — each needs a funded AI key or Phase 14's analytics
 -- tables. Leaving them registered-but-off is honest; deleting them would hide the gap.
---   daily_match_generation, conversation_summaries, monthly_finance_reports,
---   analytics_rollup, notification_digests (folded into notification_flush)
+--   daily_match_generation, monthly_finance_reports, analytics_rollup,
+--   notification_digests (folded into notification_flush)
+-- `conversation_summaries` is not in that list: it was DROPPED from the product
+-- (see 20260714190000), not left for later.
 
 insert into public.settings (key, value, type, is_public, description) values
   ('identity_document_retention_days', '30', 'number', false,

@@ -48,6 +48,13 @@ export interface PaymentClaim {
   expires_at: string | null;
 }
 
+export interface CouponPreview {
+  code: string;
+  discount: number;
+  total: number;
+  currency: string;
+}
+
 export interface AdminClaim {
   id: string;
   userId: string;
@@ -107,15 +114,36 @@ export const subscriptionService = {
     return (data as PaymentClaim) ?? null;
   },
 
-  /** Start a manual payment: the server sets the amount from the plan catalog. */
+  /**
+   * Preview a coupon. Nothing is spent here — the code is only redeemed when a claim is
+   * actually created, so typing one into the box cannot exhaust a campaign.
+   */
+  async checkCoupon(code: string, tier: Tier, period: BillingPeriod): Promise<CouponPreview> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('subscriptions', {
+      body: { action: 'check-coupon', coupon: code, tier, period },
+    });
+    if (error) {
+      const detail = await error.context?.json?.().catch(() => null);
+      if (detail?.error) throw new Error(detail.error);
+      throw error;
+    }
+    if (data?.error) throw new Error(data.error);
+    return data as CouponPreview;
+  },
+
+  /** Start a manual payment: the server sets the amount from the plan catalog, and applies
+   *  the coupon itself. The client sends a CODE, never a price — a client-supplied price
+   *  is a free membership. */
   async createClaim(
     tier: Tier,
     method: ManualMethod,
     period: BillingPeriod,
+    coupon?: string,
   ): Promise<PaymentClaim> {
     const supabase = requireSupabaseClient();
     const { data, error } = await supabase.functions.invoke('subscriptions', {
-      body: { action: 'create-claim', tier, method, period },
+      body: { action: 'create-claim', tier, method, period, coupon },
     });
     if (error) throw error;
     if (data?.error) throw new Error(data.error);

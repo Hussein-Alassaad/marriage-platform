@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { PageHeader } from '@/components/PageHeader';
 import { cn } from '@/utils/cn';
+import { AnalyticsPanel } from '@/features/admin/AnalyticsPanel';
 import { AuditPanel } from '@/features/admin/AuditPanel';
+import { CouponsPanel } from '@/features/admin/CouponsPanel';
 import { JobsPanel } from '@/features/admin/JobsPanel';
 import { OverviewPanel } from '@/features/admin/OverviewPanel';
 import { PaymentsQueue } from '@/features/admin/PaymentsQueue';
@@ -14,8 +16,10 @@ import { VerificationQueue } from '@/features/admin/VerificationQueue';
 
 const TABS = [
   'overview',
+  'analytics',
   'verification',
   'payments',
+  'coupons',
   'users',
   'settings',
   'jobs',
@@ -60,8 +64,10 @@ export function AdminPage() {
       </div>
 
       {tab === 'overview' ? <OverviewPanel /> : null}
+      {tab === 'analytics' ? <AnalyticsPanel /> : null}
       {tab === 'verification' ? <VerificationQueue /> : null}
       {tab === 'payments' ? <PaymentsQueue /> : null}
+      {tab === 'coupons' ? <CouponsPanel /> : null}
       {tab === 'users' ? <UsersPanel /> : null}
       {tab === 'settings' ? <SettingsEditor /> : null}
       {tab === 'jobs' ? <JobsPanel /> : null}

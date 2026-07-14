@@ -221,7 +221,17 @@
     "replaceReceipt": "استبدال الإيصال",
     "receiptNeeded": "لا يمكننا تفعيل عضويتك قبل رؤية الإيصال.",
     "receiptReceived": "تم استلام الإيصال — سيراجعه المشرف قريبًا.",
-    "uploadError": "تعذّر رفع الملف. استخدم JPG أو PNG أو WebP أو PDF بحجم 5 ميغابايت كحد أقصى."
+    "uploadError": "تعذّر رفع الملف. استخدم JPG أو PNG أو WebP أو PDF بحجم 5 ميغابايت كحد أقصى.",
+    "coupon": {
+      "label": "رمز الخصم",
+      "placeholder": "اختياري",
+      "apply": "تطبيق",
+      "applied": "طُبّق {{code}} — خصم {{discount}}. تدفع {{total}}.",
+      "coupon_invalid": "هذا الرمز غير صالح.",
+      "coupon_expired": "انتهت صلاحية هذا الرمز.",
+      "coupon_exhausted": "استُنفد هذا الرمز بالكامل.",
+      "coupon_wrong_plan": "هذا الرمز لا ينطبق على هذه العضوية."
+    }
   },
   "admin": {
     "payments": {
@@ -243,7 +253,9 @@
       "settings": "الإعدادات",
       "jobs": "المهام",
       "support": "الدعم",
-      "audit": "سجل التدقيق"
+      "audit": "سجل التدقيق",
+      "analytics": "التحليلات",
+      "coupons": "رموز الخصم"
     },
     "overview": {
       "members": "الأعضاء",
@@ -353,6 +365,43 @@
         "all running": "كلها تعمل.",
         "never fetched": "لم تُجلب قط — قد تُحوَّل الأرقام المالية بأسعار أولية."
       }
+    },
+    "analytics": {
+      "days": "آخر {{count}} يومًا",
+      "export": "تصدير CSV",
+      "members": "الأعضاء",
+      "verifiedRate": "موثّقون",
+      "verifiedHint": "من إجمالي المسجّلين.",
+      "paidRate": "مدفوعون",
+      "paidHint": "من إجمالي الموثّقين.",
+      "blockRate": "رسائل محجوبة",
+      "funnel": "مسار الرحلة",
+      "funnelHint": "أين تتوقف الصلات فعلًا. الرقم الجدير بالعمل هو الذي ينخفض.",
+      "signups": "التسجيلات",
+      "noSignups": "لا تسجيلات في هذه الفترة.",
+      "revenue": "الإيرادات",
+      "noRevenue": "لا مدفوعات في هذه الفترة.",
+      "ai": "استخدام الذكاء الاصطناعي",
+      "aiStats": "{{calls}} طلبات · {{errors}} أخطاء · {{tokens}} رمز",
+      "noAi": "لا طلبات ذكاء اصطناعي في هذه الفترة."
+    },
+    "coupons": {
+      "add": "رمز خصم جديد",
+      "create": "إنشاء",
+      "code": "الرمز",
+      "type": "النوع",
+      "percent": "نسبة مئوية",
+      "fixed": "مبلغ ثابت",
+      "value": "القيمة",
+      "limit": "حد الاستخدام",
+      "expires": "ينتهي",
+      "used": "استُخدم {{used}} / {{limit}}",
+      "until": "حتى {{date}}",
+      "inactive": "معطّل",
+      "activate": "تفعيل",
+      "deactivate": "تعطيل",
+      "empty": "لا رموز خصم بعد.",
+      "error": "تعذّر إنشاء رمز الخصم."
     }
   },
   "guardians": {
@@ -736,6 +785,18 @@
       "you": "أنت",
       "household": "البيت",
       "error": "حدث خطأ. حاول مرة أخرى."
+    },
+    "export": {
+      "csv": "CSV",
+      "pdf": "طباعة / PDF",
+      "date": "التاريخ",
+      "kind": "النوع",
+      "label": "الفئة",
+      "amount": "المبلغ",
+      "currency": "العملة",
+      "converted": "بـ {{currency}}",
+      "noRate": "لا سعر صرف",
+      "reportTitle": "التقرير المالي الشهري"
     }
   },
   "nav": {
