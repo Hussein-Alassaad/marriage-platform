@@ -12,7 +12,7 @@
 //   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 // Deploy: supabase functions deploy send-text-message
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { emit } from '../_shared/notify.ts';
 
 import { moderate, POLICY_VERSION } from '../_shared/moderation.ts';
@@ -25,6 +25,13 @@ const CORS = {
 };
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...CORS, 'Content-Type': 'application/json' } });
+
+/** A suspended or banned member may not act. Checked here, not at login: a session issued
+ *  a minute before a suspension must not buy an hour of harassment. */
+async function accountActive(admin: SupabaseClient, uid: string): Promise<boolean> {
+  const { data } = await admin.rpc('is_account_active', { uid });
+  return data === true;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
@@ -41,6 +48,7 @@ Deno.serve(async (req: Request) => {
   if (!uid) return json({ error: 'unauthorized' }, 401);
 
   const admin = createClient(url, serviceKey);
+  if (!(await accountActive(admin, uid))) return json({ error: 'account_suspended' }, 403);
   const { matchId, body } = await req.json().catch(() => ({}));
   const text = typeof body === 'string' ? body.trim() : '';
   if (!matchId) return json({ error: 'match_required' }, 400);

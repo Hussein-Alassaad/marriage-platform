@@ -234,6 +234,110 @@
       "emptyTitle": "Nothing to review",
       "emptyBody": "Manual payment claims appear here as soon as members submit them.",
       "error": "Couldn't load the review queue."
+    },
+    "tab": {
+      "overview": "Overview",
+      "verification": "Verification",
+      "payments": "Payments",
+      "users": "Users",
+      "settings": "Settings",
+      "jobs": "Jobs",
+      "support": "Support",
+      "audit": "Audit log"
+    },
+    "overview": {
+      "members": "Members",
+      "verified": "Verified",
+      "activeMatches": "Active connections",
+      "pendingClaims": "Payments awaiting review",
+      "tiers": "Membership",
+      "moderation": "Moderation (last 7 days)",
+      "moderationHint": "Verdicts only. No conversation is readable from here.",
+      "blockRate": "{{blocked}} of {{checked}} messages blocked ({{rate}}%)"
+    },
+    "category": {
+      "contact_info": "Contact info",
+      "too_soon": "Premature romance",
+      "inappropriate": "Inappropriate",
+      "haram_meeting": "Unsupervised meeting",
+      "scam": "Scam",
+      "unavailable": "Moderator unavailable",
+      "quota": "Quota reached",
+      "unknown": "Unknown"
+    },
+    "settings": {
+      "search": "Search settings…",
+      "none": "No settings match.",
+      "public": "Public",
+      "save": "Save",
+      "saved": "Saved",
+      "on": "On",
+      "off": "Off",
+      "invalid": "This must be a valid {{type}} value.",
+      "saveError": "Could not save this setting."
+    },
+    "users": {
+      "search": "Search by name…",
+      "none": "No members found.",
+      "unnamed": "Unnamed member",
+      "manage": "Manage",
+      "manageTitle": "Manage account",
+      "manageBody": "Changing the status of {{name}}. Every change is recorded in the audit log.",
+      "newStatus": "Status",
+      "days": "Suspend for (days)",
+      "daysHint": "Leave at 0 for an indefinite suspension.",
+      "reason": "Reason",
+      "apply": "Apply",
+      "error": "Could not change this account.",
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended",
+        "banned": "Banned"
+      }
+    },
+    "verification": {
+      "empty": "Nothing to review",
+      "emptyBody": "Verification requests appear here as members submit them.",
+      "unnamed": "Unnamed member",
+      "documentType": "Document",
+      "country": "Country",
+      "dob": "Date of birth",
+      "openDocument": "Open document",
+      "openSelfie": "Open selfie",
+      "approve": "Verify",
+      "reject": "Reject",
+      "reasonPlaceholder": "Reason (shown to the member if rejected)",
+      "rejectHint": "Document links expire in ten minutes, and opening this queue is recorded in the audit log."
+    },
+    "jobs": {
+      "enabled": "On",
+      "disabled": "Off",
+      "failing": "Failing",
+      "lastRun": "Last run {{when}} — {{result}}",
+      "neverRun": "Never run.",
+      "runNow": "Run now",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off"
+    },
+    "audit": {
+      "empty": "No activity yet",
+      "system": "System",
+      "unknownActor": "Unknown"
+    },
+    "tickets": {
+      "empty": "No support tickets",
+      "status": {
+        "open": "Open",
+        "in_progress": "In progress",
+        "closed": "Closed"
+      },
+      "category": {
+        "payment": "Payment",
+        "technical": "Technical",
+        "bug": "Bug",
+        "feature": "Feature",
+        "general": "General"
+      }
     }
   },
   "guardians": {

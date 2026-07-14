@@ -234,6 +234,110 @@
       "emptyTitle": "لا شيء للمراجعة",
       "emptyBody": "تظهر طلبات الدفع اليدوي هنا فور إرسال الأعضاء لها.",
       "error": "تعذّر تحميل قائمة المراجعة."
+    },
+    "tab": {
+      "overview": "نظرة عامة",
+      "verification": "التوثيق",
+      "payments": "المدفوعات",
+      "users": "الأعضاء",
+      "settings": "الإعدادات",
+      "jobs": "المهام",
+      "support": "الدعم",
+      "audit": "سجل التدقيق"
+    },
+    "overview": {
+      "members": "الأعضاء",
+      "verified": "موثّقون",
+      "activeMatches": "الصلات النشطة",
+      "pendingClaims": "مدفوعات بانتظار المراجعة",
+      "tiers": "العضويات",
+      "moderation": "الإشراف (آخر ٧ أيام)",
+      "moderationHint": "الأحكام فقط. لا يمكن قراءة أي محادثة من هنا.",
+      "blockRate": "حُجبت {{blocked}} من أصل {{checked}} رسالة ({{rate}}٪)"
+    },
+    "category": {
+      "contact_info": "معلومات تواصل",
+      "too_soon": "عاطفة سابقة لأوانها",
+      "inappropriate": "محتوى غير لائق",
+      "haram_meeting": "لقاء دون محرم",
+      "scam": "احتيال",
+      "unavailable": "المشرف غير متاح",
+      "quota": "بلغ الحد",
+      "unknown": "غير معروف"
+    },
+    "settings": {
+      "search": "ابحث في الإعدادات…",
+      "none": "لا توجد إعدادات مطابقة.",
+      "public": "عام",
+      "save": "حفظ",
+      "saved": "تم الحفظ",
+      "on": "مفعّل",
+      "off": "معطّل",
+      "invalid": "يجب أن تكون القيمة من نوع {{type}}.",
+      "saveError": "تعذّر حفظ هذا الإعداد."
+    },
+    "users": {
+      "search": "ابحث بالاسم…",
+      "none": "لا يوجد أعضاء.",
+      "unnamed": "عضو بلا اسم",
+      "manage": "إدارة",
+      "manageTitle": "إدارة الحساب",
+      "manageBody": "تغيير حالة {{name}}. يُسجَّل كل تغيير في سجل التدقيق.",
+      "newStatus": "الحالة",
+      "days": "مدة الإيقاف (أيام)",
+      "daysHint": "اتركها صفرًا لإيقاف غير محدد المدة.",
+      "reason": "السبب",
+      "apply": "تطبيق",
+      "error": "تعذّر تغيير هذا الحساب.",
+      "status": {
+        "active": "نشط",
+        "suspended": "موقوف",
+        "banned": "محظور"
+      }
+    },
+    "verification": {
+      "empty": "لا شيء للمراجعة",
+      "emptyBody": "تظهر طلبات التوثيق هنا عند إرسالها.",
+      "unnamed": "عضو بلا اسم",
+      "documentType": "المستند",
+      "country": "الدولة",
+      "dob": "تاريخ الميلاد",
+      "openDocument": "فتح المستند",
+      "openSelfie": "فتح الصورة الشخصية",
+      "approve": "توثيق",
+      "reject": "رفض",
+      "reasonPlaceholder": "السبب (يُعرض للعضو عند الرفض)",
+      "rejectHint": "روابط المستندات تنتهي خلال عشر دقائق، وفتح هذه القائمة يُسجَّل في سجل التدقيق."
+    },
+    "jobs": {
+      "enabled": "مفعّلة",
+      "disabled": "معطّلة",
+      "failing": "تفشل",
+      "lastRun": "آخر تشغيل {{when}} — {{result}}",
+      "neverRun": "لم تُشغَّل بعد.",
+      "runNow": "شغّل الآن",
+      "turnOn": "تفعيل",
+      "turnOff": "تعطيل"
+    },
+    "audit": {
+      "empty": "لا نشاط بعد",
+      "system": "النظام",
+      "unknownActor": "غير معروف"
+    },
+    "tickets": {
+      "empty": "لا تذاكر دعم",
+      "status": {
+        "open": "مفتوحة",
+        "in_progress": "قيد المعالجة",
+        "closed": "مغلقة"
+      },
+      "category": {
+        "payment": "دفع",
+        "technical": "تقني",
+        "bug": "خلل",
+        "feature": "اقتراح",
+        "general": "عام"
+      }
     }
   },
   "guardians": {

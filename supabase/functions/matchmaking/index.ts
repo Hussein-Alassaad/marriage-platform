@@ -88,6 +88,13 @@ async function mapCandidate(
   };
 }
 
+/** A suspended or banned member may not act. Checked here, not at login: a session issued
+ *  a minute before a suspension must not buy an hour of harassment. */
+async function accountActive(admin: SupabaseClient, uid: string): Promise<boolean> {
+  const { data } = await admin.rpc('is_account_active', { uid });
+  return data === true;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -102,6 +109,7 @@ Deno.serve(async (req: Request) => {
   if (!uid) return json({ error: 'unauthorized' }, 401);
 
   const admin = createClient(url, serviceKey);
+  if (!(await accountActive(admin, uid))) return json({ error: 'account_suspended' }, 403);
   const body = await req.json().catch(() => ({}));
   const action = body.action as string;
 
