@@ -272,6 +272,53 @@ then reads. Triggered on demand by the "Generate recommendations" button; a
 scheduled batch can call the same logic for everyone later. Deploy:
 `supabase functions deploy compute-compatibility`.
 
+**`admin`** is the one audited surface for every administrative action. Three rules run
+through it: every mutation lands in `audit_logs`; an admin can operate the platform
+without ever reading a private conversation (there is no action here that returns a
+message body — moderation is judged from the verdict log); and *reading an identity
+document is itself logged*, because Decision #15 promises members that only authorised
+admins see them, and a promise nobody can check is not one. Actions: `overview`, `health`
+(the silent-failure traps — see below), `settings-list` / `settings-update` (type-checked
+both sides; `settings_history` records every change), `users-search` / `user-status`
+(suspend/ban — an admin cannot suspend another admin or themselves), `verification-queue`
+/ `verification-review` (**this is what finally lets anyone be verified** — the review
+action existed since Phase 5 with no caller), `jobs` / `job-run` / `job-toggle`, `audit`,
+`tickets` / `ticket-update`. Deploy: `supabase functions deploy admin`. Needs
+`20260714170000_admin_moderation.sql`.
+
+**`assistant`** is the Marriage Assistant. It is given the member's OWN profile and
+journey stage and **nothing about the other person** — so "what did she say about
+children?" fails because the information was never in the context, not because a prompt
+asked it to decline. It refuses to issue religious rulings (an AI fatwa is a real harm)
+and refuses to help anyone route around the platform's own safety rules. `assistant_enabled`
+is **false** until `ANTHROPIC_API_KEY` is funded: this is the one feature with no key-free
+fallback, so it shows an honest "not yet" rather than a chat box that errors on every
+question. Deploy: `supabase functions deploy assistant`.
+
+**`account`** is data export and account deletion — obligations, not features. Export
+returns what the platform holds about *you*, and deliberately not the messages other
+people sent you (their words, not your data). Deletion erases identity documents from
+storage **first**, then photos, terminates every connection, anonymises and soft-deletes
+the profile, and deletes the auth user last. Payment and audit records survive — they
+exist so "who approved this payment" outlives the account — but no longer point at a
+person. Deploy: `supabase functions deploy account`.
+
+## 5c. The silent failures
+
+Three things can be broken for a week without raising a single error. `admin` → `health`
+checks all three, and Admin → Overview shows a red strip when any is unhealthy:
+
+1. **`moderation_ai_enabled = true` with no funded key.** Moderation fails **closed**, so
+   this blocks *every message on the platform*. It is the single most dangerous
+   configuration state, and it looks like nothing. Either fund the key or set the setting
+   to `false` (the key-free pre-filter then becomes the only moderator).
+2. **A scheduled job that stopped running.** `scheduled_jobs.last_result` keeps the error
+   text verbatim; the Jobs panel shows it rather than reducing it to a red dot.
+3. **Stale exchange rates.** These do not error — they quietly convert every figure on the
+   finance page at last week's rate, which is worse than an outage.
+
+See `docs/Runbook.md` for what to do about each.
+
 ## 6. Pre-deploy checklist
 
 - [ ] `npm run typecheck && npm run lint && npm test && npm run build` all pass.

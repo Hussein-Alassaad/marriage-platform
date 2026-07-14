@@ -15,6 +15,11 @@ import '@fontsource/ibm-plex-sans-arabic/600.css';
 import '@fontsource/ibm-plex-sans-arabic/700.css';
 
 import { App } from '@/app/App';
+import { installGlobalErrorHandlers } from '@/lib/telemetry';
+
+// Catches what the React error boundary cannot: throws outside the render tree and
+// promise rejections nobody awaited.
+installGlobalErrorHandlers();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element #root not found');

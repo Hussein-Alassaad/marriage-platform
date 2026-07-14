@@ -27,10 +27,34 @@ Context for every Claude Code session. Read this first. The authoritative specs 
 - **Conversation suggestions: complete** — the AI proposes what to ask next, per stage.
 - **Phase 12 — Finance Module: complete** (personal ledger, tiered dashboard,
   multi-currency, Couple Finance). Monthly AI reports + exports are not built yet.
-- **Next: Phase 11 — Marriage Assistant** (see `docs/Roadmap.md`). It is **blocked on a
-  funded `ANTHROPIC_API_KEY`**: unlike moderation, an assistant has no key-free
-  fallback — with no model there is nothing for it to say. Phase 12 was built first for
-  exactly this reason (the Roadmap allows 11 and 12 in either order).
+- **Phase 13 — Notifications & scheduled jobs: complete.** Event-driven delivery (SQL
+  trigger, not an Edge Function), quiet hours, digests, preferences; jobs run under
+  pg_cron with **no service key**.
+- **Phase 14 — Admin dashboard: complete.** Settings editor, verification queue (which
+  nobody could do before — see below), user suspension, jobs, audit log, support.
+- **Phase 11 — Marriage Assistant: built, and switched OFF.** `assistant_enabled` is
+  false until `ANTHROPIC_API_KEY` is funded. It is the one feature with **no key-free
+  fallback** — an assistant with no model has nothing to say — so it shows an honest
+  "not yet" rather than a chat box that errors on every question.
+- **Phase 15/16 (partial): complete.** Data export + account deletion, legal pages,
+  Settings page, error telemetry, health checks, `docs/Runbook.md`.
+- **Remaining:** analytics dashboards, monthly AI reports, finance exports (PDF/CSV),
+  card payments (Areeba) + coupons, conversation summaries, a11y/perf audit, and
+  external alerting. See `docs/Runbook.md` §5 for what is deliberately NOT monitored.
+
+Two holes Phase 14 closed that are worth remembering:
+1. **`verify-identity` had a review action that nothing ever called.** No member could be
+   verified, and verification gates matchmaking — the platform was closed at its own front
+   door. Admin → Verification is that queue.
+2. **There was no way to suspend anyone.** `profiles.status` + `is_account_active()` now
+   exist, and suspension is checked **at the point of action** (sending a message, sending
+   an interest), not at login — a session issued a minute earlier must not buy an hour of
+   harassment. `revoke update on profiles` + a column-level grant means a client can write
+   its own profile fields and nothing else: no self-unban, no self-upgrade.
+
+**The dangerous state to know about:** `moderation_ai_enabled = true` with no funded key.
+Moderation fails **closed**, so that combination blocks *every message on the platform*
+while raising no error anywhere. Admin → Overview checks for it explicitly.
 
 Finance delivered (Phase 12): tiers follow Decision #17 — Free adds income/expenses and
 sees a plain history; Serious adds charts, statistics, budgets and savings goals; the

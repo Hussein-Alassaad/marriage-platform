@@ -146,6 +146,75 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (action === 'health') {
+      // The silent-failure traps. Each of these can be broken for a week without a single
+      // error appearing anywhere — which is exactly why they are checked explicitly.
+      const checks: { key: string; ok: boolean; detail: string }[] = [];
+
+      // 1. Moderation. The dangerous state is not "off" — it is "on, but the key is gone",
+      //    which fails closed and silently blocks every message on the platform.
+      const aiEnabled = await setting(admin, 'moderation_ai_enabled', true);
+      const hasKey = Boolean(Deno.env.get('ANTHROPIC_API_KEY'));
+      checks.push({
+        key: 'moderation',
+        ok: !aiEnabled || hasKey,
+        detail: !aiEnabled
+          ? 'local_only'
+          : hasKey
+            ? 'ai_enabled'
+            : 'ai_enabled_but_no_key', // every message is being blocked right now
+      });
+
+      // 2. Jobs that have not run when they should have.
+      const { data: jobs } = await admin.from('scheduled_jobs').select('name, enabled, last_run_at, last_result');
+      const stale = ((jobs ?? []) as { name: string; enabled: boolean; last_run_at: string | null }[])
+        .filter((j) => j.enabled)
+        .filter((j) => !j.last_run_at || Date.now() - new Date(j.last_run_at).getTime() > 36 * 3600e3);
+      const failing = ((jobs ?? []) as { name: string; last_result: string | null }[]).filter((j) =>
+        j.last_result?.startsWith('error:'),
+      );
+      checks.push({
+        key: 'jobs',
+        ok: !stale.length && !failing.length,
+        detail: [
+          stale.length ? `stale: ${stale.map((j) => j.name).join(', ')}` : '',
+          failing.length ? `failing: ${failing.map((j) => j.name).join(', ')}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · ') || 'all running',
+      });
+
+      // 3. Exchange rates. A stale rate does not error — it quietly makes every figure on
+      //    the finance page wrong, which is worse than an outage.
+      const { data: rate } = await admin
+        .from('exchange_rates')
+        .select('as_of')
+        .eq('base_currency', 'USD')
+        .order('as_of', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const ageDays = rate?.as_of
+        ? Math.floor((Date.now() - new Date(rate.as_of).getTime()) / 864e5)
+        : Infinity;
+      checks.push({
+        key: 'exchange_rates',
+        ok: ageDays <= 3,
+        detail: Number.isFinite(ageDays) ? `${ageDays} days old` : 'never fetched',
+      });
+
+      // 4. Backlog: work waiting on a human. Not an outage, but a queue nobody is working
+      //    is how a member waits a fortnight to be verified.
+      const pendingVerifications = await countWhere(admin, 'identity_verifications', 'status', 'pending');
+      const pendingClaims = await countWhere(admin, 'payment_claims', 'status', 'pending');
+      checks.push({
+        key: 'queues',
+        ok: pendingVerifications < 20 && pendingClaims < 20,
+        detail: `${pendingVerifications} verifications, ${pendingClaims} payments waiting`,
+      });
+
+      return json({ checks, healthy: checks.every((c) => c.ok) });
+    }
+
     if (action === 'settings-list') {
       const { data } = await admin
         .from('settings')

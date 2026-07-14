@@ -338,6 +338,21 @@
         "feature": "Feature",
         "general": "General"
       }
+    },
+    "health": {
+      "allGood": "All systems healthy.",
+      "attention": "Needs attention",
+      "moderation": "Moderation",
+      "jobs": "Scheduled jobs",
+      "exchange_rates": "Exchange rates",
+      "queues": "Review queues",
+      "detail": {
+        "ai_enabled_but_no_key": "AI moderation is ON but there is no API key — every message is being blocked right now. Fund the key, or switch moderation_ai_enabled off.",
+        "local_only": "Running on the local pre-filter only (no AI).",
+        "ai_enabled": "AI moderation active.",
+        "all running": "All running.",
+        "never fetched": "Never fetched — finance figures may be converting at seeded rates."
+      }
     }
   },
   "guardians": {

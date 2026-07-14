@@ -6,6 +6,14 @@ export function useAdminOverview() {
   return useQuery({ queryKey: ['admin-overview'], queryFn: () => adminService.overview() });
 }
 
+export function useHealth() {
+  return useQuery({
+    queryKey: ['admin-health'],
+    queryFn: () => adminService.health(),
+    refetchInterval: 60_000,
+  });
+}
+
 export function useAdminSettings(enabled: boolean) {
   return useQuery({
     queryKey: ['admin-settings'],

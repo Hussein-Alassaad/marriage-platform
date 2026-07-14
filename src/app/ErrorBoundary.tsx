@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
+import { captureError } from '@/lib/telemetry';
+
 interface Props {
   children: ReactNode;
 }
@@ -19,8 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Surfaced in the console for debugging.
-    console.error('Page error:', error, info.componentStack);
+    captureError(error, { where: 'ErrorBoundary', componentStack: info.componentStack });
   }
 
   render() {

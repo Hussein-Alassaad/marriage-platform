@@ -85,8 +85,17 @@ async function call<T>(action: string, extra: Record<string, unknown> = {}): Pro
   return data as T;
 }
 
+export interface HealthCheck {
+  key: string;
+  ok: boolean;
+  detail: string;
+}
+
 export const adminService = {
   overview: () => call<Overview>('overview'),
+
+  /** The silent-failure traps: each can be broken for a week without raising an error. */
+  health: () => call<{ checks: HealthCheck[]; healthy: boolean }>('health'),
 
   listSettings: () => call<{ settings: Setting[] }>('settings-list').then((r) => r.settings),
   updateSetting: (key: string, value: unknown) =>

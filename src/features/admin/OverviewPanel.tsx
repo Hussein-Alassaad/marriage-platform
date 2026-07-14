@@ -1,9 +1,54 @@
 import { useTranslation } from 'react-i18next';
-import { CreditCard, Heart, ShieldCheck, Users } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CreditCard, Heart, ShieldCheck, Users } from 'lucide-react';
 
 import { Card, CardTitle } from '@/components/Card';
 import { Skeleton } from '@/components/Skeleton';
-import { useAdminOverview } from '@/hooks/useAdmin';
+import { useAdminOverview, useHealth } from '@/hooks/useAdmin';
+
+/**
+ * The silent-failure traps, checked explicitly because none of them raise an error:
+ * moderation switched on with no key (every message on the platform is being blocked right
+ * now), a job that stopped running a week ago, exchange rates gone stale (which does not
+ * fail — it quietly makes every figure on the finance page wrong), and queues nobody is
+ * working. A dashboard that only shows what is fine is decoration.
+ */
+function HealthStrip() {
+  const { t } = useTranslation();
+  const { data } = useHealth();
+  if (!data) return null;
+
+  const problems = data.checks.filter((c) => !c.ok);
+  if (!problems.length) {
+    return (
+      <p className="text-success flex items-center gap-2 text-sm">
+        <CheckCircle2 className="h-4 w-4" aria-hidden />
+        {t('admin.health.allGood')}
+      </p>
+    );
+  }
+
+  return (
+    <Card className="border-danger/30 p-4">
+      <div className="text-danger mb-2 flex items-center gap-2">
+        <AlertTriangle className="h-4 w-4" aria-hidden />
+        <span className="text-sm font-semibold">{t('admin.health.attention')}</span>
+      </div>
+      <ul className="space-y-1">
+        {problems.map((c) => (
+          <li key={c.key} className="text-ink-soft text-sm">
+            <span className="font-medium">
+              {t(`admin.health.${c.key}`, { defaultValue: c.key })}
+            </span>
+            {' — '}
+            <span className="text-muted">
+              {t(`admin.health.detail.${c.detail}`, { defaultValue: c.detail })}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
 
 /**
  * The health of the platform, with no way to reach into anyone's private life. There is
@@ -37,6 +82,8 @@ export function OverviewPanel() {
 
   return (
     <div className="space-y-6">
+      <HealthStrip />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <Card key={c.key} className="p-5">
