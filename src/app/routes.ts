@@ -21,6 +21,10 @@ export const ROUTES = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   authCallback: '/auth/callback',
+  // Legal pages are public: someone must be able to read the terms BEFORE agreeing to them.
+  terms: '/terms',
+  privacy: '/privacy',
+  rules: '/community-rules',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

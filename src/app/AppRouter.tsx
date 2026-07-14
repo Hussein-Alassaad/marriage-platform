@@ -28,6 +28,7 @@ import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { AuthCallbackPage } from '@/features/auth/AuthCallbackPage';
 import { PhoneVerificationPage } from '@/features/auth/PhoneVerificationPage';
 import { VerifyIdentityPage } from '@/features/verification/VerifyIdentityPage';
+import { LegalPage } from '@/features/legal/LegalPage';
 import { NotFoundPage } from '@/features/errors/NotFoundPage';
 
 export function AppRouter() {
@@ -41,6 +42,12 @@ export function AppRouter() {
         <Route path={ROUTES.resetPassword} element={<ResetPasswordPage />} />
       </Route>
       <Route path={ROUTES.authCallback} element={<AuthCallbackPage />} />
+
+      {/* Public, and outside every layout: you must be able to read the terms before you
+          agree to them — which means before you have an account. */}
+      <Route path={ROUTES.terms} element={<LegalPage doc="terms" />} />
+      <Route path={ROUTES.privacy} element={<LegalPage doc="privacy" />} />
+      <Route path={ROUTES.rules} element={<LegalPage doc="rules" />} />
 
       {/* Authenticated app */}
       <Route element={<RequireAuth />}>

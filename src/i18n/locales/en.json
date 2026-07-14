@@ -1021,5 +1021,138 @@
       "daily_limit": "You have reached your conversations for today.",
       "too_long": "That message is too long."
     }
+  },
+  "settings": {
+    "eyebrow": "Settings",
+    "title": "Settings",
+    "subtitle": "Preferences, privacy, and your account.",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "notificationsBody": "Choose what you hear about, how often, and when to stay quiet.",
+    "openNotifications": "Notification preferences",
+    "export": "Download your data",
+    "exportBody": "Everything the platform holds about you, as a single file. Messages other people sent you are their words, not your data, and are not included.",
+    "exportAction": "Download",
+    "exporting": "Preparing…",
+    "exportError": "Could not prepare your data. Please try again.",
+    "delete": "Delete your account",
+    "deleteBody": "Permanent. Your identity documents are erased, your profile is removed, and your connections end.",
+    "deleteAction": "Delete account",
+    "deleteTitle": "Delete your account",
+    "deleteWarning": "This cannot be undone. When you confirm:",
+    "deleteBullet": {
+      "documents": "Your identity documents are deleted from storage immediately.",
+      "profile": "Your profile is erased and can no longer be found by anyone.",
+      "matches": "Your connections end, so nobody is left waiting for a reply.",
+      "records": "Payment and audit records are kept as the law requires, but no longer point to you."
+    },
+    "deleteConfirm": "Type {{email}} to confirm",
+    "deleteFinal": "Delete my account permanently",
+    "deleting": "Deleting…",
+    "deleteError": "Could not delete your account. Please try again."
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "updated": "Last updated 14 July 2026. These documents describe what the platform actually does. If anything here does not match your experience, that is a bug — please tell us.",
+    "terms": {
+      "title": "Terms of Service",
+      "subtitle": "What you agree to by using Mithaq.",
+      "sections": [
+        {
+          "heading": "What Mithaq is",
+          "body": "Mithaq is a platform for people seeking marriage. It is not a dating app. Every connection here moves through defined stages — Introduction, Serious Communication, Family, and Marriage — and the platform is built around that intent."
+        },
+        {
+          "heading": "Who may use it",
+          "body": "You must be at or above the minimum age for your region, and you must verify your identity before you can be matched with anyone. You may hold one account. You must give true information about yourself: this platform exists so that people can trust what they read here."
+        },
+        {
+          "heading": "How you must behave",
+          "body": "Treat every member with respect. Do not harass, deceive, threaten, or pressure anyone. Do not use this platform for anything other than seeking marriage. Breaking these rules can suspend or end your account — see the Community Rules for detail."
+        },
+        {
+          "heading": "Moderation",
+          "body": "Messages are checked before they are delivered. Contact details, romantic language before it is appropriate, and attempts to move off the platform are blocked in the early stages. This is not a suggestion — it is enforced by the system, and it applies to everyone equally."
+        },
+        {
+          "heading": "Membership and payments",
+          "body": "Some features require a paid membership. Prices are shown before you pay. Manual payments (OMT, Whish, bank transfer) are reviewed by a person and activated once confirmed. If a payment cannot be verified, we will tell you why."
+        },
+        {
+          "heading": "Ending your account",
+          "body": "You may delete your account at any time, from Settings. Deletion is immediate and permanent. We may suspend or end an account that breaks these terms."
+        },
+        {
+          "heading": "What we do not promise",
+          "body": "We do not promise that you will find a spouse. We do not verify claims that we cannot check — for example, a declared family relationship is confirmed by the person named, not proven by us, and we say so wherever it appears."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "subtitle": "What we hold, who can see it, and what we delete.",
+      "sections": [
+        {
+          "heading": "What we hold",
+          "body": "Your profile, your photos, your identity documents, your messages, your finance entries if you use that feature, and your assistant conversations if you use that one."
+        },
+        {
+          "heading": "Your identity documents",
+          "body": "They are stored privately and are never public. Only authorised administrators can open them, every time they do so is recorded, and the documents are deleted automatically after your verification succeeds. If you delete your account, they are erased immediately."
+        },
+        {
+          "heading": "Your messages",
+          "body": "Messages are checked by an automated moderator before delivery. Administrators cannot browse your conversations — there is no screen in this platform that lets them. Moderation is reviewed from verdicts (what was blocked, and why), not from your words."
+        },
+        {
+          "heading": "Your finances",
+          "body": "Your income and expenses are yours alone. Administrators cannot read them; there is no policy in the database that would allow it. If you and your spouse connect Couple Finance, you share monthly totals — never individual entries — and either of you can disconnect at any time, alone."
+        },
+        {
+          "heading": "The assistant",
+          "body": "Your assistant conversations are private. The assistant is given your own profile and your journey stage, and nothing about the other person — not their profile, not your messages with them. You can delete your assistant history and its memory yourself, without asking us."
+        },
+        {
+          "heading": "Your guardian",
+          "body": "A guardian sees only the connections you explicitly share with them, one at a time, and you can revoke that at any moment. They cannot browse the platform, search members, or read anything you have not shared."
+        },
+        {
+          "heading": "Taking your data, and leaving",
+          "body": "You can download everything we hold about you, as a file, from Settings. You can delete your account from the same place. We keep payment and audit records after deletion because the law requires it, but they no longer point to you."
+        }
+      ]
+    },
+    "rules": {
+      "title": "Community Rules",
+      "subtitle": "The behaviour this platform exists to protect.",
+      "sections": [
+        {
+          "heading": "Be here for marriage",
+          "body": "This is not a place to make friends, pass time, or look for anything other than a spouse. If that is not why you are here, this is the wrong platform."
+        },
+        {
+          "heading": "Be truthful",
+          "body": "Do not misrepresent your age, marital status, intentions, or circumstances. Someone is making one of the largest decisions of their life on the basis of what you tell them."
+        },
+        {
+          "heading": "Respect the stages",
+          "body": "Contact details and romantic language are blocked before the Family stage, and this is enforced by the system. Do not try to work around it — asking someone to move to another app is a violation, whether or not the words get through."
+        },
+        {
+          "heading": "Respect a \"no\"",
+          "body": "If someone declines your interest or ends a connection, that is the end of it. Do not try to reach them another way."
+        },
+        {
+          "heading": "Never pressure, deceive, or extort",
+          "body": "Threats, blackmail, financial scams, and pressure of any kind will end your account immediately and permanently. If someone does this to you, report it — you are not the one in trouble."
+        },
+        {
+          "heading": "What happens when a rule is broken",
+          "body": "Depending on severity: a warning, a temporary suspension, or a permanent ban. Serious violations skip straight to the end. Every decision is recorded."
+        }
+      ]
+    }
   }
 }
