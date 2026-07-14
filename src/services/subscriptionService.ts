@@ -187,7 +187,13 @@ export const subscriptionService = {
     const { data, error } = await supabase.functions.invoke('subscriptions', {
       body: { action: 'review', claimId, decision, reason },
     });
-    if (error) throw error;
+    if (error) {
+      // A non-2xx from an Edge Function surfaces as "returned a non-2xx status code",
+      // which names nothing. The reason is in the body — read it.
+      const detail = await error.context?.json?.().catch(() => null);
+      if (detail?.error) throw new Error(detail.error);
+      throw error;
+    }
     if (data?.error) throw new Error(data.error);
   },
 };

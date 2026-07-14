@@ -20,17 +20,25 @@ import { usePendingClaims, useReviewClaim } from '@/hooks/useSubscription';
 export function PaymentsQueue() {
   const { t } = useTranslation();
   const { hasRole } = useSession();
-  const isAdmin = hasRole('admin');
+  // `super_admin` is an admin. Checking only 'admin' hid this whole queue from the very
+  // role that is meant to be able to do everything.
+  const isAdmin = hasRole('admin', 'super_admin');
   const { data: claims, isLoading, error } = usePendingClaims(isAdmin);
   const review = useReviewClaim();
   const [busy, setBusy] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   if (!isAdmin) return null;
 
   const act = async (claimId: string, decision: 'approved' | 'rejected') => {
     setBusy(claimId);
+    setActionError(null);
     try {
       await review.mutateAsync({ claimId, decision });
+    } catch (e) {
+      // This used to be swallowed: the approval failed, the claim stayed pending, and the
+      // screen said nothing at all. A failure you cannot see is the worst kind.
+      setActionError(e instanceof Error ? e.message : 'unknown_error');
     } finally {
       setBusy(null);
     }
@@ -41,6 +49,15 @@ export function PaymentsQueue() {
       <h2 className="font-display text-ink mb-4 text-lg font-semibold">
         {t('admin.payments.title')}
       </h2>
+
+      {/* The reason the approval failed, verbatim. Guessing at it from an empty screen is
+          how an hour disappears. */}
+      {actionError ? (
+        <Card className="border-danger/30 mb-4 p-4">
+          <p className="text-danger text-sm font-medium">{t('admin.payments.actionFailed')}</p>
+          <p className="text-muted mt-1 font-mono text-xs break-all">{actionError}</p>
+        </Card>
+      ) : null}
 
       {isLoading ? (
         <div className="space-y-3">

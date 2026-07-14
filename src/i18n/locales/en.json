@@ -243,7 +243,8 @@
       "reject": "Reject",
       "emptyTitle": "Nothing to review",
       "emptyBody": "Manual payment claims appear here as soon as members submit them.",
-      "error": "Couldn't load the review queue."
+      "error": "Couldn't load the review queue.",
+      "actionFailed": "The approval failed. Nothing was changed."
     },
     "tab": {
       "overview": "Overview",
