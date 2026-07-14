@@ -989,5 +989,37 @@
         "body": "You and your spouse now share monthly totals."
       }
     }
+  },
+  "assistant": {
+    "eyebrow": "Assistant",
+    "title": "Marriage Assistant",
+    "subtitle": "A respectful assistant for your whole marriage journey.",
+    "newChat": "New conversation",
+    "untitled": "Untitled",
+    "deleteChat": "Delete conversation",
+    "greeting": "What would you like to think through?",
+    "privacyNote": "I only know your own profile and where you are in the journey. I have never seen the other person’s profile or your messages with them.",
+    "placeholder": "Ask anything about preparing for marriage…",
+    "thinking": "Thinking…",
+    "remaining": "{{used}} of {{limit}} conversations used today",
+    "limitReached": "You have used your {{limit}} conversations for today. You can continue an existing one, or start again tomorrow.",
+    "prompt": {
+      "prepare": "How do I prepare for a serious marriage conversation?",
+      "questions": "What should I ask at this stage?",
+      "family": "How do I involve my family respectfully?",
+      "profile": "How can I improve my profile?",
+      "wedding": "How do I plan a wedding within my means?"
+    },
+    "disabled": {
+      "title": "The assistant is not available yet",
+      "body": "The Marriage Assistant needs an AI model to answer you. It will appear here the moment it is switched on — nothing else about the platform depends on it."
+    },
+    "error": {
+      "generic": "Something went wrong. Please try again.",
+      "assistant_unavailable": "The assistant is not switched on yet.",
+      "assistant_failed": "The assistant could not answer just now. Please try again.",
+      "daily_limit": "You have reached your conversations for today.",
+      "too_long": "That message is too long."
+    }
   }
 }
