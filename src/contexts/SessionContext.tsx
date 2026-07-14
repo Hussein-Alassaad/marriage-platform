@@ -74,6 +74,36 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (session?.user) await loadProfile(session.user.id);
   }, [session, loadProfile]);
 
+  /**
+   * The profile carries things the SERVER changes while the member is sitting there: an
+   * admin approves their payment (tier), approves their documents (verification), or
+   * suspends them. Loading it once at sign-in meant a member who paid kept seeing "Free"
+   * until they logged out and back in — the platform had already granted the tier and was
+   * simply not telling them.
+   *
+   * So: re-read it when the tab regains focus (the natural moment — they switched away to
+   * pay and came back), and on a slow timer as a floor.
+   */
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    const refresh = () => void loadProfile(userId);
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    const timer = window.setInterval(refresh, 60_000);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.clearInterval(timer);
+    };
+  }, [session?.user?.id, loadProfile]);
+
   const signOut = useCallback(async () => {
     await authService.signOut();
     setSession(null);
