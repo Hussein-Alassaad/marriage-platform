@@ -1,69 +1,36 @@
-import { type PointerEvent } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { PageTransition } from '@/components/motion/PageTransition';
-import { AuroraBackground } from '@/components/motion/AuroraBackground';
-import { GeometricVeil } from '@/components/motion/GeometricVeil';
-import { AmbientParticles } from '@/components/motion/AmbientParticles';
-import { Starfield } from '@/features/auth/scene/Starfield';
 import { ArchedWindow } from '@/features/auth/scene/ArchedWindow';
 import { Lantern } from '@/features/auth/scene/Lantern';
 import { CalligraphyVerse } from '@/features/auth/scene/CalligraphyVerse';
 import { TrustBar } from '@/features/auth/scene/TrustBar';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { usePointerFine } from '@/hooks/usePointerFine';
 import { EASE_EXPO } from '@/lib/motion';
 
 /**
  * Auth scene — luxury Islamic-architecture, no characters. A centered glass card
  * (the focal point) framed by a glowing pointed arch, flanked by twin lanterns,
- * with an Amiri calligraphy verse, geometric lattice, drifting aurora + mesh and
- * slow light particles. All CSS/Framer (no WebGL) for 60fps on average phones.
- * Content/routing/i18n/validation untouched.
+ * over a warm static gradient.
+ *
+ * Deliberately STATIC. The earlier version layered a starfield, drifting aurora,
+ * floating particles and a geometric veil, and tracked the pointer to parallax eight
+ * separate layers on every mouse move — beautiful, and far too much work per frame on
+ * an average machine, which showed as lag on the login screen. The look is kept; the
+ * per-frame animation is gone. Only the card keeps a single one-shot entrance.
  */
 export function AuthLayout() {
   const { t } = useTranslation();
   const location = useLocation();
   const reduced = useReducedMotion();
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
-  const pointerFine = usePointerFine();
-  const parallax = isDesktop && pointerFine && !reduced;
-
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 50, damping: 18, mass: 0.6 });
-  const sy = useSpring(my, { stiffness: 50, damping: 18, mass: 0.6 });
-  const archX = useTransform(sx, [-1, 1], [-10, 10]);
-  const archY = useTransform(sy, [-1, 1], [-10, 10]);
-  const lanternX = useTransform(sx, [-1, 1], [-14, 14]);
-  const lanternY = useTransform(sy, [-1, 1], [-14, 14]);
-  const verseX = useTransform(sx, [-1, 1], [7, -7]);
-  const cardX = useTransform(sx, [-1, 1], [-5, 5]);
-  const cardY = useTransform(sy, [-1, 1], [-5, 5]);
-
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!parallax) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    mx.set(((e.clientX - r.left) / r.width - 0.5) * 2);
-    my.set(((e.clientY - r.top) / r.height - 0.5) * 2);
-  };
-  const onLeave = () => {
-    mx.set(0);
-    my.set(0);
-  };
 
   return (
-    <div
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-      className="app-backdrop relative flex min-h-screen flex-col overflow-hidden"
-    >
-      {/* Background depth (back → front) */}
+    <div className="app-backdrop relative flex min-h-screen flex-col overflow-hidden">
+      {/* Background depth (back → front) — all static. */}
       <div aria-hidden className="auth-mesh pointer-events-none absolute inset-0" />
       <div
         aria-hidden
@@ -73,36 +40,25 @@ export function AuthLayout() {
             'radial-gradient(60rem 44rem at 12% 76%, rgba(201,162,39,0.14), transparent 60%), radial-gradient(52rem 40rem at 90% 20%, rgba(227,197,103,0.09), transparent 62%)',
         }}
       />
-      <Starfield />
-      <motion.div style={parallax ? { x: verseX } : undefined} className="absolute inset-0 z-0">
+      <div aria-hidden className="absolute inset-0 z-0">
         <CalligraphyVerse />
-      </motion.div>
-      <GeometricVeil />
-      <AuroraBackground />
-      <AmbientParticles count={12} />
+      </div>
 
       {/* Central architectural arch, framing the card with warm light. */}
-      <motion.div
+      <div
         aria-hidden
-        style={parallax ? { x: archX, y: archY } : undefined}
         className="absolute top-1/2 left-1/2 z-0 hidden h-[94vh] w-[64vh] -translate-x-1/2 -translate-y-1/2 opacity-80 lg:block"
       >
         <ArchedWindow className="inset-0 h-full w-full" />
-      </motion.div>
+      </div>
 
       {/* Twin lanterns */}
-      <motion.div
-        style={parallax ? { x: lanternX, y: lanternY } : undefined}
-        className="absolute top-0 z-0 ltr:left-[17%] rtl:right-[17%]"
-      >
+      <div className="absolute top-0 z-0 ltr:left-[17%] rtl:right-[17%]">
         <Lantern />
-      </motion.div>
-      <motion.div
-        style={parallax ? { x: lanternX, y: lanternY } : undefined}
-        className="absolute top-0 z-0 hidden scale-90 opacity-90 lg:block ltr:right-[17%] rtl:left-[17%]"
-      >
+      </div>
+      <div className="absolute top-0 z-0 hidden scale-90 opacity-90 lg:block ltr:right-[17%] rtl:left-[17%]">
         <Lantern />
-      </motion.div>
+      </div>
 
       {/* Trust pill (top-start) */}
       <div className="glass border-line absolute top-4 z-30 hidden items-center gap-2 rounded-full border px-3.5 py-2 sm:flex ltr:left-4 rtl:right-4">
@@ -118,10 +74,7 @@ export function AuthLayout() {
 
       {/* Card — the focal point */}
       <div className="relative z-20 flex flex-1 items-center justify-center px-4 pt-16 pb-6 sm:pt-12">
-        <motion.div
-          style={parallax ? { x: cardX, y: cardY } : undefined}
-          className="relative w-[min(560px,92vw)]"
-        >
+        <div className="relative w-[min(560px,92vw)]">
           {/* Soft gold + emerald glow pooled behind the card. */}
           <div
             aria-hidden
@@ -131,10 +84,11 @@ export function AuthLayout() {
                 'radial-gradient(closest-side, rgba(16,185,129,0.22), transparent 70%), radial-gradient(closest-side at 70% 30%, rgba(201,162,39,0.14), transparent 72%)',
             }}
           />
+          {/* One gentle entrance, then nothing moves. */}
           <motion.div
-            initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE_EXPO, delay: 0.5 }}
+            initial={reduced ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: EASE_EXPO }}
             className="auth-card-glass border-line relative overflow-hidden rounded-[40px_40px_24px_24px] border [box-shadow:0_24px_80px_rgba(0,0,0,0.5),var(--inner-hi)]"
           >
             {/* Gold hairline along the arched top. */}
@@ -146,7 +100,7 @@ export function AuthLayout() {
               <Outlet />
             </PageTransition>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Trust bar */}
