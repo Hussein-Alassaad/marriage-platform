@@ -103,7 +103,10 @@ Deno.serve(async (req: Request) => {
 
   const isAdmin = async () => {
     const { data } = await admin.from('user_roles').select('role').eq('user_id', uid);
-    return (data ?? []).some((r: { role: string }) => r.role === 'admin');
+    // A super_admin is an admin. Checking only 'admin' locked the highest role out of the
+    // payments queue entirely — the queue came back forbidden (so empty, no Approve
+    // button), and review would have refused too.
+    return (data ?? []).some((r: { role: string }) => r.role === 'admin' || r.role === 'super_admin');
   };
 
   try {
