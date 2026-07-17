@@ -83,9 +83,12 @@ function StageNode({ stage, index }: { stage: Stage; index: number }) {
           <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
         )}
       </motion.span>
+      {/* Constrained to the cell and allowed to wrap, so a long word like
+          "Introduction" stacks inside its own column instead of running into the
+          next label. */}
       <span
         className={cn(
-          'text-[10px] leading-tight font-medium sm:text-xs',
+          'w-full px-0.5 text-[10px] leading-tight font-medium break-words sm:text-xs',
           current ? 'text-ink' : 'text-muted',
         )}
       >
