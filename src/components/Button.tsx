@@ -82,12 +82,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const y = useSpring(my, { stiffness: 380, damping: 30 });
 
   const magneticOn = magnetic && pointerFine && !reduced;
-  // A green light that travels around filled CTAs (gold buttons get a gold light).
-  const showGlow = variant === 'primary' || variant === 'gold';
-  const glowGradient =
-    variant === 'gold'
-      ? 'conic-gradient(from 0deg, transparent, var(--color-gold-400), transparent 40%, var(--color-gold-500), transparent 75%, var(--color-gold-400))'
-      : 'conic-gradient(from 0deg, transparent, var(--color-brand-400), transparent 40%, var(--color-brand-600), transparent 75%, var(--color-brand-400))';
+  // Filled CTAs (primary + gold) get a light sheen that sweeps across on hover.
+  const filled = variant === 'primary' || variant === 'gold';
 
   const handleMagnet = (event: PointerEvent<HTMLSpanElement>) => {
     const el = wrapRef.current;
@@ -123,24 +119,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       onPointerMove={magneticOn ? handleMagnet : undefined}
       onPointerLeave={magneticOn ? resetMagnet : undefined}
     >
-      {showGlow ? (
-        // Traveling light: a conic gradient rotates inside a thin ring that is
-        // clipped to the button's shape, so a green (gold) light circles the
-        // edge without ever leaking onto the surface. The button (above) covers
-        // the center, leaving only the lit border. Static for reduced motion.
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -inset-[2px] -z-0 overflow-hidden rounded-[1rem]"
-        >
-          <motion.span
-            className="absolute top-1/2 left-1/2 h-[240%] w-[240%] -translate-x-1/2 -translate-y-1/2 opacity-90"
-            style={{ background: glowGradient }}
-            animate={reduced ? undefined : { rotate: 360 }}
-            transition={{ duration: 4, ease: 'linear', repeat: Infinity }}
-          />
-        </span>
-      ) : null}
-
       <motion.button
         ref={ref}
         type={type}
@@ -163,6 +141,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         transition={SPRING_SNAPPY}
         {...props}
       >
+        {/* Sheen: a soft diagonal light rests off the left edge and glides across
+            once on hover. Pure CSS transform transition — it costs nothing until you
+            hover, unlike the old glow that spun forever. Sits above the fill, below
+            the label (z-10). Skipped when the user asked for reduced motion. */}
+        {filled && !reduced ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-md"
+          >
+            <span className="absolute inset-y-0 -left-1/2 w-1/2 -translate-x-[220%] -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-[650ms] ease-out group-hover:translate-x-[420%]" />
+          </span>
+        ) : null}
+
         {ripples.map((ripple) => (
           <motion.span
             key={ripple.id}
