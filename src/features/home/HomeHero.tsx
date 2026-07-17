@@ -1,17 +1,14 @@
-import { type PointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BadgeCheck, ShieldCheck, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
-import { AuroraBackground } from '@/components/motion/AuroraBackground';
 import { GeometricVeil } from '@/components/motion/GeometricVeil';
 import { ROUTES } from '@/app/routes';
 import { isSupabaseConfigured } from '@/services/backendService';
 import { EASE_OUT_EXPO, revealVariants } from '@/lib/motion';
-import { usePointerFine } from '@/hooks/usePointerFine';
 
 function BackendStatus() {
   const { t } = useTranslation();
@@ -59,33 +56,11 @@ function HeroHeadline({ text }: { text: string }) {
 
 export function HomeHero() {
   const { t } = useTranslation();
-  const pointerFine = usePointerFine();
-  const reduced = useReducedMotion();
-  const parallaxOn = pointerFine && !reduced;
 
-  // Pointer parallax: headline and background drift on opposite axes for depth.
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const spring = { stiffness: 150, damping: 20, mass: 0.6 };
-  const fgX = useSpring(px, spring);
-  const fgY = useSpring(py, spring);
-  const bgX = useTransform(fgX, (v) => v * -0.8);
-  const bgY = useTransform(fgY, (v) => v * -0.8);
-
-  const handleMove = (event: PointerEvent<HTMLElement>) => {
-    if (!parallaxOn) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const nx = (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-    const ny = (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    px.set(Math.max(-1, Math.min(1, nx)) * 11);
-    py.set(Math.max(-1, Math.min(1, ny)) * 11);
-  };
-
-  const handleLeave = () => {
-    px.set(0);
-    py.set(0);
-  };
-
+  // The hero used to run pointer parallax — the background and headline drifting on
+  // opposite axes, re-rendered on every mouse move. It read well but was steady per-frame
+  // work whenever the cursor was over the card. Removed for the same reason the login
+  // scene went static: a calmer, lighter home screen. The one-shot entrance stays.
   return (
     <motion.section
       initial="hidden"
@@ -94,18 +69,10 @@ export function HomeHero() {
         hidden: {},
         visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
       }}
-      onPointerMove={parallaxOn ? handleMove : undefined}
-      onPointerLeave={parallaxOn ? handleLeave : undefined}
       className="rounded-card border-line bg-surface relative overflow-hidden border [box-shadow:var(--shadow-card),var(--inner-hi)]"
     >
-      {/* Layer order (back→front): surface → hero wash (parallax) → aurora drift
-          → geometric veil → content. */}
-      <motion.div
-        aria-hidden
-        style={{ x: bgX, y: bgY }}
-        className="hero-gradient pointer-events-none absolute -inset-6"
-      />
-      <AuroraBackground />
+      {/* Static hero wash + faint geometric veil. */}
+      <div aria-hidden className="hero-gradient pointer-events-none absolute -inset-6" />
       <GeometricVeil />
 
       <div className="relative px-6 py-10 sm:px-12 sm:py-14">
@@ -118,9 +85,7 @@ export function HomeHero() {
             {t('page.home.eyebrow')}
           </motion.span>
 
-          <motion.div style={{ x: fgX, y: fgY }}>
-            <HeroHeadline text={t('page.home.greeting')} />
-          </motion.div>
+          <HeroHeadline text={t('page.home.greeting')} />
 
           <motion.p
             variants={revealVariants}

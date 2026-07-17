@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import { Sidebar } from '@/app/navigation/Sidebar';
@@ -5,6 +6,7 @@ import { TopBar } from '@/app/navigation/TopBar';
 import { BottomNav } from '@/app/navigation/BottomNav';
 import { ErrorBoundary } from '@/app/ErrorBoundary';
 import { PageTransition } from '@/components/motion/PageTransition';
+import { RouteFallback } from '@/components/RouteFallback';
 
 /**
  * Primary app frame: sidebar (desktop), top bar (all sizes), and a floating
@@ -22,7 +24,11 @@ export function AppLayout() {
           <div className="mx-auto w-full max-w-6xl">
             <PageTransition pathname={location.pathname}>
               <ErrorBoundary key={location.pathname}>
-                <Outlet />
+                {/* Only the content area waits while a lazy page's code arrives; the
+                    sidebar and top bar never flicker. */}
+                <Suspense fallback={<RouteFallback />}>
+                  <Outlet />
+                </Suspense>
               </ErrorBoundary>
             </PageTransition>
           </div>

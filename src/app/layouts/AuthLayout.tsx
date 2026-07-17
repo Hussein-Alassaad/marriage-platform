@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
@@ -10,6 +11,7 @@ import { ArchedWindow } from '@/features/auth/scene/ArchedWindow';
 import { Lantern } from '@/features/auth/scene/Lantern';
 import { CalligraphyVerse } from '@/features/auth/scene/CalligraphyVerse';
 import { TrustBar } from '@/features/auth/scene/TrustBar';
+import { RouteFallback } from '@/components/RouteFallback';
 import { EASE_EXPO } from '@/lib/motion';
 
 /**
@@ -97,7 +99,9 @@ export function AuthLayout() {
               className="via-gold-400/50 pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent"
             />
             <PageTransition pathname={location.pathname}>
-              <Outlet />
+              <Suspense fallback={<RouteFallback />}>
+                <Outlet />
+              </Suspense>
             </PageTransition>
           </motion.div>
         </div>

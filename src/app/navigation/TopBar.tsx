@@ -19,7 +19,7 @@ export function TopBar() {
   const { t } = useTranslation();
   const unread = useUnreadCount();
   return (
-    <header className="glass border-line sticky top-0 z-20 flex h-16 items-center gap-2 border-b px-4 md:h-[72px] md:px-8">
+    <header className="glass-solid border-line sticky top-0 z-20 flex h-16 items-center gap-2 border-b px-4 md:h-[72px] md:px-8">
       <div className="md:hidden">
         <Logo compact />
       </div>
