@@ -50,10 +50,11 @@ function StageNode({ stage, index }: { stage: Stage; index: number }) {
   const Icon = stage.icon;
 
   return (
-    <div className="relative z-10 flex min-w-[4.25rem] flex-1 flex-col items-center gap-2 text-center">
+    <div className="relative z-10 flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
       <motion.span
         className={cn(
-          'relative flex h-11 w-11 items-center justify-center rounded-full border',
+          // Shrinks on phones so all seven fit without scrolling; full size from sm up.
+          'relative flex h-9 w-9 items-center justify-center rounded-full border sm:h-11 sm:w-11',
           done && 'border-brand-400 bg-brand-wash text-brand-600',
           current && 'border-brand-400 bg-bg-3 text-brand-600 border-2',
           !done && !current && 'border-line-strong bg-surface text-faint',
@@ -77,12 +78,17 @@ function StageNode({ stage, index }: { stage: Stage; index: number }) {
           />
         ) : null}
         {done ? (
-          <Check className="h-5 w-5" aria-hidden />
+          <Check className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
         ) : (
-          <Icon className="h-5 w-5" aria-hidden />
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
         )}
       </motion.span>
-      <span className={cn('text-xs font-medium', current ? 'text-ink' : 'text-muted')}>
+      <span
+        className={cn(
+          'text-[10px] leading-tight font-medium sm:text-xs',
+          current ? 'text-ink' : 'text-muted',
+        )}
+      >
         {t(`page.home.journey.stages.${stage.key}`)}
       </span>
     </div>
@@ -117,14 +123,16 @@ export function JourneyCard() {
       {/* Stepper. The connecting line traces itself from the start to the current
           step (transform-only scaleX) — the journey literally advancing. */}
       <div className="relative mt-7">
+        {/* Rail sits at each node's vertical center — 18px for the h-9 mobile node,
+            22px for the h-11 node from sm up. */}
         <div
           aria-hidden
-          className="bg-line-strong absolute top-[21px] z-0 h-0.5 rounded"
+          className="bg-line-strong absolute top-[18px] z-0 h-0.5 rounded sm:top-[22px]"
           style={{ insetInlineStart: `${railStart}%`, insetInlineEnd: `${100 - railEnd}%` }}
         />
         <motion.div
           aria-hidden
-          className="bg-brand-500 absolute top-[21px] z-0 h-0.5 origin-left rounded rtl:origin-right"
+          className="bg-brand-500 absolute top-[18px] z-0 h-0.5 origin-left rounded sm:top-[22px] rtl:origin-right"
           style={{ insetInlineStart: `${railStart}%`, width: `${traceEnd - railStart}%` }}
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -132,9 +140,11 @@ export function JourneyCard() {
           transition={{ duration: TRACE_DURATION, ease: EASE_OUT_EXPO }}
         />
 
-        <ol className="relative flex items-start gap-1 overflow-x-auto pb-1">
+        {/* No horizontal scroll: the steps shrink to fit the width instead of spilling
+            over and showing a scroll arrow with a half-cut label. */}
+        <ol className="relative flex items-start gap-0.5 sm:gap-1">
           {STAGES.map((stage, index) => (
-            <li key={stage.key} className="flex flex-1">
+            <li key={stage.key} className="flex min-w-0 flex-1">
               <StageNode stage={stage} index={index} />
             </li>
           ))}
