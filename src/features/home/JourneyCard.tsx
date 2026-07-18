@@ -17,24 +17,66 @@ import { Button } from '@/components/Button';
 import { cn } from '@/utils/cn';
 import { EASE_OUT_EXPO } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
+import { useProfile } from '@/hooks/useProfile';
+import { useConnections } from '@/hooks/useMatch';
 
 interface Stage {
   key: string;
   icon: LucideIcon;
+  /** Where the "next step" button sends the member while this stage is current. */
+  route: string;
 }
 
+/**
+ * The journey, in the order the platform actually asks for it: make an account, build
+ * your profile, verify your identity (the gate before matching, Decision #5), then match,
+ * talk, involve family, and marry.
+ */
 const STAGES: Stage[] = [
-  { key: 'account', icon: UserPlus },
-  { key: 'verify', icon: ShieldCheck },
-  { key: 'profile', icon: UserRound },
-  { key: 'matching', icon: Heart },
-  { key: 'introduction', icon: MessagesSquare },
-  { key: 'family', icon: Users },
-  { key: 'married', icon: Gem },
+  { key: 'account', icon: UserPlus, route: ROUTES.home },
+  { key: 'profile', icon: UserRound, route: ROUTES.onboarding },
+  { key: 'verify', icon: ShieldCheck, route: ROUTES.verifyIdentity },
+  { key: 'matching', icon: Heart, route: ROUTES.match },
+  { key: 'introduction', icon: MessagesSquare, route: ROUTES.messages },
+  { key: 'family', icon: Users, route: ROUTES.messages },
+  { key: 'married', icon: Gem, route: ROUTES.messages },
 ];
 
-// A freshly created account: step 1 done, identity verification is next.
-const CURRENT_INDEX = 1;
+const INDEX = {
+  account: 0,
+  profile: 1,
+  verify: 2,
+  matching: 3,
+  introduction: 4,
+  family: 5,
+  married: 6,
+} as const;
+
+/** A profile counts as "done" for the journey at this completeness — one skipped optional
+ *  field should not hold the whole journey back. */
+const PROFILE_DONE_AT = 80;
+
+/**
+ * The member's real position, derived from their profile and their connections — not a
+ * hardcoded step. The furthest of "where their setup has reached" and "where their most
+ * advanced connection has reached" wins, so an active chat shows as further along than
+ * setup, and setup still shows while there is no connection yet.
+ */
+function currentIndex(verified: boolean, profileComplete: boolean, matchStages: string[]): number {
+  let fromMatch = 0;
+  if (matchStages.includes('married')) fromMatch = INDEX.married;
+  else if (matchStages.includes('family')) fromMatch = INDEX.family;
+  else if (matchStages.some((s) => s === 'introduction' || s === 'serious_communication')) {
+    fromMatch = INDEX.introduction;
+  } else if (matchStages.length) fromMatch = INDEX.matching; // an interest is in flight
+
+  let fromSetup: number;
+  if (!profileComplete) fromSetup = INDEX.profile;
+  else if (!verified) fromSetup = INDEX.verify;
+  else fromSetup = INDEX.matching; // profile done + verified → ready to match
+
+  return Math.min(Math.max(fromSetup, fromMatch), STAGES.length - 1);
+}
 
 // Horizontal centre of each node as a percentage of the track width.
 const cellWidth = 100 / STAGES.length;
@@ -43,10 +85,18 @@ const nodeCenter = (index: number) => (index + 0.5) * cellWidth;
 // Timing: the path finishes tracing, then the active node beats once.
 const TRACE_DURATION = 0.8;
 
-function StageNode({ stage, index }: { stage: Stage; index: number }) {
+function StageNode({
+  stage,
+  index,
+  current: currentIdx,
+}: {
+  stage: Stage;
+  index: number;
+  current: number;
+}) {
   const { t } = useTranslation();
-  const done = index < CURRENT_INDEX;
-  const current = index === CURRENT_INDEX;
+  const done = index < currentIdx;
+  const current = index === currentIdx;
   const Icon = stage.icon;
 
   return (
@@ -100,9 +150,24 @@ function StageNode({ stage, index }: { stage: Stage; index: number }) {
 
 export function JourneyCard() {
   const { t } = useTranslation();
+  const { data: profile } = useProfile();
+  const { data: connections } = useConnections();
+
+  const verified = profile?.verification_status === 'verified';
+  const profileComplete = (profile?.profile_completion ?? 0) >= PROFILE_DONE_AT;
+  const matchStages = (connections?.matches ?? [])
+    .filter((m) => m.stage !== 'terminated')
+    .map((m) => m.stage);
+
+  const current = currentIndex(verified, profileComplete, matchStages);
+  const currentStage = STAGES[current];
+  const complete = current === STAGES.length - 1; // married — the journey's end
+
   const railStart = nodeCenter(0);
   const railEnd = nodeCenter(STAGES.length - 1);
-  const traceEnd = nodeCenter(CURRENT_INDEX);
+  const traceEnd = nodeCenter(current);
+
+  const NextIcon = currentStage.icon;
 
   return (
     <section className="rounded-card border-line bg-surface border p-6 [box-shadow:var(--shadow-card),var(--inner-hi)] sm:p-8">
@@ -119,7 +184,7 @@ export function JourneyCard() {
           </p>
         </div>
         <span className="bg-gold-wash text-gold-400 ring-gold-500/30 shrink-0 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset">
-          {t('page.home.journey.stepOf', { current: CURRENT_INDEX + 1, total: STAGES.length })}
+          {t('page.home.journey.stepOf', { current: current + 1, total: STAGES.length })}
         </span>
       </div>
 
@@ -148,31 +213,43 @@ export function JourneyCard() {
         <ol className="relative flex items-start gap-0.5 sm:gap-1">
           {STAGES.map((stage, index) => (
             <li key={stage.key} className="flex min-w-0 flex-1">
-              <StageNode stage={stage} index={index} />
+              <StageNode stage={stage} index={index} current={current} />
             </li>
           ))}
         </ol>
       </div>
 
-      {/* Next-step callout. */}
-      <div className="border-brand-100 bg-brand-50/50 mt-7 flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="flex items-start gap-3">
-          <span className="bg-surface text-brand-600 ring-brand-100 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset">
-            <ShieldCheck className="h-5 w-5" aria-hidden />
-          </span>
-          <div>
-            <p className="text-brand-700 text-xs font-semibold tracking-wider uppercase">
-              {t('page.home.journey.next')}
-            </p>
-            <p className="text-ink-soft mt-0.5 text-sm leading-relaxed">
-              {t('page.home.journey.nextDetail')}
-            </p>
+      {/* Next-step callout — reflects the step the member is actually on. Hidden once the
+          journey is complete, since there is no next step to point at. */}
+      {!complete ? (
+        <div className="border-brand-100 bg-brand-50/50 mt-7 flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex items-start gap-3">
+            <span className="bg-surface text-brand-600 ring-brand-100 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset">
+              <NextIcon className="h-5 w-5" aria-hidden />
+            </span>
+            <div>
+              <p className="text-brand-700 text-xs font-semibold tracking-wider uppercase">
+                {t('page.home.journey.next')}
+              </p>
+              <p className="text-ink-soft mt-0.5 text-sm leading-relaxed">
+                {t(`page.home.journey.step.${currentStage.key}.detail`)}
+              </p>
+            </div>
           </div>
+          <Link to={currentStage.route} className="shrink-0">
+            <Button>{t(`page.home.journey.step.${currentStage.key}.cta`)}</Button>
+          </Link>
         </div>
-        <Link to={ROUTES.profile} className="shrink-0">
-          <Button>{t('page.home.journey.cta')}</Button>
-        </Link>
-      </div>
+      ) : (
+        <div className="border-brand-100 bg-brand-50/50 mt-7 flex items-center gap-3 rounded-2xl border p-4 sm:p-5">
+          <span className="bg-surface text-brand-600 ring-brand-100 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset">
+            <Gem className="h-5 w-5" aria-hidden />
+          </span>
+          <p className="text-ink-soft text-sm leading-relaxed">
+            {t('page.home.journey.step.married.detail')}
+          </p>
+        </div>
+      )}
     </section>
   );
 }

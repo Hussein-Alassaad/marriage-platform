@@ -836,6 +836,31 @@
           "introduction": "Introduction",
           "family": "Family",
           "married": "Marriage"
+        },
+        "step": {
+          "profile": {
+            "detail": "Complete your marriage profile so we can find the right matches.",
+            "cta": "Complete profile"
+          },
+          "verify": {
+            "detail": "Verify your identity to unlock private, compatibility-based matching.",
+            "cta": "Verify identity"
+          },
+          "matching": {
+            "detail": "You're ready. See your compatibility-ranked introductions.",
+            "cta": "See matches"
+          },
+          "introduction": {
+            "detail": "Continue getting to know each other in your moderated conversation.",
+            "cta": "Open chat"
+          },
+          "family": {
+            "detail": "Bring family into the conversation as you grow closer.",
+            "cta": "Open chat"
+          },
+          "married": {
+            "detail": "Mabrook — your journey is complete. May Allah bless your marriage."
+          }
         }
       },
       "match": {
