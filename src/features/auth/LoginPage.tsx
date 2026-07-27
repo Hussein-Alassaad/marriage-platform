@@ -14,6 +14,7 @@ import { RevealText } from '@/components/motion/RevealText';
 import { FadeRise } from '@/components/motion/FadeRise';
 import { ConfettiBurst } from '@/components/motion/ConfettiBurst';
 import { AuthField } from './scene/AuthField';
+import { GoogleSignInButton } from './GoogleSignInButton';
 import { ROUTES } from '@/app/routes';
 import { authService } from '@/services/authService';
 
@@ -41,14 +42,21 @@ export function LoginPage() {
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
     setFormError(null);
-    const { error } = await authService.signIn(email, password);
-    if (error) {
-      setFormError(error.message);
-      return;
+    try {
+      const { error } = await authService.signIn(email, password);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      // Barakah moment — confetti — then continue.
+      setSucceeded(true);
+      setTimeout(() => navigate(from, { replace: true }), 1100);
+    } catch {
+      // authService.signIn can throw (not just return {error}) if Supabase itself
+      // isn't reachable/configured — without this, that failure was silent: no
+      // message, submit button just went back to normal with nothing explained.
+      setFormError(t('auth.unexpectedError'));
     }
-    // Barakah moment — confetti — then continue.
-    setSucceeded(true);
-    setTimeout(() => navigate(from, { replace: true }), 1100);
   });
 
   return (
@@ -80,7 +88,16 @@ export function LoginPage() {
         </p>
       </FadeRise>
 
-      <form className="mt-7 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+      <div className="mt-7">
+        <GoogleSignInButton onError={setFormError} />
+        <div className="my-5 flex items-center gap-3">
+          <span className="border-line-strong h-px flex-1 border-t" aria-hidden />
+          <span className="text-faint text-xs font-medium uppercase">{t('auth.orDivider')}</span>
+          <span className="border-line-strong h-px flex-1 border-t" aria-hidden />
+        </div>
+      </div>
+
+      <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
         {state?.idleLogout ? <Alert variant="info">{t('page.login.idleLogout')}</Alert> : null}
         {formError ? <Alert>{formError}</Alert> : null}
 

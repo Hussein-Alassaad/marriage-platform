@@ -39,13 +39,17 @@ export function ResetPasswordPage() {
 
   const onSubmit = handleSubmit(async ({ password }) => {
     setFormError(null);
-    const { error } = await authService.updatePassword(password);
-    if (error) {
-      setFormError(error.message);
-      return;
+    try {
+      const { error } = await authService.updatePassword(password);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      setDone(true);
+      setTimeout(() => navigate(ROUTES.home, { replace: true }), 1200);
+    } catch {
+      setFormError(t('auth.unexpectedError'));
     }
-    setDone(true);
-    setTimeout(() => navigate(ROUTES.home, { replace: true }), 1200);
   });
 
   return (

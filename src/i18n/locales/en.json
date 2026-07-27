@@ -24,6 +24,9 @@
     "selectPlaceholder": "Select…"
   },
   "auth": {
+    "unexpectedError": "Something went wrong. Please try again.",
+    "continueWithGoogle": "Continue with Google",
+    "orDivider": "or",
     "signOut": "Sign out",
     "showPassword": "Show password",
     "hidePassword": "Hide password",

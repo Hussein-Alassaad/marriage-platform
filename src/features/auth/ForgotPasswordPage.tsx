@@ -29,12 +29,16 @@ export function ForgotPasswordPage() {
 
   const onSubmit = handleSubmit(async ({ email }) => {
     setFormError(null);
-    const { error } = await authService.requestPasswordReset(email);
-    if (error) {
-      setFormError(error.message);
-      return;
+    try {
+      const { error } = await authService.requestPasswordReset(email);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      setSent(true);
+    } catch {
+      setFormError(t('auth.unexpectedError'));
     }
-    setSent(true);
   });
 
   return (

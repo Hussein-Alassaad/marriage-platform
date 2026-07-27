@@ -58,6 +58,21 @@ export const authService = {
     return client().auth.signInWithPassword({ email, password });
   },
 
+  /**
+   * Redirects to Google, then back to /auth/callback — the same route email
+   * confirmation already uses. Supabase's detectSessionInUrl (set on the client)
+   * picks up the session there regardless of which provider issued it, so no new
+   * callback handling was needed. Requires the Google provider to actually be
+   * enabled in the Supabase dashboard (Authentication → Providers) with a real
+   * Google Cloud OAuth client — this call will error until that's done.
+   */
+  signInWithGoogle() {
+    return client().auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: redirectTo('/auth/callback') },
+    });
+  },
+
   signOut() {
     return client().auth.signOut();
   },

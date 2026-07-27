@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { ROUTES } from '@/app/routes';
 import { authService } from '@/services/authService';
 import { useSettings } from '@/hooks/useSettings';
+import { GoogleSignInButton } from './GoogleSignInButton';
 
 function ageOnDate(dob: string): number {
   const birth = new Date(dob);
@@ -59,21 +60,25 @@ export function RegisterPage() {
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
-    const { data, error } = await authService.signUp({
-      email: values.email,
-      password: values.password,
-      displayName: values.displayName,
-      gender: values.gender,
-      dob: values.dob,
-    });
-    if (error) {
-      setFormError(error.message);
-      return;
-    }
-    if (data.session) {
-      navigate(ROUTES.home, { replace: true }); // email confirmation disabled
-    } else {
-      setSubmittedEmail(values.email); // confirmation email sent
+    try {
+      const { data, error } = await authService.signUp({
+        email: values.email,
+        password: values.password,
+        displayName: values.displayName,
+        gender: values.gender,
+        dob: values.dob,
+      });
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      if (data.session) {
+        navigate(ROUTES.home, { replace: true }); // email confirmation disabled
+      } else {
+        setSubmittedEmail(values.email); // confirmation email sent
+      }
+    } catch {
+      setFormError(t('auth.unexpectedError'));
     }
   });
 
@@ -99,7 +104,16 @@ export function RegisterPage() {
       <h1 className="text-ink text-xl font-semibold">{t('page.register.title')}</h1>
       <p className="text-muted mt-1 text-sm">{t('page.register.subtitle')}</p>
 
-      <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+      <div className="mt-6">
+        <GoogleSignInButton onError={setFormError} />
+        <div className="my-5 flex items-center gap-3">
+          <span className="border-line-strong h-px flex-1 border-t" aria-hidden />
+          <span className="text-faint text-xs font-medium uppercase">{t('auth.orDivider')}</span>
+          <span className="border-line-strong h-px flex-1 border-t" aria-hidden />
+        </div>
+      </div>
+
+      <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
         {formError ? <Alert>{formError}</Alert> : null}
 
         <FormField

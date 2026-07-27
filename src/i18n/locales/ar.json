@@ -24,6 +24,9 @@
     "freeMember": "عضو مجاني"
   },
   "auth": {
+    "unexpectedError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "continueWithGoogle": "المتابعة باستخدام Google",
+    "orDivider": "أو",
     "signOut": "تسجيل الخروج",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
