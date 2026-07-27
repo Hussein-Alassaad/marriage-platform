@@ -14,12 +14,19 @@
 // Actions: overview | health | settings-list | settings-update | users-search |
 //          user-status | verification-queue | verification-review | coupons |
 //          coupon-create | coupon-toggle | analytics | jobs | job-run | job-toggle |
-//          audit | tickets | ticket-update
+//          audit | tickets | ticket-update | flagged-violations | violation-review
+//
+// flagged-violations / violation-review close the "repeated or severe violations →
+// administrator review" step of the escalation ladder (Decisions Part D) —
+// `record_violation` (20260726150000_violation_escalation_ladder.sql) sets
+// `requires_review` on a violation row; this is where an admin actually sees and
+// clears it, same list→review shape as verification-queue/verification-review.
 //
 // Deploy: `supabase functions deploy admin`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { emit } from '../_shared/notify.ts';
+import { runHealthChecks } from '../_shared/health.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -59,11 +66,6 @@ async function audit(
   });
 }
 
-async function setting<T>(admin: SupabaseClient, key: string, fallback: T): Promise<T> {
-  const { data } = await admin.from('settings').select('value').eq('key', key).maybeSingle();
-  return (data?.value ?? fallback) as T;
-}
-
 /** Row count without pulling the rows (head: true). */
 async function countRows(admin: SupabaseClient, table: string, column = 'id'): Promise<number> {
   const { count } = await admin.from(table).select(column, { count: 'exact', head: true });
@@ -78,6 +80,79 @@ async function countWhere(
 ): Promise<number> {
   const { count } = await admin.from(table).select('id', { count: 'exact', head: true }).eq(column, value);
   return count ?? 0;
+}
+
+// ── Analytics helpers ────────────────────────────────────────────────────────
+function ageFromDob(dob: string | null): number | null {
+  if (!dob) return null;
+  const d = new Date(dob);
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
+  return age;
+}
+
+function ageGroup(age: number | null): string {
+  if (age == null) return 'unknown';
+  if (age < 25) return '18-24';
+  if (age < 31) return '25-30';
+  if (age < 41) return '31-40';
+  return '41+';
+}
+
+function tally(values: string[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const v of values) out[v] = (out[v] ?? 0) + 1;
+  return out;
+}
+
+/** Top N by count; everything else folds into "other" so a rare (potentially
+ *  identifying) value never appears on its own as a named bucket. */
+function topWithOther(counts: Record<string, number>, n: number): Record<string, number> {
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const top = entries.slice(0, n);
+  const rest = entries.slice(n).reduce((sum, [, c]) => sum + c, 0);
+  const out: Record<string, number> = Object.fromEntries(top);
+  if (rest > 0) out.other = (out.other ?? 0) + rest;
+  return out;
+}
+
+/**
+ * Match Analytics (PRD): "Average Time Until Conversation/Family Stage/Marriage" —
+ * computed straight from `stage_history`, which already timestamps every stage
+ * change (Phase 8). For each match, the first row is its start; the average delta
+ * to each later stage's first occurrence, across every match that reached it, in
+ * days. A stage nobody has reached yet returns null rather than 0 — no data is not
+ * the same as "instant".
+ */
+function computeMatchTiming(
+  history: { match_id: string; to_stage: string; created_at: string }[],
+): Record<string, number | null> {
+  const byMatch = new Map<string, { start: number; reached: Map<string, number> }>();
+  for (const row of history) {
+    const t = new Date(row.created_at).getTime();
+    let m = byMatch.get(row.match_id);
+    if (!m) {
+      m = { start: t, reached: new Map() };
+      byMatch.set(row.match_id, m);
+    }
+    if (!m.reached.has(row.to_stage)) m.reached.set(row.to_stage, t);
+  }
+
+  const stages = ['introduction', 'serious_communication', 'family', 'married'];
+  const result: Record<string, number | null> = {};
+  for (const stage of stages) {
+    const deltasDays: number[] = [];
+    for (const m of byMatch.values()) {
+      const reachedAt = m.reached.get(stage);
+      if (reachedAt != null) deltasDays.push((reachedAt - m.start) / 86_400_000);
+    }
+    result[stage] = deltasDays.length
+      ? Math.round((deltasDays.reduce((a, b) => a + b, 0) / deltasDays.length) * 10) / 10
+      : null;
+  }
+  return result;
 }
 
 Deno.serve(async (req: Request) => {
@@ -153,72 +228,10 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'health') {
-      // The silent-failure traps. Each of these can be broken for a week without a single
-      // error appearing anywhere — which is exactly why they are checked explicitly.
-      const checks: { key: string; ok: boolean; detail: string }[] = [];
-
-      // 1. Moderation. The dangerous state is not "off" — it is "on, but the key is gone",
-      //    which fails closed and silently blocks every message on the platform.
-      const aiEnabled = await setting(admin, 'moderation_ai_enabled', true);
-      const hasKey = Boolean(Deno.env.get('ANTHROPIC_API_KEY'));
-      checks.push({
-        key: 'moderation',
-        ok: !aiEnabled || hasKey,
-        detail: !aiEnabled
-          ? 'local_only'
-          : hasKey
-            ? 'ai_enabled'
-            : 'ai_enabled_but_no_key', // every message is being blocked right now
-      });
-
-      // 2. Jobs that have not run when they should have.
-      const { data: jobs } = await admin.from('scheduled_jobs').select('name, enabled, last_run_at, last_result');
-      const stale = ((jobs ?? []) as { name: string; enabled: boolean; last_run_at: string | null }[])
-        .filter((j) => j.enabled)
-        .filter((j) => !j.last_run_at || Date.now() - new Date(j.last_run_at).getTime() > 36 * 3600e3);
-      const failing = ((jobs ?? []) as { name: string; last_result: string | null }[]).filter((j) =>
-        j.last_result?.startsWith('error:'),
-      );
-      checks.push({
-        key: 'jobs',
-        ok: !stale.length && !failing.length,
-        detail: [
-          stale.length ? `stale: ${stale.map((j) => j.name).join(', ')}` : '',
-          failing.length ? `failing: ${failing.map((j) => j.name).join(', ')}` : '',
-        ]
-          .filter(Boolean)
-          .join(' · ') || 'all running',
-      });
-
-      // 3. Exchange rates. A stale rate does not error — it quietly makes every figure on
-      //    the finance page wrong, which is worse than an outage.
-      const { data: rate } = await admin
-        .from('exchange_rates')
-        .select('as_of')
-        .eq('base_currency', 'USD')
-        .order('as_of', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      const ageDays = rate?.as_of
-        ? Math.floor((Date.now() - new Date(rate.as_of).getTime()) / 864e5)
-        : Infinity;
-      checks.push({
-        key: 'exchange_rates',
-        ok: ageDays <= 3,
-        detail: Number.isFinite(ageDays) ? `${ageDays} days old` : 'never fetched',
-      });
-
-      // 4. Backlog: work waiting on a human. Not an outage, but a queue nobody is working
-      //    is how a member waits a fortnight to be verified.
-      const pendingVerifications = await countWhere(admin, 'identity_verifications', 'status', 'pending');
-      const pendingClaims = await countWhere(admin, 'payment_claims', 'status', 'pending');
-      checks.push({
-        key: 'queues',
-        ok: pendingVerifications < 20 && pendingClaims < 20,
-        detail: `${pendingVerifications} verifications, ${pendingClaims} payments waiting`,
-      });
-
-      return json({ checks, healthy: checks.every((c) => c.ok) });
+      // Shared with the public `health-check` function (_shared/health.ts) so an
+      // admin looking at the dashboard and an external uptime monitor can never
+      // see a different answer to "is this platform healthy".
+      return json(await runHealthChecks(admin));
     }
 
     if (action === 'settings-list') {
@@ -301,6 +314,58 @@ Deno.serve(async (req: Request) => {
       if (error) return json({ error: error.message }, 400);
 
       await audit(admin, uid, `user.${status}`, 'profile', userId, before, { status, suspended_until: until }, reason ?? undefined);
+      return json({ ok: true });
+    }
+
+    if (action === 'flagged-violations') {
+      const { data: rows } = await admin
+        .from('violations')
+        .select('id, user_id, category, severity, created_at')
+        .eq('requires_review', true)
+        .is('reviewed_at', null)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      const userIds = [...new Set((rows ?? []).map((r: { user_id: string }) => r.user_id))];
+      const { data: profs } = userIds.length
+        ? await admin.from('profiles').select('id, display_name, status').in('id', userIds)
+        : { data: [] };
+      const byId = new Map(((profs ?? []) as { id: string; display_name: string | null; status: string }[]).map((p) => [p.id, p]));
+
+      // One row per user (their most severe/most recent flagged violation), plus
+      // their total lifetime violation count — an admin reviewing needs the whole
+      // picture, not just the one row that happened to trip the flag.
+      const seen = new Set<string>();
+      const flagged = [];
+      for (const r of (rows ?? []) as { id: string; user_id: string; category: string; severity: number; created_at: string }[]) {
+        if (seen.has(r.user_id)) continue;
+        seen.add(r.user_id);
+        const { count } = await admin
+          .from('violations')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', r.user_id);
+        flagged.push({
+          violationId: r.id,
+          userId: r.user_id,
+          displayName: byId.get(r.user_id)?.display_name ?? null,
+          status: byId.get(r.user_id)?.status ?? 'active',
+          category: r.category,
+          severity: r.severity,
+          totalViolations: count ?? 0,
+          createdAt: r.created_at,
+        });
+      }
+      return json({ flagged });
+    }
+
+    if (action === 'violation-review') {
+      const violationId = String(body.violationId ?? '');
+      if (!violationId) return json({ error: 'bad_request' }, 400);
+      const { error } = await admin
+        .from('violations')
+        .update({ reviewed_at: new Date().toISOString(), reviewed_by: uid })
+        .eq('id', violationId);
+      if (error) return json({ error: error.message }, 400);
+      await audit(admin, uid, 'violation.reviewed', 'violation', violationId, null, { reviewed_by: uid });
       return json({ ok: true });
     }
 
@@ -408,14 +473,39 @@ Deno.serve(async (req: Request) => {
       const days = Math.min(Math.max(Number(body.days ?? 30), 7), 365);
       const since = new Date(Date.now() - days * 864e5).toISOString();
 
-      const [{ data: profiles }, { data: matches }, { data: payments }, { data: mods }, { data: ai }] =
-        await Promise.all([
-          admin.from('profiles').select('created_at, verification_status, subscription_tier, gender'),
-          admin.from('matches').select('stage, created_at, deleted_at'),
-          admin.from('payments').select('amount, currency, status, created_at').gte('created_at', since),
-          admin.from('message_moderation').select('verdict, created_at').gte('created_at', since),
-          admin.from('ai_requests').select('feature, status, total_tokens, created_at').gte('created_at', since),
-        ]);
+      const [
+        { data: profiles },
+        { data: matches },
+        { data: payments },
+        { data: mods },
+        { data: ai },
+        { data: tickets },
+        { data: violations },
+      ] = await Promise.all([
+        admin.from('profiles').select('created_at, verification_status, subscription_tier, gender, dob, country, city, status'),
+        admin.from('matches').select('stage, created_at, deleted_at'),
+        admin.from('payments').select('amount, currency, status, created_at').gte('created_at', since),
+        admin.from('message_moderation').select('verdict, category, created_at').gte('created_at', since),
+        admin.from('ai_requests').select('feature, status, total_tokens, created_at').gte('created_at', since),
+        admin.from('support_tickets').select('category, status, created_at'),
+        admin.from('violations').select('category, severity, requires_review, reviewed_at, created_at').gte('created_at', since),
+      ]);
+
+      const { data: filterEvents } = await admin
+        .from('filter_usage_events')
+        .select('filter_key')
+        .gte('created_at', since);
+      const topFilters = tally(((filterEvents ?? []) as { filter_key: string }[]).map((f) => f.filter_key));
+
+      // Match Analytics: average days from a match's start (interest_sent) to each
+      // later stage it reached. All-time, not windowed by `since` — a recent-only
+      // window would bias toward matches that haven't had time to progress yet.
+      const { data: history } = await admin
+        .from('stage_history')
+        .select('match_id, to_stage, created_at')
+        .order('match_id')
+        .order('created_at');
+      const matchTiming = computeMatchTiming((history ?? []) as { match_id: string; to_stage: string; created_at: string }[]);
 
       // Signups per day — the shape of growth, not a list of people.
       const signupsByDay: Record<string, number> = {};
@@ -450,13 +540,93 @@ Deno.serve(async (req: Request) => {
         f.tokens += r.total_tokens ?? 0;
       }
 
-      const verified = ((profiles ?? []) as { verification_status: string }[]).filter(
-        (p) => p.verification_status === 'verified',
-      ).length;
-      const paid = ((profiles ?? []) as { subscription_tier: string }[]).filter(
-        (p) => p.subscription_tier !== 'free',
-      ).length;
-      const total = (profiles ?? []).length;
+      const profileRows = (profiles ?? []) as {
+        created_at: string;
+        verification_status: string;
+        subscription_tier: string;
+        gender: string | null;
+        dob: string | null;
+        country: string | null;
+        city: string | null;
+        status: string;
+      }[];
+
+      const verified = profileRows.filter((p) => p.verification_status === 'verified').length;
+      const paid = profileRows.filter((p) => p.subscription_tier !== 'free').length;
+      const total = profileRows.length;
+      const verifiedRate = total ? Math.round((verified / total) * 100) : 0;
+      const paidRate = verified ? Math.round((paid / verified) * 100) : 0;
+
+      // User Analytics — demographics. Country/city are capped to the top 10 with
+      // everything else folded into "other", so a rare (potentially identifying)
+      // location never appears on its own as a named bucket.
+      const demographics = {
+        gender: tally(profileRows.map((p) => p.gender ?? 'unknown')),
+        ageGroup: tally(profileRows.map((p) => ageGroup(ageFromDob(p.dob)))),
+        country: topWithOther(tally(profileRows.map((p) => p.country ?? 'unknown')), 10),
+        city: topWithOther(tally(profileRows.map((p) => p.city ?? 'unknown')), 10),
+      };
+
+      // Communication Analytics — categories only, never content (Part D categories).
+      const modRows = (mods ?? []) as { verdict: string; category: string | null }[];
+      const blockedByCategory = tally(
+        modRows.filter((m) => m.verdict !== 'allowed').map((m) => m.category ?? 'none'),
+      );
+
+      // Support Analytics.
+      const ticketRows = (tickets ?? []) as { category: string; status: string }[];
+      const ticketsByCategory = tally(ticketRows.map((t) => t.category));
+      const ticketsByStatus = tally(ticketRows.map((t) => t.status));
+
+      // Safety monitoring (the "AI Dashboard" safety view) — built from what this
+      // platform actually instruments: the violation ladder and moderation log.
+      // There is no prompt-injection/abuse-pattern detector anywhere in the codebase
+      // to report on; fabricating one here would be worse than not having the panel.
+      const violationRows = (violations ?? []) as {
+        category: string;
+        severity: number;
+        requires_review: boolean;
+        reviewed_at: string | null;
+      }[];
+      const safety = {
+        violationsByCategory: tally(violationRows.map((v) => v.category)),
+        flaggedForReview: violationRows.filter((v) => v.requires_review && !v.reviewed_at).length,
+        suspendedAccounts: profileRows.filter((p) => p.status === 'suspended').length,
+        bannedAccounts: profileRows.filter((p) => p.status === 'banned').length,
+        moderationUnavailableCount: blockedByCategory['unavailable'] ?? 0,
+      };
+
+      // Business Intelligence — deterministic, rule-based sentences from the numbers
+      // above (no AI key required), same tradeoff as the rest of this platform's
+      // "AI-shaped" features. Returned as {key, params} so the frontend renders the
+      // actual sentence via i18n — copy lives in one place, not duplicated here.
+      const insights: { key: string; params?: Record<string, unknown> }[] = [];
+      if (total > 0 && verifiedRate >= 70) insights.push({ key: 'goodVerification', params: { rate: verifiedRate } });
+      else if (total >= 10 && verifiedRate < 40) insights.push({ key: 'lowVerification', params: { rate: verifiedRate } });
+      if (paid > 0) insights.push({ key: 'conversionRate', params: { rate: paidRate } });
+
+      const sortedDays = Object.keys(signupsByDay).sort();
+      if (sortedDays.length >= 4) {
+        const mid = Math.floor(sortedDays.length / 2);
+        const firstHalf = sortedDays.slice(0, mid).reduce((s, d) => s + signupsByDay[d], 0);
+        const secondHalf = sortedDays.slice(mid).reduce((s, d) => s + signupsByDay[d], 0);
+        if (firstHalf > 0) {
+          const change = Math.round(((secondHalf - firstHalf) / firstHalf) * 100);
+          if (Math.abs(change) >= 10) {
+            insights.push({ key: change > 0 ? 'signupsUp' : 'signupsDown', params: { pct: Math.abs(change) } });
+          }
+        }
+      }
+
+      const blockRatePct = checked ? Math.round((blocked / checked) * 100) : 0;
+      if (checked >= 5 && blockRatePct >= 15) insights.push({ key: 'highBlockRate', params: { rate: blockRatePct } });
+
+      const topBlocked = Object.entries(blockedByCategory).sort((a, b) => b[1] - a[1])[0];
+      if (topBlocked && topBlocked[0] !== 'none' && topBlocked[1] >= 3) {
+        insights.push({ key: 'topBlockCategory', params: { category: topBlocked[0], count: topBlocked[1] } });
+      }
+
+      if (safety.flaggedForReview > 0) insights.push({ key: 'pendingReview', params: { count: safety.flaggedForReview } });
 
       return json({
         days,
@@ -470,9 +640,16 @@ Deno.serve(async (req: Request) => {
           verified,
           paid,
           // The two numbers that decide whether this platform works at all.
-          verifiedRate: total ? Math.round((verified / total) * 100) : 0,
-          paidRate: verified ? Math.round((paid / verified) * 100) : 0,
+          verifiedRate,
+          paidRate,
         },
+        demographics,
+        communication: { blockedByCategory },
+        support: { total: ticketRows.length, byCategory: ticketsByCategory, byStatus: ticketsByStatus },
+        safety,
+        matchTiming,
+        topFilters,
+        insights,
       });
     }
 

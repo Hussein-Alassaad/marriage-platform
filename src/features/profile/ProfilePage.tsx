@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/Skeleton';
 import { ProgressRing } from '@/components/motion/ProgressRing';
 import { CountUp } from '@/components/motion/CountUp';
 import { PhotoManager } from '@/features/profile/PhotoManager';
+import { ProfileScores } from '@/features/profile/ProfileScores';
+import { PrivacyToggles } from '@/features/profile/PrivacyToggles';
 import { useOptionLabel } from '@/features/profile/ProfileFields';
 import { ROUTES } from '@/app/routes';
 import { useProfile } from '@/hooks/useProfile';
@@ -95,6 +97,9 @@ export function ProfilePage() {
           </div>
         </div>
       </Card>
+
+      <ProfileScores profile={profile ?? null} />
+      <PrivacyToggles profile={profile ?? null} />
 
       {/* About */}
       {profile?.bio ? (

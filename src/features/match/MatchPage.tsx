@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -12,6 +12,7 @@ import {
   Briefcase,
   RefreshCw,
   Send,
+  SlidersHorizontal,
   Sparkles,
   X,
 } from 'lucide-react';
@@ -20,24 +21,30 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
+import { Input } from '@/components/Input';
 import { Modal } from '@/components/Modal';
 import { Alert } from '@/components/Alert';
 import { EmptyState } from '@/components/EmptyState';
+import { Select } from '@/components/Select';
 import { Skeleton } from '@/components/Skeleton';
 import { ProgressRing } from '@/components/motion/ProgressRing';
 import { cn } from '@/utils/cn';
 import { SPRING_SNAPPY } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useOptionLabel } from '@/features/profile/ProfileFields';
+import { EDUCATION_LEVELS } from '@/features/profile/profileOptions';
+import { useLanguage } from '@/hooks/useLanguage';
+import { useSession } from '@/hooks/useSession';
 import {
   useCandidateActions,
   useConnections,
   useDiscover,
+  useRefreshPlus,
   useRefreshRecommendations,
   useRespondInterest,
   useSendInterest,
 } from '@/hooks/useMatch';
-import type { Candidate, InterestEntry, MatchEntry } from '@/services/matchService';
+import type { Candidate, DiscoverFilters, InterestEntry, MatchEntry } from '@/services/matchService';
 
 export function MatchPage() {
   const { t } = useTranslation();
@@ -89,9 +96,32 @@ export function MatchPage() {
 
 function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useDiscover();
+  const { profile } = useSession();
+  const tier = profile?.subscription_tier ?? 'free';
+  const paid = tier === 'serious' || tier === 'marriage_plus';
+  const marriagePlus = tier === 'marriage_plus';
+
+  const [filters, setFilters] = useState<DiscoverFilters>({});
+  const { data, isLoading, isError } = useDiscover(paid ? filters : undefined);
   const actions = useCandidateActions();
   const refresh = useRefreshRecommendations();
+  const refreshPlus = useRefreshPlus();
+  const [plusMessage, setPlusMessage] = useState<string | null>(null);
+
+  const doRefreshPlus = async () => {
+    setPlusMessage(null);
+    try {
+      const res = await refreshPlus.mutateAsync();
+      setPlusMessage(t('match.filters.plusRefreshResult', { used: res.used, limit: res.limit }));
+    } catch (e) {
+      const err = e as Error & { limit?: number };
+      setPlusMessage(
+        err.message === 'refresh_limit_reached'
+          ? t('match.filters.plusRefreshLimitReached', { limit: err.limit ?? 3 })
+          : t('match.error'),
+      );
+    }
+  };
 
   const refreshBtn = (ghost?: boolean) => (
     <Button
@@ -107,6 +137,31 @@ function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
     </Button>
   );
 
+  const toolbar = paid ? (
+    <div className="mb-4 flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FilterPanel filters={filters} onChange={setFilters} />
+        <div className="flex items-center gap-2">
+          {marriagePlus ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={doRefreshPlus}
+              disabled={refreshPlus.isPending}
+            >
+              <Sparkles className="h-4 w-4" aria-hidden />
+              {t('match.filters.plusRefresh')}
+            </Button>
+          ) : null}
+          {refreshBtn(true)}
+        </div>
+      </div>
+      {plusMessage ? <p className="text-muted text-xs">{plusMessage}</p> : null}
+    </div>
+  ) : (
+    <div className="mb-4 flex justify-end">{refreshBtn(true)}</div>
+  );
+
   if (isLoading) {
     return (
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -119,27 +174,33 @@ function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
   if (isError) return <Alert>{t('match.error')}</Alert>;
   if (!data || data.candidates.length === 0) {
     return (
-      <EmptyState
-        icon={Sparkles}
-        title={t('match.empty.title')}
-        description={t('match.empty.body')}
-        action={refreshBtn()}
-      />
+      <>
+        {toolbar}
+        <EmptyState
+          icon={Sparkles}
+          title={t('match.empty.title')}
+          description={t('match.empty.body')}
+          action={refreshBtn()}
+        />
+      </>
     );
   }
 
   return (
     <>
-      <div className="mb-4 flex justify-end">{refreshBtn(true)}</div>
+      {toolbar}
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {data.candidates.map((c) => (
           <CandidateCard
             key={c.id}
             candidate={c}
-            onInterest={() => onInterest(c)}
-            onSave={() => actions.save.mutate({ candidateId: c.id, saved: c.saved })}
-            onPass={() => actions.decline.mutate(c.id)}
-            busy={actions.decline.isPending || actions.save.isPending}
+            onInterest={onInterest}
+            onSave={actions.save.mutate}
+            onPass={actions.decline.mutate}
+            busy={
+              (actions.decline.isPending && actions.decline.variables === c.id) ||
+              (actions.save.isPending && actions.save.variables?.candidateId === c.id)
+            }
           />
         ))}
       </div>
@@ -147,7 +208,105 @@ function Discover({ onInterest }: { onInterest: (c: Candidate) => void }) {
   );
 }
 
-function CandidateCard({
+/** Serious+ search filters (Decision #17's "advanced search filters" plan bullet).
+ *  Draft values only take effect on Apply, so typing in country/city doesn't
+ *  refetch on every keystroke. */
+function FilterPanel({
+  filters,
+  onChange,
+}: {
+  filters: DiscoverFilters;
+  onChange: (f: DiscoverFilters) => void;
+}) {
+  const { t } = useTranslation();
+  const label = useOptionLabel();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<DiscoverFilters>(filters);
+
+  const active = Object.values(filters).some((v) => v !== undefined && v !== '');
+
+  const apply = () => {
+    onChange({
+      minAge: draft.minAge,
+      maxAge: draft.maxAge,
+      country: draft.country?.trim() || undefined,
+      city: draft.city?.trim() || undefined,
+      educationLevel: draft.educationLevel || undefined,
+    });
+    setOpen(false);
+  };
+  const clear = () => {
+    setDraft({});
+    onChange({});
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <Button
+        variant={active ? 'secondary' : 'ghost'}
+        size="sm"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <SlidersHorizontal className="h-4 w-4" aria-hidden />
+        {t('match.filters.title')}
+      </Button>
+
+      {open ? (
+        <Card className="absolute start-0 top-full z-20 mt-2 w-80 p-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              type="number"
+              min="18"
+              placeholder={t('match.filters.minAge')}
+              value={draft.minAge ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, minAge: e.target.value ? Number(e.target.value) : undefined }))}
+            />
+            <Input
+              type="number"
+              min="18"
+              placeholder={t('match.filters.maxAge')}
+              value={draft.maxAge ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, maxAge: e.target.value ? Number(e.target.value) : undefined }))}
+            />
+            <Input
+              placeholder={t('match.filters.country')}
+              value={draft.country ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, country: e.target.value }))}
+            />
+            <Input
+              placeholder={t('match.filters.city')}
+              value={draft.city ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, city: e.target.value }))}
+            />
+          </div>
+          <Select
+            className="mt-3"
+            value={draft.educationLevel ?? ''}
+            onChange={(e) => setDraft((d) => ({ ...d, educationLevel: e.target.value || undefined }))}
+          >
+            <option value="">{t('match.filters.anyEducation')}</option>
+            {EDUCATION_LEVELS.map((lvl) => (
+              <option key={lvl} value={lvl}>
+                {label('education', lvl)}
+              </option>
+            ))}
+          </Select>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={clear}>
+              {t('match.filters.clear')}
+            </Button>
+            <Button size="sm" onClick={apply}>
+              {t('match.filters.apply')}
+            </Button>
+          </div>
+        </Card>
+      ) : null}
+    </div>
+  );
+}
+
+const CandidateCard = memo(function CandidateCard({
   candidate: c,
   onInterest,
   onSave,
@@ -155,12 +314,13 @@ function CandidateCard({
   busy,
 }: {
   candidate: Candidate;
-  onInterest: () => void;
-  onSave: () => void;
-  onPass: () => void;
+  onInterest: (candidate: Candidate) => void;
+  onSave: (args: { candidateId: string; saved: boolean }) => void;
+  onPass: (candidateId: string) => void;
   busy: boolean;
 }) {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const label = useOptionLabel();
   const meta = [
     c.age ? t('match.age', { age: c.age }) : null,
@@ -169,12 +329,26 @@ function CandidateCard({
     .filter(Boolean)
     .join(' · ');
 
+  // Online/Activity Status (PRD Privacy Controls): already filtered server-side by
+  // the candidate's own toggle — null here just means "show nothing".
+  const online = c.lastActiveAt && Date.now() - new Date(c.lastActiveAt).getTime() <= 5 * 60_000;
+  const activityLabel = c.lastActiveAt
+    ? online
+      ? t('match.onlineNow')
+      : t('match.activeOn', { date: new Date(c.lastActiveAt).toLocaleDateString(language) })
+    : null;
+
   return (
     <Card interactive className="flex flex-col overflow-hidden p-0">
       {/* Photo / privacy tile */}
       <div className="bg-bg-3 relative aspect-[5/4] w-full overflow-hidden">
         {c.photoUrl ? (
-          <img src={c.photoUrl} alt="" className="h-full w-full object-cover" />
+          <img
+            src={c.photoUrl}
+            alt={c.displayName ?? ''}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         ) : c.photoLocked ? (
           <div className="from-brand-100 to-brand-200 text-brand-700 grid h-full w-full place-items-center bg-gradient-to-br">
             <div className="flex flex-col items-center gap-1.5 text-center">
@@ -204,11 +378,24 @@ function CandidateCard({
         <div className="flex items-center gap-1.5">
           <h3 className="text-ink truncate text-base font-semibold">{c.displayName ?? '—'}</h3>
           <BadgeCheck className="text-gold-400 h-4 w-4 shrink-0" aria-hidden />
+          <span className="sr-only">{t('profile.verified')}</span>
         </div>
         {meta ? (
           <p className="text-muted mt-0.5 inline-flex items-center gap-1 text-sm">
             <MapPin className="h-3.5 w-3.5" aria-hidden />
             {meta}
+          </p>
+        ) : null}
+        {activityLabel ? (
+          <p className="text-faint mt-1 inline-flex items-center gap-1.5 text-xs">
+            <span
+              className={cn(
+                'h-1.5 w-1.5 rounded-full',
+                online ? 'bg-success' : 'bg-faint',
+              )}
+              aria-hidden
+            />
+            {activityLabel}
           </p>
         ) : null}
 
@@ -244,7 +431,7 @@ function CandidateCard({
         <div className="mt-auto flex items-center gap-2 pt-5">
           <button
             type="button"
-            onClick={onPass}
+            onClick={() => onPass(c.id)}
             disabled={busy}
             aria-label={t('match.pass')}
             className="border-line-strong text-muted hover:border-danger/40 hover:text-danger grid h-11 w-11 shrink-0 place-items-center rounded-full border transition-colors"
@@ -253,7 +440,7 @@ function CandidateCard({
           </button>
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => onSave({ candidateId: c.id, saved: c.saved })}
             disabled={busy}
             aria-label={c.saved ? t('match.saved') : t('match.save')}
             className={cn(
@@ -265,7 +452,7 @@ function CandidateCard({
           >
             <Heart className={cn('h-5 w-5', c.saved && 'fill-current')} aria-hidden />
           </button>
-          <Button onClick={onInterest} fullWidth>
+          <Button onClick={() => onInterest(c)} fullWidth>
             {t('match.sendInterest')}
             <Send className="h-4 w-4 rtl:-scale-x-100" aria-hidden />
           </Button>
@@ -273,7 +460,7 @@ function CandidateCard({
       </div>
     </Card>
   );
-}
+});
 
 function InterestModal({
   candidate,

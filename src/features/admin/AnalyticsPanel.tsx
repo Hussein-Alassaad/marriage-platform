@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Card, CardTitle } from '@/components/Card';
@@ -7,6 +8,7 @@ import { Skeleton } from '@/components/Skeleton';
 import { cn } from '@/utils/cn';
 import { useAnalytics } from '@/hooks/useAdmin';
 import { downloadCsv } from '@/utils/csv';
+import type { Analytics } from '@/services/adminService';
 
 const RANGES = [7, 30, 90] as const;
 
@@ -84,6 +86,8 @@ export function AnalyticsPanel() {
           {t('admin.analytics.export')}
         </Button>
       </div>
+
+      <ExecutiveSummary data={data} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label={t('admin.analytics.members')} value={String(data.conversion.total)} />
@@ -186,6 +190,155 @@ export function AnalyticsPanel() {
           )}
         </Card>
       </div>
+
+      {/* User Analytics — demographics. Country/city already capped server-side (top
+          10 + "other"), so a rare location never appears on its own. */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <DistributionCard titleKey="admin.analytics.demographics.gender" counts={data.demographics.gender} />
+        <DistributionCard titleKey="admin.analytics.demographics.ageGroup" counts={data.demographics.ageGroup} />
+        <DistributionCard titleKey="admin.analytics.demographics.country" counts={data.demographics.country} />
+        <DistributionCard titleKey="admin.analytics.demographics.city" counts={data.demographics.city} />
+      </div>
+
+      {/* Communication + Support Analytics — categories and counts only, never
+          message content or a member's own words (Decisions Part D). */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <DistributionCard
+          titleKey="admin.analytics.communication.title"
+          counts={data.communication.blockedByCategory}
+          labelPrefix="admin.analytics.communication.category"
+        />
+        <DistributionCard
+          titleKey="admin.analytics.support.title"
+          counts={data.support.byStatus}
+          labelPrefix="admin.tickets.status"
+        />
+      </div>
+
+      {/* Match Analytics: how long it actually takes to reach each stage, straight
+          from stage_history's timestamps (Phase 8) — no new tracking needed. */}
+      <Card className="p-5">
+        <CardTitle className="mb-1">{t('admin.analytics.timing.title')}</CardTitle>
+        <p className="text-muted mb-4 text-xs">{t('admin.analytics.timing.hint')}</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(['introduction', 'serious_communication', 'family', 'married'] as const).map((stage) => (
+            <MiniStat
+              key={stage}
+              label={t(`journey.stage.${stage}`, { defaultValue: stage })}
+              value={
+                data.matchTiming[stage] != null
+                  ? t('admin.analytics.timing.days', { count: data.matchTiming[stage] as number })
+                  : t('admin.analytics.timing.none')
+              }
+            />
+          ))}
+        </div>
+      </Card>
+
+      <DistributionCard
+        titleKey="admin.analytics.topFilters.title"
+        counts={data.topFilters}
+        labelPrefix="match.filters"
+      />
+
+      {/* Safety monitoring (the "AI Dashboard" safety view) — built from the
+          violation ladder and moderation log this platform actually instruments. */}
+      <Card className="p-5">
+        <CardTitle className="mb-4">{t('admin.analytics.safety.title')}</CardTitle>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MiniStat label={t('admin.analytics.safety.flagged')} value={data.safety.flaggedForReview} />
+          <MiniStat label={t('admin.analytics.safety.suspended')} value={data.safety.suspendedAccounts} />
+          <MiniStat label={t('admin.analytics.safety.banned')} value={data.safety.bannedAccounts} />
+          <MiniStat
+            label={t('admin.analytics.safety.moderationDown')}
+            value={data.safety.moderationUnavailableCount}
+          />
+        </div>
+        {Object.keys(data.safety.violationsByCategory).length ? (
+          <ul className="border-line mt-4 space-y-1.5 border-t pt-4">
+            {Object.entries(data.safety.violationsByCategory).map(([category, n]) => (
+              <li key={category} className="flex items-center justify-between text-sm">
+                <span className="text-muted">
+                  {t(`admin.users.flagged.category.${category}`, { defaultValue: category })}
+                </span>
+                <span className="text-ink font-medium">{n}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </Card>
+    </div>
+  );
+}
+
+/** "At the top of the Analytics section, include an Executive Summary" (PRD) — the
+ *  headline numbers plus the deterministic Business Intelligence insights, in plain
+ *  sentences rather than raw data. */
+function ExecutiveSummary({ data }: { data: Analytics }) {
+  const { t } = useTranslation();
+  if (!data.insights.length) return null;
+
+  return (
+    <Card className="p-5">
+      <CardTitle className="mb-3">{t('admin.analytics.summary.title')}</CardTitle>
+      <ul className="space-y-2">
+        {data.insights.map((insight, i) => (
+          <li key={i} className="text-ink-soft flex items-start gap-2 text-sm">
+            <Sparkles className="text-brand-500 mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            {t(`admin.analytics.insight.${insight.key}`, insight.params)}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+/** A generic count-by-key breakdown — reused for demographics, communication, and
+ *  support so the same rendering handles every "which category, how many" shape. */
+function DistributionCard({
+  titleKey,
+  counts,
+  labelPrefix,
+}: {
+  titleKey: string;
+  counts: Record<string, number>;
+  labelPrefix?: string;
+}) {
+  const { t } = useTranslation();
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(1, ...entries.map(([, n]) => n));
+
+  return (
+    <Card className="p-5">
+      <CardTitle className="mb-4">{t(titleKey)}</CardTitle>
+      {entries.length ? (
+        <ul className="space-y-2.5">
+          {entries.map(([key, n]) => (
+            <li key={key}>
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <span className="text-ink-soft">
+                  {labelPrefix ? t(`${labelPrefix}.${key}`, { defaultValue: key }) : key}
+                </span>
+                <span className="text-ink font-medium">{n}</span>
+              </div>
+              <div className="bg-bg-3 h-1.5 overflow-hidden rounded-full">
+                <div className="bg-brand-500 h-full rounded-full" style={{ width: `${(n / max) * 100}%` }} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-muted py-6 text-center text-sm">{t('admin.analytics.noData')}</p>
+      )}
+    </Card>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="bg-bg-3 rounded-xl p-4">
+      <p className="text-muted mb-1 text-xs font-medium">{label}</p>
+      <p className="text-ink text-xl font-semibold">{value}</p>
     </div>
   );
 }

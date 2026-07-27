@@ -24,7 +24,12 @@ export function VoiceBubble({ messageId, transcript }: VoiceBubbleProps) {
   const { data: url, isLoading, isError } = useMediaUrl(messageId, load);
 
   return (
-    <div className="min-w-[220px] space-y-2">
+    // No fixed min-width: the parent message bubble caps itself to 78% of the chat
+    // column (ConversationPage.tsx), and on a narrow phone that's well under a
+    // hardcoded 220px — this was forcing voice bubbles wider than every other
+    // message and clipping against the chat card's edge. `w-full` on the audio
+    // element and button already size correctly to whatever room the bubble has.
+    <div className="w-full min-w-0 space-y-2">
       {url ? (
         <audio src={url} controls autoPlay className="h-10 w-full" />
       ) : isLoading ? (

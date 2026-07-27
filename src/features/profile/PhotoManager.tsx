@@ -85,7 +85,12 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
                   photo.isPrimary ? 'border-[color:var(--color-border-accent)]' : 'border-line',
                 )}
               >
-                <img src={photo.url} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={photo.url}
+                  alt={photo.isPrimary ? t('profile.photos.primary') : t('profile.photos.photo')}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
                 {photo.isPrimary ? (
                   <span className="bg-brand-600 text-on-brand absolute start-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-semibold">
                     {t('profile.photos.primary')}
@@ -119,6 +124,7 @@ export function PhotoManager({ profile }: { profile: ProfileRecord | null }) {
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={upload.isPending}
+          aria-label={t('profile.photos.add')}
           className="border-line-strong text-muted hover:text-brand-600 grid aspect-square place-items-center rounded-xl border border-dashed transition-colors hover:border-[color:var(--color-border-accent)]"
         >
           {upload.isPending ? (

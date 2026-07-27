@@ -22,7 +22,7 @@ export const MODEL = 'claude-opus-4-8';
 export const PROMPT_VERSION = 'mithaq-mod-v2'; // v2: allow-by-default, explicit marriage whitelist
 export const POLICY_VERSION = 'partD-v4';
 
-const SYSTEM = `You are the moderation gate for Mithaq, an Islamic marriage platform (NOT a dating app). Two people who are considering marriage are getting to know each other under supervision. They progress through stages: introduction -> serious_communication -> family -> married.
+const SYSTEM = `You are the moderation gate for Hayat, an Islamic marriage platform (NOT a dating app). Two people who are considering marriage are getting to know each other under supervision. They progress through stages: introduction -> serious_communication -> family -> married.
 
 Your DEFAULT is to ALLOW. These people are supposed to be talking. Block only a clear violation of the rules below. When a message is ordinary, ambiguous, or merely awkward, ALLOW it.
 
@@ -118,7 +118,7 @@ async function aiModerate(apiKey: string, text: string, stage: string): Promise<
  * before it is ever stored. There is no local fallback for pixels — if the moderator
  * is unavailable, the image is blocked, never delivered unreviewed.
  */
-const IMAGE_SYSTEM = `You are the image moderation gate for Mithaq, an Islamic marriage platform (NOT a dating app). The couple is at the Family stage: their families are involved and a guardian is present.
+const IMAGE_SYSTEM = `You are the image moderation gate for Hayat, an Islamic marriage platform (NOT a dating app). The couple is at the Family stage: their families are involved and a guardian is present.
 
 Judge ONE image. Block it if it contains ANY of:
 - nudity, partial nudity, underwear, swimwear, or sexually suggestive posing or framing

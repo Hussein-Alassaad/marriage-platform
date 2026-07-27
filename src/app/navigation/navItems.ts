@@ -1,5 +1,6 @@
 import {
   Bell,
+  Briefcase,
   Gem,
   Heart,
   Home,
@@ -32,6 +33,9 @@ export const primaryNav: NavItem[] = [
   { key: 'assistant', path: ROUTES.assistant, icon: Sparkles },
   { key: 'notifications', path: ROUTES.notifications, icon: Bell },
   { key: 'profile', path: ROUTES.profile, icon: User },
+  // Appended, not inserted — keeps bottomNav's fixed indices (below) pointing at the
+  // same five items. Jobs has no page behind it yet (ComingSoon), so it's sidebar-only.
+  { key: 'jobs', path: ROUTES.jobs, icon: Briefcase },
 ];
 
 export const settingsNav: NavItem = { key: 'settings', path: ROUTES.settings, icon: Settings };

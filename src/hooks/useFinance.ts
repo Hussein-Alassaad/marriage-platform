@@ -71,6 +71,23 @@ export function useAddEntry() {
   });
 }
 
+export function useUpdateEntry() {
+  const queryClient = useQueryClient();
+  const { user } = useSession();
+  return useMutation({
+    mutationFn: (input: {
+      kind: EntryKind;
+      id: string;
+      label: string;
+      amount: number;
+      currency: string;
+      occurredOn: string;
+      recurring: boolean;
+    }) => financeService.updateEntry(input.kind, input.id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-entries', user?.id] }),
+  });
+}
+
 export function useDeleteEntry() {
   const queryClient = useQueryClient();
   const { user } = useSession();
@@ -96,6 +113,16 @@ export function useSaveBudget() {
   return useMutation({
     mutationFn: (input: { category: string; amount: number; currency: string }) =>
       financeService.saveBudget(user?.id as string, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-budgets', user?.id] }),
+  });
+}
+
+export function useUpdateBudget() {
+  const queryClient = useQueryClient();
+  const { user } = useSession();
+  return useMutation({
+    mutationFn: (input: { id: string; amount: number; currency: string }) =>
+      financeService.updateBudget(input.id, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-budgets', user?.id] }),
   });
 }
@@ -128,6 +155,21 @@ export function useSaveGoal() {
       currency: string;
       deadline: string | null;
     }) => financeService.saveGoal(user?.id as string, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-goals', user?.id] }),
+  });
+}
+
+export function useUpdateGoal() {
+  const queryClient = useQueryClient();
+  const { user } = useSession();
+  return useMutation({
+    mutationFn: (input: {
+      id: string;
+      name: string;
+      target: number;
+      currency: string;
+      deadline: string | null;
+    }) => financeService.updateGoal(input.id, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-goals', user?.id] }),
   });
 }
@@ -196,5 +238,92 @@ export function useSharedSummary(matchId: string | null | undefined, active: boo
     queryKey: ['shared-summary', matchId],
     queryFn: () => financeService.sharedSummary(matchId as string),
     enabled: Boolean(matchId) && active,
+  });
+}
+
+// ── Marriage Plus: shared budgets + shared goals ────────────────────────────────
+
+export function useSharedBudgets(matchId: string | null | undefined, unlocked: boolean) {
+  return useQuery({
+    queryKey: ['shared-budgets', matchId],
+    queryFn: () => financeService.sharedBudgets(matchId as string),
+    enabled: Boolean(matchId) && unlocked,
+  });
+}
+
+export function useSaveSharedBudget(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { category: string; amount: number; currency: string }) =>
+      financeService.saveSharedBudget(matchId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shared-budgets', matchId] }),
+  });
+}
+
+export function useDeleteSharedBudget(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => financeService.deleteSharedBudget(matchId, id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shared-budgets', matchId] }),
+  });
+}
+
+export function useSharedGoals(matchId: string | null | undefined, unlocked: boolean) {
+  return useQuery({
+    queryKey: ['shared-goals', matchId],
+    queryFn: () => financeService.sharedGoals(matchId as string),
+    enabled: Boolean(matchId) && unlocked,
+  });
+}
+
+export function useSaveSharedGoal(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      id?: string;
+      name: string;
+      target: number;
+      currency: string;
+      deadline: string | null;
+    }) => financeService.saveSharedGoal(matchId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shared-goals', matchId] }),
+  });
+}
+
+export function useContributeSharedGoal(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { id: string; newAmount: number }) =>
+      financeService.contributeSharedGoal(matchId, input.id, input.newAmount),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shared-goals', matchId] }),
+  });
+}
+
+export function useDeleteSharedGoal(matchId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => financeService.deleteSharedGoal(matchId, id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shared-goals', matchId] }),
+  });
+}
+
+// ── Monthly reports ────────────────────────────────────────────────────────────
+
+export function useReports(enabled: boolean) {
+  const { user } = useSession();
+  return useQuery({
+    queryKey: ['finance-reports', user?.id],
+    queryFn: () => financeService.listReports(user?.id as string),
+    enabled: enabled && Boolean(user?.id),
+  });
+}
+
+export function useReportNarrative() {
+  const queryClient = useQueryClient();
+  const { user } = useSession();
+  return useMutation({
+    mutationFn: (input: { reportId: string; locale: string }) =>
+      financeService.reportNarrative(input.reportId, input.locale),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['finance-reports', user?.id] }),
   });
 }

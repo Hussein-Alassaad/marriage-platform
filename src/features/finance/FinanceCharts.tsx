@@ -19,6 +19,7 @@ import { Card, CardTitle } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { useDirection } from '@/hooks/useDirection';
 import { useLanguage } from '@/hooks/useLanguage';
+import { monthKey } from '@/utils/date';
 import { convert, formatMoney, type RateMap } from '@/utils/money';
 import { ChartPie } from 'lucide-react';
 import type { Entry } from '@/services/financeService';
@@ -51,10 +52,8 @@ const MONTHS_BACK = 6;
 function lastMonths(count: number): string[] {
   const out: string[] = [];
   const d = new Date();
-  d.setDate(1);
   for (let i = count - 1; i >= 0; i -= 1) {
-    const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
-    out.push(m.toISOString().slice(0, 7));
+    out.push(monthKey(new Date(d.getFullYear(), d.getMonth() - i, 1)));
   }
   return out;
 }
@@ -75,7 +74,7 @@ export default function FinanceCharts({
   const inDisplay = (e: Entry) => convert(e.amount, e.currency, currency, rates) ?? 0;
 
   // Pie: this month's expenses by category.
-  const month = new Date().toISOString().slice(0, 7);
+  const month = monthKey();
   const byCategory = new Map<string, number>();
   for (const e of entries) {
     if (e.kind !== 'expense' || !e.occurred_on.startsWith(month)) continue;

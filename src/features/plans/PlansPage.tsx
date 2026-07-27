@@ -1,19 +1,31 @@
-import { useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Check, Clock, CreditCard, Landmark, Receipt, Smartphone, Upload } from 'lucide-react';
+import {
+  Check,
+  Clock,
+  CreditCard,
+  HandHelping,
+  Landmark,
+  Receipt,
+  Smartphone,
+  Upload,
+  X,
+} from 'lucide-react';
 
 import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Badge } from '@/components/Badge';
 import { Input } from '@/components/Input';
+import { Select } from '@/components/Select';
 import { Skeleton } from '@/components/Skeleton';
 import { Modal } from '@/components/Modal';
 import { cn } from '@/utils/cn';
 import { EASE_OUT } from '@/lib/motion';
 import { useSettings } from '@/hooks/useSettings';
 import { useSession } from '@/hooks/useSession';
+import { useCreateTicket } from '@/hooks/useSupport';
 import {
   useCreateClaim,
   useMyClaim,
@@ -21,7 +33,7 @@ import {
   usePlans,
   useUploadReceipt,
 } from '@/hooks/useSubscription';
-import { subscriptionService } from '@/services/subscriptionService';
+import { subscriptionService, tierAtLeast } from '@/services/subscriptionService';
 import type {
   BillingPeriod,
   CouponPreview,
@@ -30,19 +42,15 @@ import type {
   Tier,
 } from '@/services/subscriptionService';
 
+const CANT_PAY_REASONS = ['payment_problem', 'country_restriction', 'need_alternative', 'general_billing'] as const;
+const TIERS: Tier[] = ['free', 'serious', 'marriage_plus'];
+
 const METHOD_ICONS: Record<ManualMethod, typeof Smartphone> = {
   omt: Receipt,
   whish: Smartphone,
   bank_transfer: Landmark,
 };
 const METHODS: ManualMethod[] = ['omt', 'whish', 'bank_transfer'];
-
-/** Feature keys are seeded on the plan rows; copy for each lives in i18n. */
-function featureList(plan: Plan): string[] {
-  return Object.entries(plan.features ?? {})
-    .filter(([, on]) => on)
-    .map(([key]) => key);
-}
 
 export function PlansPage() {
   const { t } = useTranslation();
@@ -54,6 +62,7 @@ export function PlansPage() {
 
   const [period, setPeriod] = useState<BillingPeriod>('monthly');
   const [chosen, setChosen] = useState<Plan | null>(null);
+  const [cantPayOpen, setCantPayOpen] = useState(false);
 
   const currentTier = (profile?.subscription_tier ?? 'free') as Tier;
   const pendingClaim = claim && claim.status === 'pending' ? claim : null;
@@ -165,14 +174,11 @@ export function PlansPage() {
                     )}
                   </p>
 
-                  <ul className="mb-6 flex-1 space-y-2">
-                    {featureList(plan).map((key) => (
-                      <li key={key} className="text-ink-soft flex items-start gap-2 text-sm">
-                        <Check className="text-brand-500 mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                        {t(`plans.feature.${key}`, { defaultValue: key })}
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Full feature breakdown lives in the comparison table below —
+                      the old per-card bullet list only ever showed that plan's own
+                      (non-cumulative) `features` row, so Marriage Plus never
+                      displayed the Serious-tier benefits it also includes. */}
+                  <div className="mb-6 flex-1" />
 
                   {plan.tier === 'free' || isCurrent ? (
                     <Button variant="outline" fullWidth disabled>
@@ -195,6 +201,8 @@ export function PlansPage() {
         </div>
       )}
 
+      <PlanCompareTable currentTier={currentTier} />
+
       {/* Card checkout is deliberately absent until a gateway is configured. */}
       {!bool('card_payments_enabled') ? (
         <p className="text-faint mt-6 flex items-center justify-center gap-2 text-xs">
@@ -203,9 +211,248 @@ export function PlansPage() {
         </p>
       ) : null}
 
+      {/* Some members cannot pay online at all (Lebanon banking restrictions, no
+          matching method). This is their last way in — always visible, never gated
+          behind a pending claim or a chosen plan. */}
+      <p className="mt-4 flex items-center justify-center">
+        <Button variant="ghost" size="sm" onClick={() => setCantPayOpen(true)}>
+          <HandHelping className="h-4 w-4" aria-hidden />
+          {t('plans.cantPay.trigger')}
+        </Button>
+      </p>
+
       <ChooseMethodModal plan={chosen} period={period} onClose={() => setChosen(null)} />
+      <CantPayModal open={cantPayOpen} onClose={() => setCantPayOpen(false)} />
     </div>
   );
+}
+
+type CompareValue = { kind: 'yes' } | { kind: 'no' } | { kind: 'text'; value: string };
+
+interface CompareRow {
+  key: string;
+  cells: Record<Tier, CompareValue>;
+}
+
+interface CompareGroup {
+  key: string;
+  rows: CompareRow[];
+}
+
+/**
+ * Every real tier gate, in one place, read live from settings — never hardcoded
+ * copy that could drift from what the platform actually enforces. Two gates
+ * (member photos, advanced search filters) are a fixed `paid` boolean in the
+ * matchmaking Edge Function rather than a settings key, so those two rows use the
+ * same 'serious' minimum directly; everything else reads its real settings key.
+ */
+function PlanCompareTable({ currentTier }: { currentTier: Tier }) {
+  const { t } = useTranslation();
+  const { number, bool, text } = useSettings();
+
+  const yes: CompareValue = { kind: 'yes' };
+  const no: CompareValue = { kind: 'no' };
+  const perDay = (count: number): CompareValue => ({
+    kind: 'text',
+    value: t('plans.compare.perDay', { count }),
+  });
+  const byMinTier = (minTier: string): Record<Tier, CompareValue> => ({
+    free: tierAtLeast('free', minTier) ? yes : no,
+    serious: tierAtLeast('serious', minTier) ? yes : no,
+    marriage_plus: tierAtLeast('marriage_plus', minTier) ? yes : no,
+  });
+
+  const dailyRecs: Record<Tier, number> = {
+    free: number('daily_recs_free', 10),
+    serious: number('daily_recs_serious', 25),
+    marriage_plus: number('daily_recs_marriage_plus', 50),
+  };
+  const assistantConvos: Record<Tier, number> = {
+    free: number('ai_daily_conversations_free', 5),
+    serious: number('ai_daily_conversations_serious', 50),
+    marriage_plus: number('assistant_daily_marriage_plus', 0), // 0 = unlimited
+  };
+  const plusRefresh = number('plus_refresh_per_day', 3);
+  const financeMinTier = text('finance_charts_min_tier', 'serious');
+  const sharedTotalsMinTier = text('basic_shared_finance_tier', 'serious');
+  const sharedAdvancedMinTier = text('finance_shared_min_tier', 'marriage_plus');
+  const stageRequiresPaid = bool('serious_stage_requires_paid');
+
+  const groups: CompareGroup[] = [
+    {
+      key: 'matching',
+      rows: [
+        {
+          key: 'dailyRecs',
+          cells: {
+            free: perDay(dailyRecs.free),
+            serious: perDay(dailyRecs.serious),
+            marriage_plus: perDay(dailyRecs.marriage_plus),
+          },
+        },
+        {
+          key: 'plusRefresh',
+          cells: { free: no, serious: no, marriage_plus: perDay(plusRefresh) },
+        },
+        // Only real if the platform actually requires it — an admin can turn this
+        // requirement off, and the row should disappear rather than lie.
+        ...(stageRequiresPaid
+          ? [{ key: 'advanceStage', cells: { free: no, serious: yes, marriage_plus: yes } }]
+          : []),
+      ],
+    },
+    {
+      key: 'photosSearch',
+      rows: [
+        { key: 'photos', cells: byMinTier('serious') },
+        { key: 'filters', cells: byMinTier('serious') },
+      ],
+    },
+    {
+      key: 'finance',
+      rows: [
+        { key: 'financeBase', cells: { free: yes, serious: yes, marriage_plus: yes } },
+        { key: 'financeCharts', cells: byMinTier(financeMinTier) },
+        { key: 'financeBudgets', cells: byMinTier(financeMinTier) },
+        { key: 'financeReports', cells: byMinTier(financeMinTier) },
+        { key: 'sharedTotals', cells: byMinTier(sharedTotalsMinTier) },
+        { key: 'sharedAdvanced', cells: byMinTier(sharedAdvancedMinTier) },
+      ],
+    },
+    {
+      key: 'assistant',
+      rows: [
+        {
+          key: 'assistantConversations',
+          cells: {
+            free: perDay(assistantConvos.free),
+            serious: perDay(assistantConvos.serious),
+            marriage_plus:
+              assistantConvos.marriage_plus === 0
+                ? { kind: 'text', value: t('plans.compare.unlimited') }
+                : perDay(assistantConvos.marriage_plus),
+          },
+        },
+      ],
+    },
+  ];
+
+  return (
+    <section className="mt-10">
+      <div className="mb-5">
+        <h2 className="font-display text-ink text-xl font-semibold">{t('plans.compare.title')}</h2>
+        <p className="text-muted mt-1 text-sm">{t('plans.compare.subtitle')}</p>
+      </div>
+
+      <Card className="overflow-hidden p-0">
+        {/* ≥sm: a real table. A wide, three-tier matrix asking for BOTH horizontal
+            scroll AND vertical page scroll on a narrow phone — cramped into a strip
+            the floating bottom nav also sits over — is a bad interaction, so mobile
+            gets its own stacked layout below instead of relying on this scrolling. */}
+        <div className="hidden overflow-x-auto sm:block">
+          <table className="w-full min-w-[640px] border-collapse text-sm">
+            <thead>
+              <tr className="border-line border-b">
+                <th className="text-muted p-4 text-start font-medium">
+                  {t('plans.compare.feature')}
+                </th>
+                {TIERS.map((tier) => (
+                  <th
+                    key={tier}
+                    className={cn(
+                      'p-4 text-center font-semibold whitespace-nowrap',
+                      tier === currentTier ? 'text-brand-600' : 'text-ink',
+                    )}
+                  >
+                    {t(`plans.tier.${tier}`)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <Fragment key={group.key}>
+                  <tr className="bg-bg-3">
+                    <td
+                      colSpan={TIERS.length + 1}
+                      className="text-muted px-4 py-2 text-xs font-semibold tracking-wide uppercase"
+                    >
+                      {t(`plans.compare.group.${group.key}`)}
+                    </td>
+                  </tr>
+                  {group.rows.map((row) => (
+                    <tr key={row.key} className="border-line border-b last:border-0">
+                      <td className="text-ink-soft p-4">{t(`plans.compare.row.${row.key}`)}</td>
+                      {TIERS.map((tier) => (
+                        <td key={tier} className="p-4 text-center">
+                          <CompareCell value={row.cells[tier]} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* <sm: every row's three values stacked in a full-width mini-grid — same
+            data, no horizontal scroll. */}
+        <div className="sm:hidden">
+          {groups.map((group) => (
+            <div key={group.key}>
+              <p className="bg-bg-3 text-muted px-4 py-2 text-xs font-semibold tracking-wide uppercase">
+                {t(`plans.compare.group.${group.key}`)}
+              </p>
+              <div className="divide-line divide-y">
+                {group.rows.map((row) => (
+                  <div key={row.key} className="p-4">
+                    <p className="text-ink-soft mb-3 text-sm">{t(`plans.compare.row.${row.key}`)}</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {TIERS.map((tier) => (
+                        <div key={tier} className="flex flex-col items-center gap-1 text-center">
+                          <span
+                            className={cn(
+                              'text-[11px] leading-tight font-medium',
+                              tier === currentTier ? 'text-brand-600' : 'text-faint',
+                            )}
+                          >
+                            {t(`plans.tier.${tier}`)}
+                          </span>
+                          <CompareCell value={row.cells[tier]} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </section>
+  );
+}
+
+function CompareCell({ value }: { value: CompareValue }) {
+  const { t } = useTranslation();
+  if (value.kind === 'yes') {
+    return (
+      <>
+        <Check className="text-brand-500 mx-auto h-4 w-4" aria-hidden />
+        <span className="sr-only">{t('plans.included')}</span>
+      </>
+    );
+  }
+  if (value.kind === 'no') {
+    return (
+      <>
+        <X className="text-faint mx-auto h-4 w-4" aria-hidden />
+        <span className="sr-only">{t('plans.notIncluded')}</span>
+      </>
+    );
+  }
+  return <span className="text-ink-soft font-medium whitespace-nowrap">{value.value}</span>;
 }
 
 /** Pick a manual method, which creates the claim and hands back a reference code. */
@@ -314,6 +561,99 @@ function ChooseMethodModal({
         })}
       </div>
       {error ? <p className="text-danger mt-4 text-xs">{error}</p> : null}
+    </Modal>
+  );
+}
+
+/** "Can't pay? Contact us" (PRD) — a dedicated support form for a member who cannot
+ *  use any of the payment methods on this page at all. Always available, not gated
+ *  behind choosing a plan first. */
+function CantPayModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation();
+  const create = useCreateTicket();
+  const [reason, setReason] = useState<(typeof CANT_PAY_REASONS)[number]>(CANT_PAY_REASONS[0]);
+  const [body, setBody] = useState('');
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const close = () => {
+    onClose();
+    // Reset only after the exit animation would have finished, so the form doesn't
+    // visibly reset while the modal is still closing.
+    setTimeout(() => {
+      setSent(false);
+      setBody('');
+      setReason(CANT_PAY_REASONS[0]);
+      setError(null);
+    }, 250);
+  };
+
+  const submit = async () => {
+    setError(null);
+    try {
+      await create.mutateAsync({
+        category: 'payment',
+        subject: t(`plans.cantPay.reason.${reason}`),
+        body: body.trim(),
+      });
+      setSent(true);
+    } catch {
+      setError(t('plans.cantPay.error'));
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={close} title={t('plans.cantPay.title')}>
+      {sent ? (
+        <div className="py-2">
+          <p className="text-ink text-sm leading-relaxed">{t('plans.cantPay.sent')}</p>
+          <Button className="mt-4" onClick={close}>
+            {t('common.close')}
+          </Button>
+        </div>
+      ) : (
+        <>
+          <p className="text-muted mb-5 text-sm leading-relaxed">{t('plans.cantPay.body')}</p>
+
+          <label className="mb-4 block">
+            <span className="text-ink-soft mb-1.5 block text-sm font-medium">
+              {t('plans.cantPay.reasonLabel')}
+            </span>
+            <Select value={reason} onChange={(e) => setReason(e.target.value as typeof reason)}>
+              {CANT_PAY_REASONS.map((r) => (
+                <option key={r} value={r}>
+                  {t(`plans.cantPay.reason.${r}`)}
+                </option>
+              ))}
+            </Select>
+          </label>
+
+          <label className="block">
+            <span className="text-ink-soft mb-1.5 block text-sm font-medium">
+              {t('plans.cantPay.detailsLabel')}
+            </span>
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={4}
+              maxLength={1000}
+              placeholder={t('plans.cantPay.detailsPlaceholder')}
+              className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
+            />
+          </label>
+
+          {error ? <p className="text-danger mt-3 text-xs">{error}</p> : null}
+
+          <div className="mt-5 flex justify-end gap-2">
+            <Button variant="ghost" onClick={close}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={submit} disabled={create.isPending}>
+              {create.isPending ? t('common.pleaseWait') : t('plans.cantPay.submit')}
+            </Button>
+          </div>
+        </>
+      )}
     </Modal>
   );
 }

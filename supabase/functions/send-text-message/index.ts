@@ -17,6 +17,7 @@ import { emit } from '../_shared/notify.ts';
 
 import { moderate, POLICY_VERSION } from '../_shared/moderation.ts';
 import { secret } from '../_shared/env.ts';
+import { recordViolation } from '../_shared/violations.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -117,14 +118,20 @@ Deno.serve(async (req: Request) => {
 
     const verdict = await moderate(text, stage, aiEnabled ? anthropicKey : null);
     if (verdict.blocked) {
-      await audit({
+      const { data: modRow } = await audit({
         verdict: 'blocked',
         category: verdict.category,
         original_text: text,
         provider: verdict.provider,
         model: verdict.model,
         prompt_version: verdict.promptVersion,
-      });
+      }).select('id').single();
+      // The escalation ladder (Decisions Part D) is about repeated genuine rule-
+      // breaking — never count `unavailable` (the moderator itself failed, not the
+      // member's fault).
+      if (verdict.category && verdict.category !== 'unavailable') {
+        await recordViolation(admin, uid, verdict.category, modRow?.id ?? null);
+      }
       // `detail` is only present when the moderator itself failed — it tells you
       // whether the key, the model access, or the network is the problem.
       return json({ blocked: true, category: verdict.category, detail: verdict.detail });

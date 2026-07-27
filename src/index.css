@@ -22,7 +22,7 @@
   /* ── Type ─────────────────────────────────────────────────────────────── */
   --font-sans:
     'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Fraunces', 'Amiri', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-display: 'Fraunces Variable', 'Amiri', ui-serif, Georgia, 'Times New Roman', serif;
 
   /* ── Brand — emerald (light values; interactive steps sit one darker) ──── */
   --color-brand-50: #ecfdf5;
@@ -59,13 +59,18 @@
 
   --color-text-1: #0e1f18;
   --color-text-2: #3f544b;
-  --color-text-3: #6c8078;
-  --color-text-4: #93a49c;
+  /* text-3/muted darkened from #6c8078 (4.20:1 on white — fails WCAG AA's 4.5:1)
+     to #657770 (4.75:1 — passes) with no other visual change; text-4/faint
+     from #93a49c (2.62:1) to #84948c (3.18:1 — meets the large-text/decorative
+     tier it's actually used for) while staying visibly lighter than muted, so
+     the ink → ink-soft → muted → faint hierarchy doesn't collapse. */
+  --color-text-3: #657770;
+  --color-text-4: #84948c;
   /* Legacy aliases → MITHAQ text ramp */
   --color-ink: #0e1f18;
   --color-ink-soft: #3f544b;
-  --color-muted: #6c8078;
-  --color-faint: #93a49c;
+  --color-muted: #657770;
+  --color-faint: #84948c;
 
   --color-border-1: rgba(10, 31, 23, 0.08);
   --color-border-2: rgba(10, 31, 23, 0.14);

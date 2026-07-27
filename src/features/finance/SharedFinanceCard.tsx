@@ -15,6 +15,7 @@ import {
 } from '@/hooks/useFinance';
 import { formatMoney, sumIn, type RateMap } from '@/utils/money';
 import type { Totals } from '@/services/financeService';
+import { SharedBudgetsGoalsCard } from './SharedBudgetsGoalsCard';
 
 /**
  * Couple Finance. Shown only for a married connection.
@@ -76,6 +77,10 @@ export function SharedFinanceCard({
               {t('finance.shared.disconnect')}
             </Button>
             <p className="text-faint text-xs">{t('finance.shared.disconnectHint')}</p>
+          </div>
+
+          <div className="mt-5">
+            <SharedBudgetsGoalsCard matchId={matchId} currency={currency} />
           </div>
         </>
       ) : !status.tiersOk ? (

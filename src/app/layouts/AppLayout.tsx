@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { Sidebar } from '@/app/navigation/Sidebar';
 import { TopBar } from '@/app/navigation/TopBar';
@@ -15,12 +16,21 @@ import { RouteFallback } from '@/components/RouteFallback';
  */
 export function AppLayout() {
   const location = useLocation();
+  const { t } = useTranslation();
   return (
     <div className="app-backdrop flex min-h-screen">
+      {/* Keyboard-only: lets a screen-reader/keyboard user bypass the sidebar and
+          top bar nav (repeated on every page) and jump straight to page content. */}
+      <a
+        href="#main-content"
+        className="bg-brand-600 text-on-brand focus-visible:outline-brand-400 sr-only z-50 rounded-md px-4 py-2 text-sm font-medium focus:not-sr-only focus:absolute focus:top-4 focus-visible:outline-2 focus-visible:outline-offset-2 ltr:focus:left-4 rtl:focus:right-4"
+      >
+        {t('common.skipToContent')}
+      </a>
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main className="flex-1 px-4 pt-8 pb-28 md:px-8 md:pb-12">
+        <main id="main-content" className="flex-1 px-4 pt-8 pb-28 md:px-8 md:pb-12">
           <div className="mx-auto w-full max-w-6xl">
             <PageTransition pathname={location.pathname}>
               <ErrorBoundary key={location.pathname}>

@@ -49,6 +49,32 @@ export interface SharedStatus {
   /** Both spouses hold the required tier — one cannot buy it on the other's behalf. */
   tiersOk: boolean;
   minTier: string;
+  /** Marriage Plus, on top of the totals every Serious+ couple already gets. */
+  advancedUnlocked: boolean;
+  advancedMinTier: string;
+}
+
+/** A joint budget: the target vs. the SUM of both spouses' spending — never either
+ *  person's individual entries. */
+export interface SharedBudget {
+  id: string;
+  category: string;
+  amount: number;
+  currency: string;
+  spent: number;
+  unconvertible: number;
+  overBudget: boolean;
+}
+
+/** A joint running balance either spouse can add to — a shared jar, not a ledger of
+ *  who contributed what. */
+export interface SharedGoal {
+  id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  currency: string;
+  deadline: string | null;
 }
 
 /** Monthly totals, grouped by the currency each amount was entered in. */
@@ -62,6 +88,48 @@ export interface SharedSummary {
   mine: Totals[];
   theirs: Totals[];
   partnerName: string | null;
+}
+
+export interface ReportCategoryAmount {
+  category: string;
+  amount: number;
+}
+
+export interface ReportBudget {
+  category: string;
+  budgeted: number;
+  currency: string;
+  spent: number;
+  overBudget: boolean;
+}
+
+export interface ReportGoal {
+  name: string;
+  target: number;
+  current: number;
+  currency: string;
+  progressPct: number;
+}
+
+export interface ReportData {
+  currency: string;
+  income: number;
+  expenses: number;
+  net: number;
+  unconvertible: number;
+  byCategory: ReportCategoryAmount[];
+  budgets: ReportBudget[];
+  goals: ReportGoal[];
+  previous: { income: number; expenses: number; net: number };
+  narrative: string | null;
+}
+
+/** One frozen monthly snapshot — generated server-side, never client-written. */
+export interface Report {
+  id: string;
+  period: string; // 'YYYY-MM'
+  data: ReportData;
+  created_at: string;
 }
 
 interface IncomeRow {
@@ -178,6 +246,27 @@ export const financeService = {
     if (error) throw error;
   },
 
+  /** Kind is fixed on edit — changing it would mean moving the row between the
+   *  `income`/`expenses` tables, which is a bigger operation than "edit this entry". */
+  async updateEntry(
+    kind: EntryKind,
+    id: string,
+    input: { label: string; amount: number; currency: string; occurredOn: string; recurring: boolean },
+  ): Promise<void> {
+    const supabase = requireSupabaseClient();
+    const common = {
+      amount: input.amount,
+      currency: input.currency,
+      occurred_on: input.occurredOn,
+      recurring: input.recurring,
+    };
+    const { error } =
+      kind === 'income'
+        ? await supabase.from('income').update({ ...common, source: input.label }).eq('id', id)
+        : await supabase.from('expenses').update({ ...common, category: input.label }).eq('id', id);
+    if (error) throw error;
+  },
+
   /** Latest rate per currency; the query orders by date so `toRateMap` keeps the newest. */
   async listRates(): Promise<Rate[]> {
     const supabase = requireSupabaseClient();
@@ -215,6 +304,16 @@ export const financeService = {
     if (error) throw error;
   },
 
+  /** Category is fixed on edit (one budget per category) — only amount/currency change. */
+  async updateBudget(id: string, input: { amount: number; currency: string }): Promise<void> {
+    const supabase = requireSupabaseClient();
+    const { error } = await supabase
+      .from('budgets')
+      .update({ amount: input.amount, currency: input.currency })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
   async deleteBudget(id: string): Promise<void> {
     const supabase = requireSupabaseClient();
     const { error } = await supabase.from('budgets').delete().eq('id', id);
@@ -248,6 +347,25 @@ export const financeService = {
       currency: input.currency,
       deadline: input.deadline,
     });
+    if (error) throw error;
+  },
+
+  /** Editing the goal's own fields — distinct from contributeToGoal, which only ever
+   *  touches current_amount (the running balance a contribution adds to). */
+  async updateGoal(
+    id: string,
+    input: { name: string; target: number; currency: string; deadline: string | null },
+  ): Promise<void> {
+    const supabase = requireSupabaseClient();
+    const { error } = await supabase
+      .from('savings_goals')
+      .update({
+        name: input.name,
+        target_amount: input.target,
+        currency: input.currency,
+        deadline: input.deadline,
+      })
+      .eq('id', id);
     if (error) throw error;
   },
 
@@ -302,11 +420,83 @@ export const financeService = {
   async sharedSummary(matchId: string): Promise<SharedSummary> {
     return invokeFinance<SharedSummary>('shared-summary', matchId);
   },
+
+  // ── Marriage Plus: shared budgets + shared goals ──
+
+  async sharedBudgets(matchId: string): Promise<SharedBudget[]> {
+    const { budgets } = await invokeFinance<{ budgets: SharedBudget[] }>('shared-budgets', matchId);
+    return budgets;
+  },
+
+  async saveSharedBudget(
+    matchId: string,
+    input: { category: string; amount: number; currency: string },
+  ): Promise<void> {
+    await invokeFinance('shared-budget-save', matchId, input);
+  },
+
+  async deleteSharedBudget(matchId: string, id: string): Promise<void> {
+    await invokeFinance('shared-budget-delete', matchId, { id });
+  },
+
+  async sharedGoals(matchId: string): Promise<SharedGoal[]> {
+    const { goals } = await invokeFinance<{ goals: SharedGoal[] }>('shared-goals', matchId);
+    return goals;
+  },
+
+  /** `id` present = edit that goal's own fields; absent = create a new one. */
+  async saveSharedGoal(
+    matchId: string,
+    input: { id?: string; name: string; target: number; currency: string; deadline: string | null },
+  ): Promise<void> {
+    await invokeFinance('shared-goal-save', matchId, input);
+  },
+
+  async contributeSharedGoal(matchId: string, id: string, newAmount: number): Promise<void> {
+    await invokeFinance('shared-goal-contribute', matchId, { id, newAmount });
+  },
+
+  async deleteSharedGoal(matchId: string, id: string): Promise<void> {
+    await invokeFinance('shared-goal-delete', matchId, { id });
+  },
+
+  // ── Monthly reports — server-generated (cron), client only ever reads ──
+
+  /** Own reports, newest period first. Plain RLS read — engine-written, never client-inserted. */
+  async listReports(userId: string): Promise<Report[]> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase
+      .from('financial_reports')
+      .select('id, period, data, created_at')
+      .eq('user_id', userId)
+      .is('match_id', null)
+      .order('period', { ascending: false })
+      .limit(12);
+    if (error) throw error;
+    return (data ?? []) as Report[];
+  },
+
+  /** Generates (or returns the cached) AI paragraph for one report. Null if no key yet. */
+  async reportNarrative(reportId: string, locale: string): Promise<string | null> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('finance', {
+      body: { action: 'report-narrative', reportId, locale },
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return (data?.narrative as string | null) ?? null;
+  },
 };
 
-async function invokeFinance<T>(action: string, matchId: string): Promise<T> {
+async function invokeFinance<T>(
+  action: string,
+  matchId: string,
+  extra: Record<string, unknown> = {},
+): Promise<T> {
   const supabase = requireSupabaseClient();
-  const { data, error } = await supabase.functions.invoke('finance', { body: { action, matchId } });
+  const { data, error } = await supabase.functions.invoke('finance', {
+    body: { action, matchId, ...extra },
+  });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
   return data as T;

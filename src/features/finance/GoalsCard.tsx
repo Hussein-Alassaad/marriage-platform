@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/Button';
 import { Card, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
-import { useContributeToGoal, useDeleteGoal, useGoals, useSaveGoal } from '@/hooks/useFinance';
+import {
+  useContributeToGoal,
+  useDeleteGoal,
+  useGoals,
+  useSaveGoal,
+  useUpdateGoal,
+} from '@/hooks/useFinance';
 import { useLanguage } from '@/hooks/useLanguage';
 import { formatMoney } from '@/utils/money';
+import type { Goal } from '@/services/financeService';
 
 /**
  * Savings goals, including the wedding goal — a goal holds a BALANCE, so a contribution
@@ -18,45 +25,91 @@ export function GoalsCard({ currency }: { currency: string }) {
   const { language } = useLanguage();
   const { data: goals } = useGoals(true);
   const save = useSaveGoal();
+  const update = useUpdateGoal();
   const contribute = useContributeToGoal();
   const remove = useDeleteGoal();
 
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [target, setTarget] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const pending = editingId ? update.isPending : save.isPending;
 
-  const submit = async () => {
-    const value = Number(target);
-    if (!name.trim() || !Number.isFinite(value) || value <= 0) return;
-    await save.mutateAsync({
-      name: name.trim(),
-      target: value,
-      currency,
-      deadline: deadline || null,
-    });
+  const startAdd = () => {
+    setEditingId(null);
     setName('');
     setTarget('');
     setDeadline('');
-    setAdding(false);
+    setError(null);
+    setAdding((v) => !v);
+  };
+
+  const startEdit = (g: Goal) => {
+    setEditingId(g.id);
+    setName(g.name);
+    setTarget(String(g.target_amount));
+    setDeadline(g.deadline ?? '');
+    setError(null);
+    setAdding(true);
+  };
+
+  const submit = async () => {
+    const value = Number(target);
+    if (!name.trim() || !Number.isFinite(value) || value <= 0) {
+      setError(t('finance.goals.nameError'));
+      return;
+    }
+    setError(null);
+    try {
+      if (editingId) {
+        await update.mutateAsync({
+          id: editingId,
+          name: name.trim(),
+          target: value,
+          currency,
+          deadline: deadline || null,
+        });
+      } else {
+        await save.mutateAsync({
+          name: name.trim(),
+          target: value,
+          currency,
+          deadline: deadline || null,
+        });
+      }
+      setName('');
+      setTarget('');
+      setDeadline('');
+      setAdding(false);
+      setEditingId(null);
+    } catch {
+      setError(t('finance.goals.saveError'));
+    }
   };
 
   return (
     <Card className="p-5">
       <div className="mb-4 flex items-center justify-between">
         <CardTitle>{t('finance.goals.title')}</CardTitle>
-        <Button size="sm" variant="ghost" onClick={() => setAdding((v) => !v)}>
+        <Button size="sm" variant="ghost" onClick={startAdd}>
           <Plus className="h-4 w-4" aria-hidden />
           {t('finance.goals.add')}
         </Button>
       </div>
 
       {adding ? (
-        <div className="mb-4 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
+        <div className="mb-4 flex flex-wrap gap-2">
+          {/* flex-wrap, not a fixed grid: this card can end up squeezed to half the
+              page width (FinancePage's lg:grid-cols-2) minus the sidebar, and a rigid
+              grid with fixed-width siblings crushed this field down to a sliver you
+              couldn't see text in. Now it just drops to its own line instead. */}
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t('finance.goals.namePlaceholder')}
+            className="min-w-44 flex-1"
           />
           <Input
             type="number"
@@ -65,19 +118,20 @@ export function GoalsCard({ currency }: { currency: string }) {
             value={target}
             onChange={(e) => setTarget(e.target.value)}
             placeholder={`${currency} 0.00`}
-            className="sm:w-36"
+            className="w-36"
           />
           <Input
             type="date"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="sm:w-44"
+            className="w-44"
           />
-          <Button onClick={submit} disabled={save.isPending}>
+          <Button onClick={submit} disabled={pending}>
             {t('finance.goals.save')}
           </Button>
         </div>
       ) : null}
+      {error ? <p className="text-danger mb-3 -mt-2 text-xs">{error}</p> : null}
 
       {!goals?.length ? (
         <p className="text-muted py-6 text-center text-sm">{t('finance.goals.empty')}</p>
@@ -96,6 +150,14 @@ export function GoalsCard({ currency }: { currency: string }) {
                     {formatMoney(g.current_amount, g.currency, language)} /{' '}
                     {formatMoney(g.target_amount, g.currency, language)}
                   </span>
+                  <button
+                    type="button"
+                    aria-label={t('finance.goals.edit')}
+                    onClick={() => startEdit(g)}
+                    className="text-faint hover:bg-bg-3 hover:text-ink rounded-md p-1 transition-colors"
+                  >
+                    <Pencil className="h-3.5 w-3.5" aria-hidden />
+                  </button>
                   <button
                     type="button"
                     aria-label={t('finance.goals.delete')}

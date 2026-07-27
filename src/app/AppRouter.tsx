@@ -39,6 +39,9 @@ const FinancePage = lazy(() =>
 const AssistantPage = lazy(() =>
   import('@/features/assistant/AssistantPage').then((m) => ({ default: m.AssistantPage })),
 );
+const JobsPage = lazy(() =>
+  import('@/features/jobs/JobsPage').then((m) => ({ default: m.JobsPage })),
+);
 const NotificationsPage = lazy(() =>
   import('@/features/notifications/NotificationsPage').then((m) => ({
     default: m.NotificationsPage,
@@ -117,6 +120,7 @@ export function AppRouter() {
           </Route>
 
           <Route path={ROUTES.finance} element={<FinancePage />} />
+          <Route path={ROUTES.jobs} element={<JobsPage />} />
           <Route path={ROUTES.assistant} element={<AssistantPage />} />
           <Route path={ROUTES.notifications} element={<NotificationsPage />} />
           <Route path={ROUTES.profile} element={<ProfilePage />} />

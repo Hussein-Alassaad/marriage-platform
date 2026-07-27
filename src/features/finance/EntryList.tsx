@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ArrowDownLeft, ArrowUpRight, Repeat, Trash2, Wallet } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Pencil, Repeat, Trash2, Wallet } from 'lucide-react';
 
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
@@ -9,7 +9,13 @@ import { formatMoney } from '@/utils/money';
 import type { Entry } from '@/services/financeService';
 
 /** The plain history every member gets, free tier included (Decision #17). */
-export function EntryList({ entries }: { entries: Entry[] }) {
+export function EntryList({
+  entries,
+  onEdit,
+}: {
+  entries: Entry[];
+  onEdit: (entry: Entry) => void;
+}) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const remove = useDeleteEntry();
@@ -61,6 +67,14 @@ export function EntryList({ entries }: { entries: Entry[] }) {
               {formatMoney(entry.amount, entry.currency, language)}
             </p>
 
+            <button
+              type="button"
+              aria-label={t('finance.entry.edit')}
+              onClick={() => onEdit(entry)}
+              className="text-faint hover:bg-bg-3 hover:text-ink rounded-md p-1.5 transition-colors"
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+            </button>
             <button
               type="button"
               aria-label={t('finance.entry.delete')}

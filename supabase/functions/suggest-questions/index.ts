@@ -134,7 +134,7 @@ Deno.serve(async (req: Request) => {
         ? 'Arabic (Modern Standard Arabic, warm and natural)'
         : 'English';
 
-    const system = `You help a member of Mithaq, an Islamic marriage platform (NOT a dating app), decide what to say next to the person they have matched with. You are writing FOR the member — each suggestion is a message they could send as-is.
+    const system = `You help a member of Hayat, an Islamic marriage platform (NOT a dating app), decide what to say next to the person they have matched with. You are writing FOR the member — each suggestion is a message they could send as-is.
 
 Current stage: ${stage}.
 ${STAGE_GUIDE[stage]}

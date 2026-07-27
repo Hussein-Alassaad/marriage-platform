@@ -12,9 +12,16 @@
 // Requirements per Part D:
 //   introduction  -> serious_communication : both consent + both paid
 //                                            (gate: settings.serious_stage_requires_paid)
+//                                            + guardian ready, ONLY when wali_mode
+//                                            is 'strict' (PRD "Wali Modes")
 //   serious_communication -> family        : both consent + the woman's guardian is
 //                                            confirmed and granted access to this match
 //   family -> married                      : both confirm they are married
+//
+// Wali Modes (settings.wali_mode): 'recommended' (default) and 'guided' never gate
+// Serious — the status response's `familyRecommended` flag is purely informational,
+// surfaced as a non-blocking nudge; 'strict' makes guardian-readiness an actual
+// requirement, same check the Family stage already uses.
 //
 // Deploy: `supabase functions deploy stage-transition`.
 
@@ -47,6 +54,34 @@ async function setting<T>(admin: SupabaseClient, key: string, fallback: T): Prom
 
 const isPaid = (tier: string | null) => tier === 'serious' || tier === 'marriage_plus';
 
+/** The woman's guardian must be confirmed AND explicitly granted access to this
+ *  match. Shared by the Family requirement and, in strict Wali Mode, by Serious too. */
+async function guardianReady(
+  admin: SupabaseClient,
+  matchId: string,
+  a: { id: string; gender: string | null },
+  b: { id: string; gender: string | null },
+): Promise<boolean> {
+  const woman = a.gender === 'woman' ? a.id : b.gender === 'woman' ? b.id : null;
+  if (!woman) return false;
+  const { data: guardians } = await admin
+    .from('guardians')
+    .select('guardian_user_id')
+    .eq('ward_id', woman)
+    .eq('confirmed', true)
+    .is('deleted_at', null);
+  const ids = (guardians ?? []).map((g: { guardian_user_id: string }) => g.guardian_user_id);
+  if (!ids.length) return false;
+  const { data: access } = await admin
+    .from('guardian_access')
+    .select('id')
+    .eq('match_id', matchId)
+    .in('guardian_user_id', ids)
+    .is('revoked_at', null)
+    .limit(1);
+  return Boolean(access?.length);
+}
+
 /** What still has to be true before `next` can be entered. Empty = ready (given mutual consent). */
 async function requirements(
   admin: SupabaseClient,
@@ -57,33 +92,24 @@ async function requirements(
 ): Promise<Requirement[]> {
   if (next === 'serious_communication') {
     const requiresPaid = await setting(admin, 'serious_stage_requires_paid', true);
-    if (!requiresPaid) return [];
-    return [
-      { key: 'you_paid', met: isPaid(a.tier) },
-      { key: 'they_paid', met: isPaid(b.tier) },
-    ];
+    const reqs: Requirement[] = requiresPaid
+      ? [
+          { key: 'you_paid', met: isPaid(a.tier) },
+          { key: 'they_paid', met: isPaid(b.tier) },
+        ]
+      : [];
+
+    // Wali Mode 'strict' (PRD): family involvement is REQUIRED before unlimited
+    // communication, not merely recommended.
+    const waliMode = await setting(admin, 'wali_mode', 'recommended');
+    if (waliMode === 'strict') {
+      reqs.push({ key: 'guardian_ready', met: await guardianReady(admin, matchId, a, b) });
+    }
+    return reqs;
   }
 
   if (next === 'family') {
-    // The woman's guardian must be confirmed AND explicitly granted access to this match.
-    const woman = a.gender === 'woman' ? a.id : b.gender === 'woman' ? b.id : null;
-    if (!woman) return [{ key: 'guardian_ready', met: false }];
-    const { data: guardians } = await admin
-      .from('guardians')
-      .select('guardian_user_id')
-      .eq('ward_id', woman)
-      .eq('confirmed', true)
-      .is('deleted_at', null);
-    const ids = (guardians ?? []).map((g: { guardian_user_id: string }) => g.guardian_user_id);
-    if (!ids.length) return [{ key: 'guardian_ready', met: false }];
-    const { data: access } = await admin
-      .from('guardian_access')
-      .select('id')
-      .eq('match_id', matchId)
-      .in('guardian_user_id', ids)
-      .is('revoked_at', null)
-      .limit(1);
-    return [{ key: 'guardian_ready', met: Boolean(access?.length) }];
+    return [{ key: 'guardian_ready', met: await guardianReady(admin, matchId, a, b) }];
   }
 
   return []; // married: mutual confirmation is the only requirement
@@ -163,7 +189,14 @@ Deno.serve(async (req: Request) => {
     const buildStatus = async (currentStage: string) => {
       const nextStage = NEXT[currentStage] ?? null;
       if (!nextStage) {
-        return { stage: currentStage, next: null, youConsented: false, theyConsented: false, requirements: [] };
+        return {
+          stage: currentStage,
+          next: null,
+          youConsented: false,
+          theyConsented: false,
+          requirements: [],
+          familyRecommended: false,
+        };
       }
       const [{ data: profs }, { data: consents }] = await Promise.all([
         admin.from('profiles').select('id, gender, subscription_tier').in('id', [uid, otherId]),
@@ -180,12 +213,25 @@ Deno.serve(async (req: Request) => {
       };
       const consented = new Set((consents ?? []).map((c: { user_id: string }) => c.user_id));
       const reqs = await requirements(admin, nextStage, matchId, me, them);
+
+      // Non-blocking Wali Mode nudge (PRD "recommended"/"guided"): informational
+      // only, never a gate — 'strict' is already a real requirement above, so
+      // there is nothing extra to surface here for it.
+      let familyRecommended = false;
+      if (nextStage === 'serious_communication') {
+        const waliMode = await setting(admin, 'wali_mode', 'recommended');
+        if (waliMode !== 'strict') {
+          familyRecommended = !(await guardianReady(admin, matchId, me, them));
+        }
+      }
+
       return {
         stage: currentStage,
         next: nextStage,
         youConsented: consented.has(uid),
         theyConsented: consented.has(otherId),
         requirements: reqs,
+        familyRecommended,
       };
     };
 

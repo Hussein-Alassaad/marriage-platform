@@ -1,10 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { matchService } from '@/services/matchService';
+import { matchService, type DiscoverFilters } from '@/services/matchService';
 import { useSession } from '@/hooks/useSession';
 
-export function useDiscover() {
-  return useQuery({ queryKey: ['discover'], queryFn: matchService.discover });
+export function useDiscover(filters?: DiscoverFilters) {
+  return useQuery({
+    queryKey: ['discover', filters ?? null],
+    queryFn: () => matchService.discover(filters),
+  });
 }
 
 export function useConnections() {
@@ -15,6 +18,14 @@ export function useRefreshRecommendations() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => matchService.refreshRecommendations(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['discover'] }),
+  });
+}
+
+export function useRefreshPlus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => matchService.refreshPlus(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['discover'] }),
   });
 }

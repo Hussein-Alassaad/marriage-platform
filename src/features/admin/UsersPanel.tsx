@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search } from 'lucide-react';
+import { Search, ShieldAlert } from 'lucide-react';
 
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Card, CardDescription, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Modal } from '@/components/Modal';
 import { Select } from '@/components/Select';
 import { Skeleton } from '@/components/Skeleton';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useAdminUsers, useSetUserStatus } from '@/hooks/useAdmin';
-import type { AdminUser } from '@/services/adminService';
+import {
+  useAdminUsers,
+  useFlaggedViolations,
+  useReviewViolation,
+  useSetUserStatus,
+} from '@/hooks/useAdmin';
+import type { AdminUser, FlaggedViolation } from '@/services/adminService';
 
 /**
  * Suspension bites at the point of ACTION, not at login — the Edge Functions check
@@ -30,6 +35,8 @@ export function UsersPanel() {
 
   return (
     <div>
+      <FlaggedViolationsSection onManage={(v) => setTarget(toAdminUser(v))} />
+
       <div className="relative mb-4">
         <Search
           className="text-faint pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2"
@@ -91,6 +98,85 @@ export function UsersPanel() {
 
       <StatusModal user={target} onClose={() => setTarget(null)} />
     </div>
+  );
+}
+
+/** StatusModal only reads id/display_name; the rest are placeholders since a
+ *  flagged-violation row doesn't carry the full admin user-search shape. */
+function toAdminUser(v: FlaggedViolation): AdminUser {
+  return {
+    id: v.userId,
+    display_name: v.displayName,
+    gender: null,
+    country: null,
+    verification_status: 'unverified',
+    subscription_tier: 'free',
+    status: v.status,
+    suspended_until: null,
+    created_at: v.createdAt,
+  };
+}
+
+/** "Repeated or severe violations → administrator review" (Decisions Part D). */
+function FlaggedViolationsSection({ onManage }: { onManage: (v: FlaggedViolation) => void }) {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const { data: flagged, isLoading } = useFlaggedViolations();
+  const review = useReviewViolation();
+
+  if (isLoading || !flagged?.length) return null;
+
+  return (
+    <Card className="mb-5 p-5">
+      <div className="mb-3 flex items-center gap-2">
+        <ShieldAlert className="text-danger h-4 w-4" aria-hidden />
+        <CardTitle>{t('admin.users.flagged.title')}</CardTitle>
+      </div>
+      <CardDescription>{t('admin.users.flagged.body')}</CardDescription>
+
+      <ul className="divide-line mt-4 divide-y">
+        {flagged.map((v) => (
+          <li key={v.violationId} className="flex flex-wrap items-center gap-3 py-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-ink truncate text-sm font-medium">
+                {v.displayName ?? t('admin.users.unnamed')}
+              </p>
+              <p className="text-faint mt-0.5 text-xs">
+                {t('admin.users.flagged.detail', {
+                  category: t(`admin.users.flagged.category.${v.category}`, { defaultValue: v.category }),
+                  total: v.totalViolations,
+                })}
+                {' · '}
+                {new Date(v.createdAt).toLocaleDateString(language)}
+              </p>
+            </div>
+            {v.status !== 'active' ? (
+              <Badge variant="danger">{t(`admin.users.status.${v.status}`)}</Badge>
+            ) : null}
+            <div className="flex shrink-0 gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={review.isPending}
+                onClick={() => review.mutate(v.violationId)}
+              >
+                {t('admin.users.flagged.dismiss')}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  review.mutate(v.violationId);
+                  onManage(v);
+                }}
+              >
+                {t('admin.users.manage')}
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }
 

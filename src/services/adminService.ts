@@ -38,6 +38,17 @@ export interface AdminUser {
   created_at: string;
 }
 
+export interface FlaggedViolation {
+  violationId: string;
+  userId: string;
+  displayName: string | null;
+  status: 'active' | 'suspended' | 'banned';
+  category: string;
+  severity: number;
+  totalViolations: number;
+  createdAt: string;
+}
+
 export interface VerificationItem {
   id: string;
   userId: string;
@@ -67,6 +78,11 @@ export interface AuditEntry {
   created_at: string;
 }
 
+export interface AnalyticsInsight {
+  key: string;
+  params?: Record<string, unknown>;
+}
+
 export interface Analytics {
   days: number;
   signupsByDay: Record<string, number>;
@@ -82,6 +98,31 @@ export interface Analytics {
     verifiedRate: number;
     paidRate: number;
   };
+  demographics: {
+    gender: Record<string, number>;
+    ageGroup: Record<string, number>;
+    country: Record<string, number>;
+    city: Record<string, number>;
+  };
+  communication: { blockedByCategory: Record<string, number> };
+  support: { total: number; byCategory: Record<string, number>; byStatus: Record<string, number> };
+  safety: {
+    violationsByCategory: Record<string, number>;
+    flaggedForReview: number;
+    suspendedAccounts: number;
+    bannedAccounts: number;
+    moderationUnavailableCount: number;
+  };
+  /** Match Analytics: average days from a match's start to each stage it reached
+   *  (all-time, computed from stage_history). Null = nobody has reached it yet. */
+  matchTiming: Record<string, number | null>;
+  /** Match Analytics: which Discover search filters (Serious+) actually get used,
+   *  within the selected window. */
+  topFilters: Record<string, number>;
+  /** Business Intelligence: deterministic, rule-based (no AI key required) —
+   *  rendered via i18n using `key`/`params`, same "AI-shaped but real" tradeoff as
+   *  the platform's other scores. */
+  insights: AnalyticsInsight[];
 }
 
 export interface Coupon {
@@ -143,6 +184,13 @@ export const adminService = {
     call<{ queue: VerificationItem[] }>('verification-queue').then((r) => r.queue),
   reviewVerification: (id: string, decision: 'verified' | 'rejected', reason?: string) =>
     call<{ ok: true }>('verification-review', { id, decision, reason }),
+
+  /** "Repeated or severe violations → administrator review" (Decisions Part D). One
+   *  row per flagged member, most recent flagged category + their lifetime count. */
+  flaggedViolations: () =>
+    call<{ flagged: FlaggedViolation[] }>('flagged-violations').then((r) => r.flagged),
+  reviewViolation: (violationId: string) =>
+    call<{ ok: true }>('violation-review', { violationId }),
 
   listJobs: () => call<{ jobs: Job[] }>('jobs').then((r) => r.jobs),
   runJob: (name: string) => call<{ result: string }>('job-run', { name }),

@@ -35,7 +35,7 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
 
   if (isLoading || !status) return null;
 
-  const { stage, next, youConsented, theyConsented, requirements } = status;
+  const { stage, next, youConsented, theyConsented, requirements, familyRecommended } = status;
   const unmet = requirements.filter((r) => !r.met);
   const blocked = unmet.length > 0;
   const who = personName ?? t('chat.thePerson');
@@ -140,6 +140,23 @@ export function JourneyPanel({ matchId, personName }: JourneyPanelProps) {
         {next && !blocked && youConsented && !theyConsented ? (
           <p className="border-line text-muted mt-3 border-t pt-3 text-xs">
             {t('journey.waiting', { name: who })}
+          </p>
+        ) : null}
+
+        {/* Wali Mode 'recommended'/'guided' (PRD): a nudge, never a gate — 'strict'
+            already appears above as a real requirement instead. */}
+        {next === 'serious_communication' && familyRecommended ? (
+          <p className="border-line text-muted mt-3 flex items-start gap-2 border-t pt-3 text-xs">
+            <ShieldAlert className="text-faint mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            {t('journey.familyRecommended')}
+            {profile?.gender === 'woman' ? (
+              <Link
+                to={ROUTES.guardians}
+                className="text-brand-700 ms-1.5 font-medium underline-offset-4 hover:underline"
+              >
+                {t('journey.inviteGuardian')}
+              </Link>
+            ) : null}
           </p>
         ) : null}
 

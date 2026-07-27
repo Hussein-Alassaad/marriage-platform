@@ -36,8 +36,8 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const from =
-    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? ROUTES.home;
+  const state = location.state as { from?: { pathname?: string }; idleLogout?: boolean } | null;
+  const from = state?.from?.pathname ?? ROUTES.home;
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
     setFormError(null);
@@ -81,6 +81,7 @@ export function LoginPage() {
       </FadeRise>
 
       <form className="mt-7 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+        {state?.idleLogout ? <Alert variant="info">{t('page.login.idleLogout')}</Alert> : null}
         {formError ? <Alert>{formError}</Alert> : null}
 
         <FadeRise immediate delay={0.36}>

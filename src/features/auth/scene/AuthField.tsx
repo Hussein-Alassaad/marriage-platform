@@ -66,7 +66,7 @@ export function AuthField({
             error
               ? 'border-danger/55 focus:[box-shadow:0_0_0_3px_rgba(229,114,106,0.15)]'
               : valid
-                ? 'border-brand-400/40'
+                ? 'border-brand-400/40 focus:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)]'
                 : 'focus:border-brand-400 border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] focus:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)]',
           )}
           {...registration}

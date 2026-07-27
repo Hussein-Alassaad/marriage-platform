@@ -15,6 +15,7 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 
 import { moderateImage, POLICY_VERSION } from '../_shared/moderation.ts';
 import { secret } from '../_shared/env.ts';
+import { recordViolation } from '../_shared/violations.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -135,13 +136,16 @@ Deno.serve(async (req: Request) => {
     const bytes = new Uint8Array(await image.arrayBuffer());
     const verdict = await moderateImage(toBase64(bytes), type, anthropicKey);
     if (verdict.blocked) {
-      await audit({
+      const { data: modRow } = await audit({
         verdict: 'blocked',
         category: verdict.category,
         provider: verdict.provider,
         model: verdict.model,
         prompt_version: verdict.promptVersion,
-      });
+      }).select('id').single();
+      if (verdict.category && verdict.category !== 'unavailable') {
+        await recordViolation(admin, uid, verdict.category, modRow?.id ?? null);
+      }
       return json({ blocked: true, category: verdict.category });
     }
 

@@ -52,7 +52,25 @@ export function useSetUserStatus() {
       days?: number;
       reason?: string;
     }) => adminService.setUserStatus(input.userId, input.status, input.days, input.reason),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-users'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['flagged-violations'] });
+    },
+  });
+}
+
+export function useFlaggedViolations() {
+  return useQuery({
+    queryKey: ['flagged-violations'],
+    queryFn: () => adminService.flaggedViolations(),
+  });
+}
+
+export function useReviewViolation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (violationId: string) => adminService.reviewViolation(violationId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flagged-violations'] }),
   });
 }
 

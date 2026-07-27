@@ -16,6 +16,9 @@ export interface Candidate {
   photoUrl: string | null;
   photoLocked: boolean;
   saved: boolean;
+  /** Online/Activity Status (PRD Privacy Controls) — already filtered server-side
+   *  by the candidate's own privacy toggle; null means "don't show anything". */
+  lastActiveAt: string | null;
 }
 
 export interface InterestEntry {
@@ -40,8 +43,19 @@ async function invoke<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
+export interface DiscoverFilters {
+  minAge?: number;
+  maxAge?: number;
+  country?: string;
+  city?: string;
+  educationLevel?: string;
+}
+
 export const matchService = {
-  discover: () => invoke<{ candidates: Candidate[]; paid: boolean }>({ action: 'discover' }),
+  /** filters is Serious+ only server-side; the caller only ever sends it from a UI
+   *  that's already gated on tier. */
+  discover: (filters?: DiscoverFilters) =>
+    invoke<{ candidates: Candidate[]; paid: boolean }>({ action: 'discover', filters }),
   connections: () =>
     invoke<{ incoming: InterestEntry[]; outgoing: InterestEntry[]; matches: MatchEntry[] }>({
       action: 'connections',
@@ -59,6 +73,24 @@ export const matchService = {
     });
     if (error) throw error;
     return data as { count: number };
+  },
+
+  /** Marriage Plus only: replaces today's list with profiles never shown before,
+   *  rate-limited by `plus_refresh_per_day`. Throws with `.limit`/`.used` attached
+   *  when the daily cap is already reached, so the UI can say exactly that. */
+  async refreshPlus(): Promise<{ count: number; used: number; limit: number }> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('compute-compatibility', {
+      body: { action: 'refresh_plus' },
+    });
+    if (error) throw error;
+    if (data?.error) {
+      const err = new Error(data.error) as Error & { used?: number; limit?: number };
+      err.used = data.used;
+      err.limit = data.limit;
+      throw err;
+    }
+    return data as { count: number; used: number; limit: number };
   },
 
   // Personal collections — direct writes allowed by RLS (own rows).

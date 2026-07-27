@@ -4,6 +4,7 @@ export const ROUTES = {
   match: '/match',
   messages: '/messages',
   finance: '/finance',
+  jobs: '/jobs',
   assistant: '/assistant',
   notifications: '/notifications',
   profile: '/profile',

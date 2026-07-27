@@ -4,6 +4,7 @@ import { Download, Printer } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { useLanguage } from '@/hooks/useLanguage';
 import { downloadCsv } from '@/utils/csv';
+import { dateKey, monthKey } from '@/utils/date';
 import { convert, formatMoney, type RateMap } from '@/utils/money';
 import type { Entry } from '@/services/financeService';
 
@@ -54,11 +55,11 @@ export function ExportMenu({
         ];
       }),
     ];
-    downloadCsv(`mithaq-finance-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    downloadCsv(`hayat-finance-${dateKey()}.csv`, rows);
   };
 
   const printReport = () => {
-    const month = new Date().toISOString().slice(0, 7);
+    const month = monthKey();
     const thisMonth = entries.filter((e) => e.occurred_on.startsWith(month));
     const sum = (kind: 'income' | 'expense') =>
       thisMonth

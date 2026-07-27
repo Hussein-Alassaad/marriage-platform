@@ -1,10 +1,11 @@
 {
   "common": {
-    "appName": "Mithaq",
+    "appName": "Hayat",
     "tagline": "Together in faith",
     "motto": "Find your partner. Build your future. Grow together.",
     "switchLanguage": "Switch language",
     "toggleTheme": "Toggle theme",
+    "skipToContent": "Skip to content",
     "pleaseWait": "Please wait…",
     "comingSoon": "Coming soon",
     "comingSoonTitle": "Being prepared",
@@ -18,6 +19,8 @@
     "next": "Next",
     "back": "Back",
     "cancel": "Cancel",
+    "close": "Close",
+    "dialog": "Dialog",
     "selectPlaceholder": "Select…"
   },
   "auth": {
@@ -103,6 +106,7 @@
     "send": "Send",
     "placeholder": "Write a respectful message…",
     "messagesLeft": "{{count}} left",
+    "seen": "Seen",
     "emptyTitle": "Begin with good intentions",
     "emptyBody": "This is the Introduction stage — text only, and kept respectful. Say salaam and share why you felt this could be a match.",
     "quotaReached": "You've used all your introduction messages for now.",
@@ -110,7 +114,7 @@
     "blockedInappropriate": "That message can't be sent — please keep the conversation respectful.",
     "blockedTooSoon": "Let's keep the introduction respectful and unhurried — that can come later, insha'Allah.",
     "blockedMeeting": "Private meetings aren't arranged here. Families are involved at the Family stage, insha'Allah.",
-    "blockedScam": "Money or payment requests aren't allowed on Mithaq. This has been recorded.",
+    "blockedScam": "Money or payment requests aren't allowed on Hayat. This has been recorded.",
     "moderationUnavailable": "Safety review is temporarily unavailable, so your message wasn't sent. Please try again shortly.",
     "sendError": "Couldn't send. Please try again.",
     "notAvailable": "Messaging isn't available for this connection yet.",
@@ -190,11 +194,10 @@
     },
     "feature": {
       "photos": "See members' photos (per their privacy setting)",
-      "charts": "Full compatibility breakdown charts",
+      "charts": "Interactive finance charts & reports",
       "advanced_filters": "Advanced search filters",
       "unlimited_ai": "Unlimited Marriage Assistant",
       "couple_finance": "Shared couple finance tools",
-      "priority": "Priority support and visibility",
       "shared_finance": "Shared finance"
     },
     "free": "Free",
@@ -202,6 +205,51 @@
     "popular": "Most popular",
     "current": "Your plan",
     "included": "Included",
+    "notIncluded": "Not included",
+    "compare": {
+      "title": "Compare every membership",
+      "subtitle": "Everything each tier includes, side by side — no surprises later.",
+      "feature": "Feature",
+      "perDay": "{{count}} / day",
+      "unlimited": "Unlimited",
+      "group": {
+        "matching": "Matching",
+        "photosSearch": "Photos & search",
+        "finance": "Finance",
+        "assistant": "Marriage Assistant"
+      },
+      "row": {
+        "dailyRecs": "New AI match recommendations",
+        "plusRefresh": "Refresh recommendations (skips profiles you've already seen)",
+        "advanceStage": "Both partners need this tier to move a match past Introduction chat",
+        "photos": "See other members' photos (per their privacy setting)",
+        "filters": "Advanced search filters — age, country, city, education",
+        "financeBase": "Track income & expenses, view your history",
+        "financeCharts": "Interactive charts & monthly statistics",
+        "financeBudgets": "Budgets & savings goals",
+        "financeReports": "Monthly financial reports",
+        "sharedTotals": "Couple finance — shared monthly totals (once married)",
+        "sharedAdvanced": "Couple finance — joint budget & goal (both spouses)",
+        "assistantConversations": "Marriage Assistant conversations"
+      }
+    },
+    "cantPay": {
+      "trigger": "Can't pay? Contact us",
+      "title": "Can't pay? Contact us",
+      "body": "Some members can't use any of the payment methods here. Tell us what's going on and we'll help you directly.",
+      "reasonLabel": "What's the issue?",
+      "reason": {
+        "payment_problem": "Payment problem",
+        "country_restriction": "Country restrictions",
+        "need_alternative": "Need an alternative payment method",
+        "general_billing": "General billing question"
+      },
+      "detailsLabel": "Details (optional)",
+      "detailsPlaceholder": "Anything that would help us understand your situation…",
+      "submit": "Send",
+      "sent": "Thank you — we've received your message and will get back to you.",
+      "error": "Could not send this. Please try again."
+    },
     "choose": "Choose plan",
     "cardSoon": "Card payments arrive once the gateway is connected. Manual payment works today.",
     "activeUntil": "{{tier}} active until {{date}}.",
@@ -306,6 +354,20 @@
         "active": "Active",
         "suspended": "Suspended",
         "banned": "Banned"
+      },
+      "flagged": {
+        "title": "Flagged for review",
+        "body": "Repeated or severe moderation violations (Decisions Part D). Dismiss if no action is needed, or manage the account.",
+        "detail": "{{category}} · {{total}} violation(s) total",
+        "dismiss": "Dismiss",
+        "category": {
+          "contact_info": "Contact info",
+          "too_soon": "Too soon / romantic",
+          "haram_meeting": "Unchaperoned meeting",
+          "inappropriate": "Inappropriate content",
+          "scam": "Scam",
+          "unsafe": "Unsafe image"
+        }
       }
     },
     "verification": {
@@ -384,7 +446,60 @@
       "noRevenue": "No payments in this period.",
       "ai": "AI usage",
       "aiStats": "{{calls}} calls · {{errors}} errors · {{tokens}} tokens",
-      "noAi": "No AI calls in this period."
+      "noAi": "No AI calls in this period.",
+      "noData": "Nothing to show yet.",
+      "summary": {
+        "title": "Executive summary"
+      },
+      "insight": {
+        "goodVerification": "{{rate}}% of members are verified — a healthy trust signal.",
+        "lowVerification": "Only {{rate}}% of members are verified. Worth investigating why people stop before finishing.",
+        "conversionRate": "{{rate}}% of verified members hold a paid membership.",
+        "signupsUp": "Signups are up {{pct}}% in the second half of this period vs. the first.",
+        "signupsDown": "Signups are down {{pct}}% in the second half of this period vs. the first.",
+        "highBlockRate": "{{rate}}% of messages checked this period were blocked — worth a closer look.",
+        "topBlockCategory": "The most common reason messages are blocked is \"{{category}}\" ({{count}} this period).",
+        "pendingReview": "{{count}} flagged violation(s) are waiting for admin review."
+      },
+      "demographics": {
+        "gender": "Gender",
+        "ageGroup": "Age",
+        "country": "Country",
+        "city": "City"
+      },
+      "communication": {
+        "title": "Why messages get blocked",
+        "category": {
+          "contact_info": "Contact info",
+          "too_soon": "Too soon / romantic",
+          "haram_meeting": "Unchaperoned meeting",
+          "inappropriate": "Inappropriate content",
+          "scam": "Scam",
+          "unsafe": "Unsafe image",
+          "unavailable": "Moderator unavailable",
+          "none": "Other"
+        }
+      },
+      "support": {
+        "title": "Support tickets by status"
+      },
+      "safety": {
+        "title": "Safety monitoring",
+        "flagged": "Flagged for review",
+        "suspended": "Suspended accounts",
+        "banned": "Banned accounts",
+        "moderationDown": "Blocked — moderator unavailable"
+      },
+      "topFilters": {
+        "title": "Most used search filters"
+      },
+      "timing": {
+        "title": "Time to reach each stage",
+        "hint": "Average days from a match's start until it first reached that stage (all matches, all time).",
+        "days_one": "{{count}} day",
+        "days_other": "{{count}} days",
+        "none": "Not yet"
+      }
     },
     "coupons": {
       "add": "New coupon",
@@ -436,7 +551,7 @@
     "copied": "Copied",
     "yourGuardians": "Your guardian",
     "confirmed": "Confirmed",
-    "disclaimer": "The relationship is declared by you and confirmed by them. Mithaq does not independently verify family relationships or legal guardianship.",
+    "disclaimer": "The relationship is declared by you and confirmed by them. Hayat does not independently verify family relationships or legal guardianship.",
     "sharingTitle": "What {{name}} can see",
     "sharingBody": "Share a connection with {{name}} to involve them. Sharing is required before the Family stage, and you can revoke it at any time.",
     "share": "Share",
@@ -474,6 +589,7 @@
     "endTitle": "End this connection?",
     "endBody": "This ends your connection with {{name}} and closes the conversation. It can't be undone, and you won't be able to re-request for a while.",
     "seriousNotice": "Contact details and meeting arrangements stay closed until the Family stage, when a guardian joins.",
+    "familyRecommended": "Involving your family before unlimited communication is recommended, though not required.",
     "req": {
       "you_paid": "You need a Serious or Marriage Plus membership.",
       "they_paid": "{{name}} needs a Serious or Marriage Plus membership.",
@@ -491,6 +607,8 @@
       "body": "We're preparing thoughtful, compatibility-based introductions for you. Check back soon."
     },
     "age": "{{age}} yrs",
+    "onlineNow": "Online now",
+    "activeOn": "Active on {{date}}",
     "new": "New",
     "refresh": "Refresh",
     "generate": "Generate recommendations",
@@ -499,6 +617,20 @@
     "save": "Save",
     "saved": "Saved",
     "pass": "Pass",
+    "filters": {
+      "title": "Filters",
+      "minAge": "Min age",
+      "maxAge": "Max age",
+      "country": "Country",
+      "city": "City",
+      "educationLevel": "Education",
+      "anyEducation": "Any education level",
+      "clear": "Clear",
+      "apply": "Apply",
+      "plusRefresh": "New matches",
+      "plusRefreshResult": "Refreshed — {{used}} of {{limit}} used today.",
+      "plusRefreshLimitReached": "You've used all {{limit}} refreshes for today. Come back tomorrow."
+    },
     "interest": {
       "title": "Send interest to {{name}}",
       "body": "A short, sincere note travels with your interest. Keep it respectful — it's the first thing they'll read.",
@@ -537,6 +669,32 @@
     "completeCta": "Complete your profile",
     "editCta": "Edit profile",
     "genderLockedNote": "Gender is set at registration and locks after identity verification.",
+    "scores": {
+      "title": "Profile insights",
+      "qualityTitle": "Profile Quality",
+      "qualityHint": "Photos, biography, questionnaires, verification",
+      "readinessTitle": "Marriage Readiness",
+      "readinessHint": "How complete your preparation is",
+      "trustTitle": "Trust",
+      "trustHint": "Verification, conduct, and account age",
+      "disclaimer": "These are informational guides only — never a measure of your worth or your suitability for marriage.",
+      "suggestion": {
+        "photo": "Adding a photo could improve your profile.",
+        "verify": "Verify your identity to increase trust.",
+        "bio": "Consider expanding your biography.",
+        "education": "Adding your education details could improve your profile."
+      }
+    },
+    "privacy": {
+      "title": "Privacy",
+      "body": "Choose what other members can see about your activity.",
+      "onlineStatus": "Online status",
+      "onlineStatusHint": "Let others see when you're online now.",
+      "activityStatus": "Activity status",
+      "activityStatusHint": "Let others see when you were last active.",
+      "readReceipts": "Read receipts",
+      "readReceiptsHint": "Let others see when you've read their messages."
+    },
     "sections": {
       "about": "About",
       "basics": "Basics",
@@ -573,6 +731,7 @@
     },
     "photos": {
       "add": "Add photo",
+      "photo": "Profile photo",
       "primary": "Primary",
       "makePrimary": "Set as primary",
       "delete": "Delete photo",
@@ -675,12 +834,18 @@
     "history": "History",
     "displayCurrency": "Display currency",
     "insightsSoon": "AI financial insights are coming soon.",
+    "health": {
+      "title": "Financial Health",
+      "hint": "Savings rate, budgets, emergency fund, income stability, goal progress",
+      "disclaimer": "An educational guide, not a judgment — it's here to explain what could improve, never to score you."
+    },
     "kind": {
       "income": "Income",
       "expense": "Expense"
     },
     "entry": {
       "title": "Add an entry",
+      "editTitle": "Edit entry",
       "source": "Source",
       "category": "Category",
       "amount": "Amount",
@@ -689,6 +854,7 @@
       "recurring": "This repeats every month",
       "recurringShort": "Monthly",
       "save": "Save",
+      "edit": "Edit entry",
       "delete": "Delete entry",
       "amountError": "Enter an amount greater than zero.",
       "saveError": "Could not save this entry. Please try again."
@@ -718,18 +884,24 @@
       "title": "Monthly budgets",
       "add": "Add",
       "save": "Save",
+      "edit": "Edit budget",
       "delete": "Delete budget",
-      "empty": "Set a budget for a category to track your spending against it."
+      "empty": "Set a budget for a category to track your spending against it.",
+      "amountError": "Enter an amount greater than zero.",
+      "saveError": "Could not save this budget. Please try again."
     },
     "goals": {
       "title": "Savings goals",
       "add": "Add",
       "save": "Save",
+      "edit": "Edit goal",
       "delete": "Delete goal",
       "contribute": "Add",
       "namePlaceholder": "e.g. Wedding",
       "by": "by {{date}}",
-      "empty": "Set a goal — a wedding, a home, a mahr — and track your progress."
+      "empty": "Set a goal — a wedding, a home, a mahr — and track your progress.",
+      "nameError": "Enter a name and a target amount greater than zero.",
+      "saveError": "Could not save this goal. Please try again."
     },
     "upgrade": {
       "title": "Unlock your financial dashboard",
@@ -794,12 +966,29 @@
       "converted": "In {{currency}}",
       "noRate": "no rate",
       "reportTitle": "Monthly finance report"
+    },
+    "report": {
+      "title": "Monthly report",
+      "period": "Month",
+      "empty": "Your first report appears after your first full month of activity, on the 1st.",
+      "overBudget": "Over budget",
+      "getInsight": "Get AI insight",
+      "thinking": "Thinking…"
+    },
+    "sharedAdvanced": {
+      "title": "Joint budgets & goals",
+      "upsell": "When both of you hold a {{tier}} membership, you can set a joint household budget and a shared savings goal on top of your shared totals.",
+      "budgetsTitle": "Joint budgets",
+      "budgetsEmpty": "Set a joint budget for a category to track your combined spending against it.",
+      "goalsTitle": "Joint goals",
+      "goalsEmpty": "Set a shared goal — a wedding anniversary trip, a home — and track your progress together."
     }
   },
   "nav": {
     "home": "Home",
     "match": "Match",
     "finance": "Finance",
+    "jobs": "Jobs",
     "assistant": "Marriage Assistant",
     "assistantShort": "Assistant",
     "notifications": "Notifications",
@@ -810,6 +999,9 @@
     "admin": "Admin Dashboard",
     "guardian": "Guardian Review",
     "rolePreview": "Role views"
+  },
+  "jobs": {
+    "subtitle": "Halal job opportunities for the community — being built for a future release."
   },
   "page": {
     "home": {
@@ -921,7 +1113,8 @@
       "submit": "Sign in",
       "forgot": "Forgot password?",
       "noAccount": "New here?",
-      "registerLink": "Create an account"
+      "registerLink": "Create an account",
+      "idleLogout": "You were signed out after a period of inactivity, to keep your account safe."
     },
     "register": {
       "title": "Create your account",
@@ -1042,6 +1235,14 @@
         "title": "Message not delivered",
         "body": "Your message did not pass the safety review."
       },
+      "moderation.warning": {
+        "title": "Official warning",
+        "body": "You have received an official warning for repeated messages that did not pass review. A further violation will temporarily suspend your ability to send messages."
+      },
+      "moderation.suspended": {
+        "title": "Messaging temporarily suspended",
+        "body": "Your account has been temporarily suspended due to repeated moderation violations."
+      },
       "stage.advanced": {
         "title": "Your journey moved forward",
         "body": "You have both agreed to continue."
@@ -1089,6 +1290,10 @@
       "finance.shared_connected": {
         "title": "Couple Finance connected",
         "body": "You and your spouse now share monthly totals."
+      },
+      "finance.report_ready": {
+        "title": "Your monthly report is ready",
+        "body": "Last month's income, spending and goal progress are ready to view."
       }
     }
   },
@@ -1160,11 +1365,11 @@
     "updated": "Last updated 14 July 2026. These documents describe what the platform actually does. If anything here does not match your experience, that is a bug — please tell us.",
     "terms": {
       "title": "Terms of Service",
-      "subtitle": "What you agree to by using Mithaq.",
+      "subtitle": "What you agree to by using Hayat.",
       "sections": [
         {
-          "heading": "What Mithaq is",
-          "body": "Mithaq is a platform for people seeking marriage. It is not a dating app. Every connection here moves through defined stages — Introduction, Serious Communication, Family, and Marriage — and the platform is built around that intent."
+          "heading": "What Hayat is",
+          "body": "Hayat is a platform for people seeking marriage. It is not a dating app. Every connection here moves through defined stages — Introduction, Serious Communication, Family, and Marriage — and the platform is built around that intent."
         },
         {
           "heading": "Who may use it",

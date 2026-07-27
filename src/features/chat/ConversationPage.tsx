@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import { EASE_EXPO } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { useSettings } from '@/hooks/useSettings';
+import { useProfile } from '@/hooks/useProfile';
 import { chatService, type ChatMessage } from '@/services/chatService';
 import {
   useConversationId,
@@ -43,6 +44,10 @@ export function ConversationPage() {
   const location = useLocation();
   const { user } = useSession();
   const uid = user?.id;
+  const { data: myProfile } = useProfile();
+  // Read receipts (PRD Privacy Controls): default on, opt-out in profile privacy.
+  const readReceiptsEnabled =
+    (myProfile?.privacy as { readReceipts?: boolean } | undefined)?.readReceipts !== false;
   const { number, bool } = useSettings();
   const queryClient = useQueryClient();
 
@@ -71,6 +76,17 @@ export function ConversationPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages?.length]);
+
+  // Mark the other person's messages read — never my own, and never at all if I've
+  // turned read receipts off (I simply don't reveal that I've read anything).
+  useEffect(() => {
+    if (!messages || !uid || !readReceiptsEnabled) return;
+    const unread = messages.filter((m) => m.sender_id !== uid && !m.read_at).map((m) => m.id);
+    if (!unread.length) return;
+    void chatService.markRead(unread).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
+    });
+  }, [messages, uid, conversationId, readReceiptsEnabled, queryClient]);
 
   const canMessage = stage ? MESSAGING_STAGES.has(stage) : true;
   const cap = number('intro_messages_per_person', 10);
@@ -120,6 +136,7 @@ export function ConversationPage() {
       transcript: null,
       media_path: null,
       created_at: new Date().toISOString(),
+      read_at: null,
     };
     const rollback = () => {
       if (cid)
@@ -188,48 +205,7 @@ export function ConversationPage() {
           ref={scrollRef}
           className="h-[58vh] min-h-[440px] flex-1 space-y-3 overflow-y-auto p-5"
         >
-          {isLoading ? (
-            <>
-              <Skeleton className="h-10 w-2/3 rounded-2xl" />
-              <Skeleton className="ms-auto h-10 w-1/2 rounded-2xl" />
-            </>
-          ) : (messages ?? []).length === 0 ? (
-            <EmptyState
-              icon={ShieldCheck}
-              title={t('chat.emptyTitle')}
-              description={t('chat.emptyBody')}
-            />
-          ) : (
-            (messages ?? []).map((m) => {
-              const mine = m.sender_id === uid;
-              return (
-                <motion.div
-                  key={m.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.22, ease: EASE_EXPO }}
-                  className={cn('flex', mine ? 'justify-end' : 'justify-start')}
-                >
-                  <span
-                    className={cn(
-                      'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
-                      mine
-                        ? 'bg-brand-wash text-ink rounded-tr-md ring-1 ring-[color:var(--color-border-accent)] ring-inset'
-                        : 'bg-bg-3 text-ink-soft rounded-tl-md',
-                    )}
-                  >
-                    {m.type === 'voice' ? (
-                      <VoiceBubble messageId={m.id} transcript={m.transcript} />
-                    ) : m.type === 'image' || m.type === 'video' ? (
-                      <MediaBubble messageId={m.id} kind={m.type} />
-                    ) : (
-                      m.body
-                    )}
-                  </span>
-                </motion.div>
-              );
-            })
-          )}
+          <MessageList messages={messages} isLoading={isLoading} uid={uid} />
         </div>
 
         {/* Composer */}
@@ -306,3 +282,90 @@ export function ConversationPage() {
     </div>
   );
 }
+
+// Isolated from the composer's own state (typing re-renders ConversationPage on every
+// keystroke): memoized so neither the list nor an individual bubble re-renders unless
+// its own props actually changed — React Query's structural sharing keeps unchanged
+// message objects referentially stable across the 4s poll, so this mostly matters.
+const MessageList = memo(function MessageList({
+  messages,
+  isLoading,
+  uid,
+}: {
+  messages: ChatMessage[] | undefined;
+  isLoading: boolean;
+  uid: string | undefined;
+}) {
+  const { t } = useTranslation();
+  if (isLoading) {
+    return (
+      <>
+        <Skeleton className="h-10 w-2/3 rounded-2xl" />
+        <Skeleton className="ms-auto h-10 w-1/2 rounded-2xl" />
+      </>
+    );
+  }
+  if (!messages || messages.length === 0) {
+    return (
+      <EmptyState
+        icon={ShieldCheck}
+        title={t('chat.emptyTitle')}
+        description={t('chat.emptyBody')}
+      />
+    );
+  }
+  return (
+    <>
+      {messages.map((m, i) => (
+        <MessageBubble
+          key={m.id}
+          message={m}
+          mine={m.sender_id === uid}
+          isLastMine={m.sender_id === uid && i === messages.length - 1}
+        />
+      ))}
+    </>
+  );
+});
+
+const MessageBubble = memo(function MessageBubble({
+  message: m,
+  mine,
+  isLastMine,
+}: {
+  message: ChatMessage;
+  mine: boolean;
+  isLastMine: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: EASE_EXPO }}
+      className={cn('flex flex-col', mine ? 'items-end' : 'items-start')}
+    >
+      <span
+        className={cn(
+          'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
+          mine
+            ? 'bg-brand-wash text-ink rounded-tr-md ring-1 ring-[color:var(--color-border-accent)] ring-inset'
+            : 'bg-bg-3 text-ink-soft rounded-tl-md',
+        )}
+      >
+        {m.type === 'voice' ? (
+          <VoiceBubble messageId={m.id} transcript={m.transcript} />
+        ) : m.type === 'image' || m.type === 'video' ? (
+          <MediaBubble messageId={m.id} kind={m.type} />
+        ) : (
+          m.body
+        )}
+      </span>
+      {/* Read receipts (PRD Privacy Controls): shown only on my own last message,
+          only once the other person's read_at is actually set. */}
+      {isLastMine && m.read_at ? (
+        <span className="text-faint mt-1 text-[11px]">{t('chat.seen')}</span>
+      ) : null}
+    </motion.div>
+  );
+});

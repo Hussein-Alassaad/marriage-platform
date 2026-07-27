@@ -104,8 +104,11 @@ function StageNode({
       <motion.span
         className={cn(
           // Shrinks on phones so all seven fit without scrolling; full size from sm up.
+          // Every state uses an OPAQUE fill (never bg-brand-wash, which is only ~12%
+          // opaque) — the rail sits behind these at z-0, so a translucent fill let
+          // the solid line bleed straight through the middle of "done" nodes.
           'relative flex h-9 w-9 items-center justify-center rounded-full border sm:h-11 sm:w-11',
-          done && 'border-brand-400 bg-brand-wash text-brand-600',
+          done && 'border-brand-400 bg-surface text-brand-600',
           current && 'border-brand-400 bg-bg-3 text-brand-600 border-2',
           !done && !current && 'border-line-strong bg-surface text-faint',
         )}

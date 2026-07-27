@@ -5,6 +5,7 @@ import { PiggyBank, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { Card } from '@/components/Card';
 import { EASE_OUT } from '@/lib/motion';
 import { useLanguage } from '@/hooks/useLanguage';
+import { monthKey } from '@/utils/date';
 import { formatMoney, sumIn, type RateMap } from '@/utils/money';
 import type { Entry } from '@/services/financeService';
 
@@ -24,7 +25,7 @@ export function SummaryCards({
   const { t } = useTranslation();
   const { language } = useLanguage();
 
-  const month = new Date().toISOString().slice(0, 7);
+  const month = monthKey();
   const thisMonth = entries.filter((e) => e.occurred_on.startsWith(month));
 
   const income = sumIn(

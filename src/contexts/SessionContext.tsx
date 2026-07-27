@@ -1,9 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Session, User } from '@supabase/supabase-js';
 
 import { getSupabaseClient } from '@/lib/supabase';
 import { authService, type AppRole, type Profile } from '@/services/authService';
+import { useSettings } from '@/hooks/useSettings';
+import { ROUTES } from '@/app/routes';
+
+const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'] as const;
 
 export interface SessionContextValue {
   session: Session | null;
@@ -104,12 +109,72 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     };
   }, [session?.user?.id, loadProfile]);
 
+  /**
+   * Online/Activity Status (PRD Privacy Controls): a plain "last seen" timestamp on
+   * my own row, touched while the tab is visible. Whether anyone else gets to see it
+   * is gated entirely by MY OWN `privacy.onlineStatus`/`activityStatus` toggle when
+   * it's read back out (matchmaking) — writing the timestamp here is unconditional,
+   * same as any other self-editable field; the privacy choice lives at the read side.
+   */
+  useEffect(() => {
+    const userId = session?.user?.id;
+    const client = getSupabaseClient();
+    if (!userId || !client) return;
+
+    const touch = () => {
+      if (document.visibilityState === 'visible') {
+        void client.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', userId);
+      }
+    };
+    touch();
+    const timer = window.setInterval(touch, 120_000);
+    document.addEventListener('visibilitychange', touch);
+
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', touch);
+    };
+  }, [session?.user?.id]);
+
   const signOut = useCallback(async () => {
     await authService.signOut();
     setSession(null);
     setProfile(null);
     setRoles([]);
   }, []);
+
+  /**
+   * Auto sign-out after inactivity (`session_inactivity_minutes`, seeded Phase 2,
+   * never wired up until now). A session issued at a shared/public computer must
+   * not stay open indefinitely just because nobody explicitly signed out — this is
+   * the floor, independent of anyone remembering to click "sign out".
+   */
+  const idleMinutes = useSettings().number('session_inactivity_minutes', 60);
+  const navigate = useNavigate();
+  const idleTimer = useRef<number>();
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    const idleMs = idleMinutes * 60_000;
+    const onIdle = () => {
+      void signOut();
+      navigate(ROUTES.login, { replace: true, state: { idleLogout: true } });
+    };
+    const reset = () => {
+      window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(onIdle, idleMs);
+    };
+
+    reset();
+    ACTIVITY_EVENTS.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+
+    return () => {
+      window.clearTimeout(idleTimer.current);
+      ACTIVITY_EVENTS.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [session?.user?.id, idleMinutes, signOut, navigate]);
 
   const hasRole = useCallback(
     (...wanted: AppRole[]) => wanted.some((r) => roles.includes(r)),

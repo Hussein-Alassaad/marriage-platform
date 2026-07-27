@@ -21,6 +21,7 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 import { moderate, POLICY_VERSION } from '../_shared/moderation.ts';
 import { isConfigured, transcribe } from '../_shared/transcribe.ts';
 import { secret } from '../_shared/env.ts';
+import { recordViolation } from '../_shared/violations.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -146,14 +147,17 @@ Deno.serve(async (req: Request) => {
     const aiEnabled = (await setting(admin, 'moderation_ai_enabled', true)) !== false;
     const verdict = await moderate(transcript, stage, aiEnabled ? anthropicKey : null);
     if (verdict.blocked) {
-      await audit({
+      const { data: modRow } = await audit({
         verdict: 'blocked',
         category: verdict.category,
         original_text: transcript,
         provider: verdict.provider,
         model: verdict.model,
         prompt_version: verdict.promptVersion,
-      });
+      }).select('id').single();
+      if (verdict.category && verdict.category !== 'unavailable') {
+        await recordViolation(admin, uid, verdict.category, modRow?.id ?? null);
+      }
       // The audio was never stored — there is nothing to delete.
       return json({ blocked: true, category: verdict.category });
     }

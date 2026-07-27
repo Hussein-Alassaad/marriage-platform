@@ -32,6 +32,7 @@ export interface ProfileRecord {
   profile_completion: number;
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected';
   subscription_tier: 'free' | 'serious' | 'marriage_plus';
+  created_at: string;
 }
 
 /** The subset a user may edit from onboarding / profile (RLS + triggers enforce the rest). */
@@ -65,7 +66,7 @@ export type ProfilePatch = Partial<
 >;
 
 const SELECT =
-  'id, display_name, dob, gender, gender_locked, nationality, country, city, languages, education_level, university, major, graduation_year, occupation, industry, employment_status, career_goals, marriage_goals, lifestyle, family_values, financial_readiness, bio, photo_privacy_mode, privacy, profile_completion, verification_status, subscription_tier';
+  'id, display_name, dob, gender, gender_locked, nationality, country, city, languages, education_level, university, major, graduation_year, occupation, industry, employment_status, career_goals, marriage_goals, lifestyle, family_values, financial_readiness, bio, photo_privacy_mode, privacy, profile_completion, verification_status, subscription_tier, created_at';
 
 const notEmpty = (m: JsonMap | null | undefined) =>
   !!m && Object.values(m).some((v) => v !== '' && v != null);
@@ -109,6 +110,106 @@ export function computeCompletion(
     notEmpty(p.financial_readiness),
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+/**
+ * Marriage Readiness Score (PRD Part 5) — five equal, binary checks, exactly as the
+ * PRD frames them ("✓ Completed profile", "✓ Identity verified", …). Deterministic,
+ * like the compatibility engine and the finance reports — no AI key required.
+ *
+ * The PRD requires this stay informational only: "It must never be presented as an
+ * objective measure of someone's worth or suitability for marriage." Any UI showing
+ * this number carries that disclaimer — see `profile.readiness.disclaimer` in i18n.
+ */
+export function computeMarriageReadiness(
+  p: Pick<
+    ProfileRecord,
+    'profile_completion' | 'verification_status' | 'marriage_goals' | 'financial_readiness' | 'lifestyle'
+  >,
+): number {
+  const checks = [
+    p.profile_completion >= 100,
+    p.verification_status === 'verified',
+    notEmpty(p.marriage_goals),
+    notEmpty(p.financial_readiness),
+    notEmpty(p.lifestyle),
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+/**
+ * Profile Quality Score (PRD Part 5): Profile Picture Quality, Biography Quality,
+ * Questionnaire Completion, Verification Status, Marriage Readiness — averaged
+ * equally. Picture/bio "quality" has no AI judge here (no key), so each is a
+ * deterministic proxy: photo count for pictures, length for the bio. Same
+ * transparency tradeoff as the rest of this platform's scores.
+ */
+export function computeProfileQuality(
+  p: Pick<
+    ProfileRecord,
+    | 'profile_completion'
+    | 'verification_status'
+    | 'bio'
+    | 'marriage_goals'
+    | 'financial_readiness'
+    | 'lifestyle'
+  >,
+  photoCount: number,
+): number {
+  const pictureQuality = photoCount >= 3 ? 100 : photoCount === 2 ? 70 : photoCount === 1 ? 50 : 0;
+  const bioLength = p.bio?.trim().length ?? 0;
+  const bioQuality = bioLength === 0 ? 0 : Math.min(100, Math.round((bioLength / 200) * 100));
+  const verificationScore =
+    p.verification_status === 'verified' ? 100 : p.verification_status === 'pending' ? 50 : 0;
+  const marriageReadiness = computeMarriageReadiness(p);
+
+  return Math.round(
+    (pictureQuality + bioQuality + p.profile_completion + verificationScore + marriageReadiness) / 5,
+  );
+}
+
+/**
+ * Trust Score (PRD Part 5, "Trust & Safety"): identity verification, profile
+ * completeness, respectful communication / policy violations, and account age —
+ * equally weighted, deterministic (no AI key). "Reports (after review)" and
+ * "positive engagement" are in the PRD's own "may consider" list, not a mandatory
+ * one — omitted here because there is no reporting/blocking feature and no
+ * engagement metric anywhere in the schema to back them, same as Financial
+ * Health's optional Debt Level being left out for lacking a data source.
+ *
+ * "Respectful communication" and "policy violations" are the same underlying
+ * signal (the violations table) rather than two independent factors — counting
+ * it twice would double its weight for no reason.
+ *
+ * "The score must never discriminate based on race, nationality, religion,
+ * ethnicity, disability, or any protected characteristic" (PRD) — none of the
+ * four factors here touch any of those, by construction.
+ */
+export function computeTrustScore(
+  p: Pick<ProfileRecord, 'profile_completion' | 'verification_status' | 'created_at'>,
+  violationCount: number,
+): number {
+  const verificationScore =
+    p.verification_status === 'verified' ? 100 : p.verification_status === 'pending' ? 50 : 0;
+  const conductScore =
+    violationCount === 0 ? 100 : violationCount === 1 ? 70 : violationCount <= 3 ? 40 : 10;
+  const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86_400_000;
+  const accountAgeScore = Math.max(0, Math.min(100, Math.round((ageDays / 90) * 100)));
+
+  return Math.round((verificationScore + p.profile_completion + conductScore + accountAgeScore) / 4);
+}
+
+/** Actionable suggestions (PRD Part 5 examples), ordered by impact. */
+export function profileQualitySuggestions(
+  p: Pick<ProfileRecord, 'education_level' | 'bio' | 'verification_status'>,
+  photoCount: number,
+): ('photo' | 'verify' | 'bio' | 'education')[] {
+  const suggestions: ('photo' | 'verify' | 'bio' | 'education')[] = [];
+  if (photoCount === 0) suggestions.push('photo');
+  if (p.verification_status !== 'verified') suggestions.push('verify');
+  if (!p.bio || p.bio.trim().length < 100) suggestions.push('bio');
+  if (!p.education_level) suggestions.push('education');
+  return suggestions;
 }
 
 export interface ProfilePhoto {

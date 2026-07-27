@@ -8,6 +8,12 @@
 // runs, discover falls back to a simple verified/opposite-gender query so the
 // feature works today.
 //
+// `discover` accepts an optional `filters` object (minAge, maxAge, country, city,
+// educationLevel) — Serious+ only (Decision #17's "advanced search filters" plan
+// bullet, finally backed by something). A free-tier filters payload is silently
+// ignored, not rejected: the UI never shows the panel to them, but a crafted
+// request must not become a paid feature for free.
+//
 // Deploy: `supabase functions deploy matchmaking`.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -22,7 +28,24 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
 const CANDIDATE_COLS =
-  'id, display_name, dob, gender, country, city, education_level, occupation, languages, bio, marriage_goals, photo_privacy_mode, privacy, verification_status, profile_completion';
+  'id, display_name, dob, gender, country, city, education_level, occupation, languages, bio, marriage_goals, photo_privacy_mode, privacy, verification_status, profile_completion, last_active_at';
+
+const ONLINE_WITHIN_MS = 5 * 60_000; // "online now" threshold, matches the frontend's
+
+/**
+ * Online/Activity Status (PRD Privacy Controls) — gated entirely by the
+ * CANDIDATE's own toggle (default on), never fabricated once they've opted out.
+ * Returns the raw timestamp (or null); the frontend decides "online now" vs.
+ * "active X ago" from it, using the same threshold, so there is one place that
+ * renders the label instead of two.
+ */
+function visibleLastActive(p: ProfileRow): string | null {
+  if (!p.last_active_at) return null;
+  const privacy = p.privacy ?? {};
+  const online = Date.now() - new Date(p.last_active_at).getTime() <= ONLINE_WITHIN_MS;
+  if (online) return privacy.onlineStatus !== false ? p.last_active_at : null;
+  return privacy.activityStatus !== false ? p.last_active_at : null;
+}
 
 function ageFromDob(dob: string | null): number | null {
   if (!dob) return null;
@@ -32,6 +55,27 @@ function ageFromDob(dob: string | null): number | null {
   const m = now.getMonth() - d.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
   return age;
+}
+
+interface DiscoverFilters {
+  minAge?: number;
+  maxAge?: number;
+  country?: string;
+  city?: string;
+  educationLevel?: string;
+}
+
+function passesFilters(p: ProfileRow, f: DiscoverFilters): boolean {
+  if (f.minAge != null || f.maxAge != null) {
+    const age = ageFromDob(p.dob);
+    if (age == null) return false;
+    if (f.minAge != null && age < f.minAge) return false;
+    if (f.maxAge != null && age > f.maxAge) return false;
+  }
+  if (f.country && p.country !== f.country) return false;
+  if (f.city && p.city !== f.city) return false;
+  if (f.educationLevel && p.education_level !== f.educationLevel) return false;
+  return true;
 }
 
 interface ProfileRow {
@@ -47,7 +91,8 @@ interface ProfileRow {
   bio: string | null;
   marriage_goals: Record<string, string> | null;
   photo_privacy_mode: number | null;
-  privacy: { primaryPhoto?: string | null } | null;
+  privacy: { primaryPhoto?: string | null; onlineStatus?: boolean; activityStatus?: boolean } | null;
+  last_active_at: string | null;
 }
 
 async function mapCandidate(
@@ -85,6 +130,7 @@ async function mapCandidate(
     photoUrl,
     photoLocked,
     saved,
+    lastActiveAt: visibleLastActive(p),
   };
 }
 
@@ -167,6 +213,22 @@ Deno.serve(async (req: Request) => {
           .order('profile_completion', { ascending: false })
           .limit(40);
         profiles = ((data ?? []) as ProfileRow[]).filter((p) => !exclude.has(p.id)).slice(0, 24);
+      }
+
+      // Serious+ only — a free-tier request with filters is served unfiltered, not
+      // rejected, since the UI never shows the panel to them in the first place.
+      if (paid && body.filters && typeof body.filters === 'object') {
+        const f = body.filters as DiscoverFilters;
+        profiles = profiles.filter((p) => passesFilters(p, f));
+
+        // "Most Used Filters" (PRD Match Analytics) — fire-and-forget, never blocks
+        // the response on a logging write.
+        const usedKeys = Object.entries(f)
+          .filter(([, v]) => v !== undefined && v !== '')
+          .map(([k]) => k);
+        if (usedKeys.length) {
+          void admin.from('filter_usage_events').insert(usedKeys.map((filter_key) => ({ filter_key })));
+        }
       }
 
       const ids = profiles.map((p) => p.id);

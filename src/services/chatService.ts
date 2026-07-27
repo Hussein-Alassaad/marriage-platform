@@ -9,6 +9,10 @@ export interface ChatMessage {
   transcript: string | null;
   media_path: string | null;
   created_at: string;
+  /** Read receipts (PRD Privacy Controls): set only by the recipient, on the
+   *  sender's message — never by the sender on their own. Null if unread, or if
+   *  the recipient has read receipts turned off. */
+  read_at: string | null;
 }
 
 export interface SendResult {
@@ -36,6 +40,10 @@ export interface StageStatus {
   youConsented: boolean;
   theyConsented: boolean;
   requirements: StageRequirement[];
+  /** Non-blocking Wali Mode nudge (PRD): family involvement is suggested but not
+   *  required (recommended/guided modes). Never true once 'strict' has already
+   *  turned it into a real requirement. */
+  familyRecommended: boolean;
   advanced?: boolean;
 }
 
@@ -99,12 +107,21 @@ export const chatService = {
     const supabase = requireSupabaseClient();
     const { data, error } = await supabase
       .from('messages')
-      .select('id, sender_id, type, body, transcript, media_path, created_at')
+      .select('id, sender_id, type, body, transcript, media_path, created_at, read_at')
       .eq('conversation_id', conversationId)
       .is('deleted_at', null)
       .order('created_at', { ascending: true });
     if (error) throw error;
     return (data ?? []) as ChatMessage[];
+  },
+
+  /** Marks the OTHER person's messages as read. RLS + a column-level grant enforce
+   *  that a sender can never mark their own message read — see
+   *  20260726170000_privacy_toggles.sql. A no-op if `messageIds` is empty. */
+  async markRead(messageIds: string[]): Promise<void> {
+    if (!messageIds.length) return;
+    const supabase = requireSupabaseClient();
+    await supabase.from('messages').update({ read_at: new Date().toISOString() }).in('id', messageIds);
   },
 
   /** Sender's introduction quota used in this conversation (0 if none yet). */

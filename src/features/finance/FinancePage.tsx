@@ -1,7 +1,7 @@
 import { Suspense, lazy, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Gem, Plus, Sparkles } from 'lucide-react';
+import { Gem, Plus } from 'lucide-react';
 
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/Button';
@@ -19,11 +19,14 @@ import {
   useSetPrimaryCurrency,
 } from '@/hooks/useFinance';
 import { tierAtLeast } from '@/services/subscriptionService';
+import type { Entry } from '@/services/financeService';
 import { BudgetsCard } from './BudgetsCard';
 import { EntryList } from './EntryList';
 import { EntryModal } from './EntryModal';
 import { ExportMenu } from './ExportMenu';
+import { FinancialHealthCard } from './FinancialHealthCard';
 import { GoalsCard } from './GoalsCard';
+import { MonthlyReportCard } from './MonthlyReportCard';
 import { SharedFinanceCard } from './SharedFinanceCard';
 import { SummaryCards } from './SummaryCards';
 
@@ -41,13 +44,14 @@ const FinanceCharts = lazy(() => import('./FinanceCharts'));
 export function FinancePage() {
   const { t } = useTranslation();
   const { profile } = useSession();
-  const { text, list, bool } = useSettings();
+  const { text, list } = useSettings();
   const { currency } = usePrimaryCurrency();
   const setCurrency = useSetPrimaryCurrency();
   const { rates } = useRates();
   const { data: entries, isLoading } = useEntries();
   const { data: marriedMatchId } = useMarriedMatchId();
   const [adding, setAdding] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
 
   const tier = profile?.subscription_tier ?? 'free';
   const dashboardUnlocked = tierAtLeast(tier, text('finance_charts_min_tier', 'serious'));
@@ -90,6 +94,7 @@ export function FinancePage() {
       ) : dashboardUnlocked ? (
         <div className="space-y-6">
           <SummaryCards entries={rows} currency={currency} rates={rates} />
+          <FinancialHealthCard entries={rows} currency={currency} rates={rates} />
 
           <Suspense fallback={<Skeleton className="rounded-card h-[560px]" />}>
             <FinanceCharts entries={rows} currency={currency} rates={rates} />
@@ -105,14 +110,7 @@ export function FinancePage() {
             <SharedFinanceCard matchId={marriedMatchId} currency={currency} rates={rates} />
           ) : null}
 
-          {/* AI insights need a funded key; the setting stays off until there is one,
-              and we say so rather than showing a button that always fails. */}
-          {bool('finance_ai_insights_enabled') ? null : (
-            <p className="text-faint flex items-center justify-center gap-2 text-xs">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden />
-              {t('finance.insightsSoon')}
-            </p>
-          )}
+          <MonthlyReportCard />
 
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -121,17 +119,25 @@ export function FinancePage() {
               </h2>
               <ExportMenu entries={rows} currency={currency} rates={rates} />
             </div>
-            <EntryList entries={rows} />
+            <EntryList entries={rows} onEdit={setEditingEntry} />
           </section>
         </div>
       ) : (
         <div className="space-y-6">
-          <EntryList entries={rows} />
+          <EntryList entries={rows} onEdit={setEditingEntry} />
           <UpgradeCard />
         </div>
       )}
 
-      <EntryModal open={adding} onClose={() => setAdding(false)} defaultCurrency={currency} />
+      <EntryModal
+        open={adding || Boolean(editingEntry)}
+        onClose={() => {
+          setAdding(false);
+          setEditingEntry(null);
+        }}
+        defaultCurrency={currency}
+        editing={editingEntry}
+      />
     </div>
   );
 }
