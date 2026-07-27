@@ -14,7 +14,6 @@ import { RevealText } from '@/components/motion/RevealText';
 import { FadeRise } from '@/components/motion/FadeRise';
 import { ConfettiBurst } from '@/components/motion/ConfettiBurst';
 import { AuthField } from './scene/AuthField';
-import { GoogleSignInButton } from './GoogleSignInButton';
 import { ROUTES } from '@/app/routes';
 import { authService } from '@/services/authService';
 
@@ -88,16 +87,7 @@ export function LoginPage() {
         </p>
       </FadeRise>
 
-      <div className="mt-7">
-        <GoogleSignInButton onError={setFormError} />
-        <div className="my-5 flex items-center gap-3">
-          <span className="border-line-strong h-px flex-1 border-t" aria-hidden />
-          <span className="text-faint text-xs font-medium uppercase">{t('auth.orDivider')}</span>
-          <span className="border-line-strong h-px flex-1 border-t" aria-hidden />
-        </div>
-      </div>
-
-      <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
+      <form className="mt-7 flex flex-col gap-4" onSubmit={onSubmit} noValidate>
         {state?.idleLogout ? <Alert variant="info">{t('page.login.idleLogout')}</Alert> : null}
         {formError ? <Alert>{formError}</Alert> : null}
 
