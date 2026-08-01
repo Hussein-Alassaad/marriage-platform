@@ -10,9 +10,6 @@ import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { guardiansNav, plansNav, primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
 
-const WIDTH_EXPANDED = 288; // 18rem, matches the previous fixed w-72
-const WIDTH_COLLAPSED = 76;
-
 function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const { t } = useTranslation();
   const Icon = item.icon;
@@ -48,14 +45,15 @@ function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
             )}
             aria-hidden
           />
-          {/* Width/opacity animated, not unmounted — stays in the accessibility
-              tree for screen readers even while visually collapsed, and gives
-              the expand/collapse a smooth reveal instead of a hard cut. */}
+          {/* Opacity-only, at natural width — the sidebar's own overflow-hidden
+              clips this while collapsed, so it doesn't need its own width
+              animation. Animating width on every item alongside the sidebar's
+              own width was the lag: layout recalculated for the rail AND every
+              label AND the profile block, all at once, on every frame. */}
           <span
             className={cn(
-              'relative z-10 overflow-hidden text-nowrap transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)]',
-              collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
-              !isActive && !collapsed && 'group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5',
+              'relative z-10 text-nowrap transition-opacity duration-150',
+              collapsed ? 'opacity-0' : 'opacity-100',
             )}
           >
             {label}
@@ -84,12 +82,17 @@ export function Sidebar() {
   const tier = profile?.subscription_tier ?? 'free';
 
   return (
-    <motion.aside
+    <aside
       onMouseEnter={() => setCollapsed(false)}
       onMouseLeave={() => setCollapsed(true)}
-      animate={{ width: collapsed ? WIDTH_COLLAPSED : WIDTH_EXPANDED }}
-      transition={springLayout}
-      className="border-line bg-panel hidden shrink-0 flex-col overflow-hidden border-e md:flex"
+      // Plain CSS transition, not Framer Motion spring physics — a spring
+      // re-runs layout on every animation frame via JS; a native CSS
+      // transition lets the browser handle it directly, which is
+      // noticeably smoother for a layout-affecting property like width.
+      className={cn(
+        'border-line bg-panel hidden shrink-0 flex-col overflow-hidden border-e transition-[width] duration-200 ease-out md:flex',
+        collapsed ? 'w-[76px]' : 'w-72',
+      )}
     >
       <div className={cn('flex h-[72px] items-center', collapsed ? 'justify-center px-0' : 'px-5')}>
         <Logo compact={collapsed} />
@@ -131,8 +134,8 @@ export function Sidebar() {
           </span>
           <div
             className={cn(
-              'min-w-0 overflow-hidden transition-[opacity,width] duration-150',
-              collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
+              'min-w-0 transition-opacity duration-150',
+              collapsed ? 'opacity-0' : 'opacity-100',
             )}
           >
             <p className="text-ink truncate text-sm font-medium text-nowrap">{name}</p>
@@ -140,6 +143,6 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-    </motion.aside>
+    </aside>
   );
 }
