@@ -520,7 +520,7 @@ export function OnboardingPage() {
                   onChange={(e) => set('bio', e.target.value)}
                   rows={6}
                   maxLength={600}
-                  className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
+                  className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_var(--focus-ring)] focus-visible:outline-none"
                   placeholder={t('profile.fields.bioPlaceholder')}
                 />
               </FormField>

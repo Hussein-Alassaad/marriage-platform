@@ -116,6 +116,7 @@
 :root {
   --inner-hi: inset 0 1px 0 rgba(255, 255, 255, 0.5);
   --glow-brand: 0 8px 28px rgba(5, 150, 105, 0.22);
+  --focus-ring: rgba(52, 211, 153, 0.15);
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-blur: blur(12px);
   /* More opaque, blur-free chrome for always-on surfaces (top bar, bottom nav). */
@@ -124,85 +125,91 @@
   --btn-primary-bg: #059669;
   --btn-primary-bg-hover: #047857;
   --btn-primary-fg: #ffffff;
+  --btn-primary-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
   --btn-gold-bg: linear-gradient(135deg, #d8b74e, #c9a227);
   --btn-gold-fg: #241a02;
+  --btn-gold-shadow: 0 4px 16px rgba(201, 162, 39, 0.24);
 }
 
-/* ── Dark theme — MITHAQ's primary designed target (§2.1) ───────────────────
- * Near-black canvas, calm emerald accent, off-white ink. Every legacy and
- * MITHAQ token is re-tinted; utilities reference the vars so nothing else
- * needs to change. */
+/* ── Dark theme — violet/indigo reskin (2026-08-02) ──────────────────────────
+ * Deep violet-black canvas, indigo/violet primary accent, cyan/sky secondary
+ * accent (replaces gold's role). Light mode (emerald + gold) is untouched —
+ * this block only re-tints dark mode. Every legacy and MITHAQ token is
+ * re-pointed; utilities reference the vars so nothing else needs to change. */
 :root[data-theme='dark'] {
-  --color-brand-50: #0f241b;
-  --color-brand-100: #14301f;
-  --color-brand-200: #204331;
-  --color-brand-300: #6ee7b7;
-  --color-brand-400: #34d399;
-  --color-brand-500: #10b981;
-  --color-brand-600: #059669;
-  --color-brand-700: #34d399;
-  --color-brand-800: #6ee7b7;
-  --color-brand-900: #0c3a2e;
-  --color-brand-wash: rgba(16, 185, 129, 0.12);
-  --color-on-brand: #04110b;
+  --color-brand-50: #1c1530;
+  --color-brand-100: #271d42;
+  --color-brand-200: #3a2a5e;
+  --color-brand-300: #a78bfa;
+  --color-brand-400: #8b5cf6;
+  --color-brand-500: #7c3aed;
+  --color-brand-600: #6d28d9;
+  --color-brand-700: #a78bfa;
+  --color-brand-800: #c4b5fd;
+  --color-brand-900: #4c1d95;
+  --color-brand-wash: rgba(124, 58, 237, 0.16);
+  --color-on-brand: #ffffff;
 
-  --color-gold-300: #efd9a7;
-  --color-gold-400: #e3c567;
-  --color-gold-500: #c9a227;
-  --color-gold-wash: rgba(201, 162, 39, 0.12);
+  --color-gold-300: #bae6fd;
+  --color-gold-400: #38bdf8;
+  --color-gold-500: #0ea5e9;
+  --color-gold-wash: rgba(56, 189, 248, 0.14);
 
-  --color-bg-0: #0a0f0d;
-  --color-bg-1: #0d1411;
-  --color-bg-2: #111a16;
-  --color-bg-3: #16211c;
-  --color-bg-4: #1b2822;
-  --color-canvas: #0a0f0d;
-  --color-surface: #111a16;
-  --color-panel: #0d1411;
-  --color-raised: #16211c;
+  --color-bg-0: #0a0a12;
+  --color-bg-1: #0f0f1a;
+  --color-bg-2: #13131f;
+  --color-bg-3: #191926;
+  --color-bg-4: #21212f;
+  --color-canvas: #0a0a12;
+  --color-surface: #13131f;
+  --color-panel: #0f0f1a;
+  --color-raised: #191926;
 
-  --color-text-1: #eef5f1;
-  --color-text-2: #a9bab2;
-  --color-text-3: #74857d;
-  --color-text-4: #4c5a53;
-  --color-ink: #eef5f1;
-  --color-ink-soft: #a9bab2;
-  --color-muted: #74857d;
-  --color-faint: #4c5a53;
+  --color-text-1: #f1f0f7;
+  --color-text-2: #b4b2c4;
+  --color-text-3: #8b899d;
+  --color-text-4: #5c5a6e;
+  --color-ink: #f1f0f7;
+  --color-ink-soft: #b4b2c4;
+  --color-muted: #8b899d;
+  --color-faint: #5c5a6e;
 
-  --color-border-1: rgba(255, 255, 255, 0.06);
-  --color-border-2: rgba(255, 255, 255, 0.11);
-  --color-border-accent: rgba(52, 211, 153, 0.3);
-  --color-line: rgba(255, 255, 255, 0.06);
-  --color-line-strong: rgba(255, 255, 255, 0.11);
+  --color-border-1: rgba(255, 255, 255, 0.07);
+  --color-border-2: rgba(255, 255, 255, 0.12);
+  --color-border-accent: rgba(139, 92, 246, 0.35);
+  --color-line: rgba(255, 255, 255, 0.07);
+  --color-line-strong: rgba(255, 255, 255, 0.12);
 
   --color-success: #34d399;
-  --color-warning: #f5b84c;
-  --color-danger: #e5726a;
-  --color-info: #7dd3fc;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #38bdf8;
   --color-success-wash: rgba(52, 211, 153, 0.12);
-  --color-warning-wash: rgba(245, 184, 76, 0.12);
-  --color-danger-wash: rgba(229, 114, 106, 0.12);
-  --color-info-wash: rgba(125, 211, 252, 0.1);
+  --color-warning-wash: rgba(251, 191, 36, 0.12);
+  --color-danger-wash: rgba(248, 113, 113, 0.12);
+  --color-info-wash: rgba(56, 189, 248, 0.12);
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-e1: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.35);
-  --shadow-e2: 0 6px 20px rgba(0, 0, 0, 0.35);
-  --shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.45);
-  --shadow-e3: 0 16px 48px rgba(0, 0, 0, 0.45);
-  --shadow-glow: 0 8px 28px rgba(16, 185, 129, 0.35);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-e1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow-e2: 0 6px 20px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-e3: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 8px 28px rgba(124, 58, 237, 0.4);
 
   --inner-hi: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --glow-brand: 0 8px 28px rgba(16, 185, 129, 0.35);
-  --glass-bg: rgba(13, 20, 17, 0.72);
-  --glass-solid-bg: rgba(13, 20, 17, 0.94);
+  --glow-brand: 0 8px 28px rgba(124, 58, 237, 0.4);
+  --focus-ring: rgba(139, 92, 246, 0.3);
+  --glass-bg: rgba(15, 15, 26, 0.72);
+  --glass-solid-bg: rgba(15, 15, 26, 0.94);
 
-  --btn-primary-bg: #10b981;
-  --btn-primary-bg-hover: #34d399;
-  --btn-primary-fg: #04110b;
-  --btn-gold-bg: linear-gradient(135deg, #e3c567, #c9a227);
-  --btn-gold-fg: #241a02;
+  --btn-primary-bg: #7c3aed;
+  --btn-primary-bg-hover: #8b5cf6;
+  --btn-primary-fg: #ffffff;
+  --btn-primary-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+  --btn-gold-bg: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  --btn-gold-fg: #04141f;
+  --btn-gold-shadow: 0 4px 16px rgba(56, 189, 248, 0.28);
 }
 
 /* ── Keyframes ─────────────────────────────────────────────────────────── */

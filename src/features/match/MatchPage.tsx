@@ -502,7 +502,7 @@ function InterestModal({
         rows={4}
         maxLength={300}
         placeholder={t('match.interest.notePlaceholder')}
-        className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 mt-4 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
+        className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 mt-4 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_var(--focus-ring)] focus-visible:outline-none"
       />
       <div className="mt-5 flex justify-end gap-2">
         <Button variant="ghost" onClick={onClose}>

@@ -13,7 +13,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
           'placeholder:text-faint',
           'transition-[border-color,box-shadow] duration-150',
           'hover:border-line-strong',
-          'focus-visible:border-brand-400 focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none',
+          'focus-visible:border-brand-400 focus-visible:[box-shadow:0_0_0_3px_var(--focus-ring)] focus-visible:outline-none',
           'disabled:cursor-not-allowed disabled:opacity-60',
           className,
         )}

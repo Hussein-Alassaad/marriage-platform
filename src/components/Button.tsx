@@ -27,13 +27,13 @@ export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'>
 // MITHAQ §4.1 — washes/borders reference themed tokens so both palettes hold.
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'text-on-brand border border-brand-300/40 [background:linear-gradient(135deg,var(--color-brand-500),var(--color-brand-600))] [box-shadow:0_4px_16px_rgba(16,185,129,0.20),var(--inner-hi)] hover:brightness-[1.06] hover:[box-shadow:var(--glow-brand),var(--inner-hi)]',
+    'text-on-brand border border-brand-300/40 [background:linear-gradient(135deg,var(--color-brand-500),var(--color-brand-600))] [box-shadow:var(--btn-primary-shadow),var(--inner-hi)] hover:brightness-[1.06] hover:[box-shadow:var(--glow-brand),var(--inner-hi)]',
   secondary:
     'bg-bg-3 text-ink border border-line-strong hover:bg-bg-4 hover:border-[color:var(--color-border-accent)]',
   outline:
     'border border-line-strong bg-surface text-ink hover:border-[color:var(--color-border-accent)] hover:bg-bg-3',
   ghost: 'text-muted hover:bg-bg-3 hover:text-ink',
-  gold: 'border border-gold-500/40 text-[color:var(--btn-gold-fg)] [background:var(--btn-gold-bg)] [box-shadow:0_4px_16px_rgba(201,162,39,0.24),var(--inner-hi)] hover:brightness-[1.05]',
+  gold: 'border border-gold-500/40 text-[color:var(--btn-gold-fg)] [background:var(--btn-gold-bg)] [box-shadow:var(--btn-gold-shadow),var(--inner-hi)] hover:brightness-[1.05]',
   destructive: 'bg-danger-wash text-danger border border-danger/25 hover:bg-danger/20',
 };
 

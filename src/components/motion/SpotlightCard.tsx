@@ -22,7 +22,7 @@ export const SpotlightCard = forwardRef<HTMLDivElement, SpotlightCardProps>(func
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const [active, setActive] = useState(false);
-  const glow = useMotionTemplate`radial-gradient(600px circle at ${mx}px ${my}px, rgba(52,211,153,0.08), transparent 70%)`;
+  const glow = useMotionTemplate`radial-gradient(600px circle at ${mx}px ${my}px, color-mix(in srgb, var(--color-brand-400) 8%, transparent), transparent 70%)`;
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();

@@ -22,13 +22,15 @@ export function AuroraBackground({ className }: AuroraBackgroundProps) {
       <div
         className="absolute start-[-10%] -top-[15%] h-[55vw] w-[55vw] rounded-full"
         style={{
-          background: 'radial-gradient(closest-side, rgba(16,185,129,0.20), transparent 70%)',
+          background:
+            'radial-gradient(closest-side, color-mix(in srgb, var(--color-brand-500) 20%, transparent), transparent 70%)',
         }}
       />
       <div
         className="absolute end-[-8%] -bottom-[20%] h-[45vw] w-[45vw] rounded-full"
         style={{
-          background: 'radial-gradient(closest-side, rgba(201,162,39,0.10), transparent 70%)',
+          background:
+            'radial-gradient(closest-side, color-mix(in srgb, var(--color-gold-500) 10%, transparent), transparent 70%)',
         }}
       />
     </div>

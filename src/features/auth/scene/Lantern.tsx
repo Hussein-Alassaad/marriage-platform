@@ -23,25 +23,44 @@ export function Lantern({ className }: { className?: string }) {
         <motion.span
           className="absolute top-10 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full"
           style={{
-            background: 'radial-gradient(closest-side, rgba(227,197,103,0.45), transparent 70%)',
+            background:
+              'radial-gradient(closest-side, color-mix(in srgb, var(--color-gold-400) 45%, transparent), transparent 70%)',
           }}
           animate={reduced ? undefined : { opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2.4, ease: EASE_INOUT, repeat: Infinity }}
         />
         <svg width="48" height="90" viewBox="0 0 48 90" fill="none" className="relative">
-          <line x1="24" y1="0" x2="24" y2="16" stroke="rgba(227,197,103,0.5)" strokeWidth="1.5" />
-          <path
-            d="M18 16 h12 l4 8 v34 q0 8 -10 8 t-10 -8 v-34 z"
-            fill="rgba(201,162,39,0.16)"
-            stroke="rgba(227,197,103,0.5)"
+          <line
+            x1="24"
+            y1="0"
+            x2="24"
+            y2="16"
+            stroke="color-mix(in srgb, var(--color-gold-400) 50%, transparent)"
             strokeWidth="1.5"
           />
-          <ellipse cx="24" cy="42" rx="6" ry="9" fill="rgba(239,217,167,0.85)" />
-          <g stroke="rgba(227,197,103,0.4)" strokeWidth="1">
+          <path
+            d="M18 16 h12 l4 8 v34 q0 8 -10 8 t-10 -8 v-34 z"
+            fill="color-mix(in srgb, var(--color-gold-500) 16%, transparent)"
+            stroke="color-mix(in srgb, var(--color-gold-400) 50%, transparent)"
+            strokeWidth="1.5"
+          />
+          <ellipse
+            cx="24"
+            cy="42"
+            rx="6"
+            ry="9"
+            fill="color-mix(in srgb, var(--color-gold-300) 85%, transparent)"
+          />
+          <g stroke="color-mix(in srgb, var(--color-gold-400) 40%, transparent)" strokeWidth="1">
             <line x1="18" y1="30" x2="30" y2="30" />
             <line x1="17" y1="46" x2="31" y2="46" />
           </g>
-          <circle cx="24" cy="70" r="3" fill="rgba(227,197,103,0.6)" />
+          <circle
+            cx="24"
+            cy="70"
+            r="3"
+            fill="color-mix(in srgb, var(--color-gold-400) 60%, transparent)"
+          />
         </svg>
       </motion.div>
     </motion.div>

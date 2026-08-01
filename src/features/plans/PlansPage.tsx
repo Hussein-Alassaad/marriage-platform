@@ -638,7 +638,7 @@ function CantPayModal({ open, onClose }: { open: boolean; onClose: () => void })
               rows={4}
               maxLength={1000}
               placeholder={t('plans.cantPay.detailsPlaceholder')}
-              className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
+              className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 w-full rounded-md border p-3.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_var(--focus-ring)] focus-visible:outline-none"
             />
           </label>
 

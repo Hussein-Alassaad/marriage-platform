@@ -263,7 +263,7 @@ export function ConversationPage() {
                 rows={1}
                 maxLength={2000}
                 placeholder={t('chat.placeholder')}
-                className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border px-3.5 py-2.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_rgba(52,211,153,0.15)] focus-visible:outline-none"
+                className="border-line bg-surface text-ink placeholder:text-faint focus-visible:border-brand-400 max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border px-3.5 py-2.5 text-[15px] focus-visible:[box-shadow:0_0_0_3px_var(--focus-ring)] focus-visible:outline-none"
               />
               <Button
                 onClick={onSend}

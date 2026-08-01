@@ -25,8 +25,8 @@ export function ArchedWindow({ className }: { className?: string }) {
       <svg viewBox="0 0 300 520" className="h-full w-full" fill="none">
         <defs>
           <radialGradient id={light} cx="50%" cy="60%" r="60%">
-            <stop offset="0%" stopColor="rgba(227,197,103,0.55)" />
-            <stop offset="45%" stopColor="rgba(201,162,39,0.18)" />
+            <stop offset="0%" stopColor="color-mix(in srgb, var(--color-gold-300) 55%, transparent)" />
+            <stop offset="45%" stopColor="color-mix(in srgb, var(--color-gold-500) 18%, transparent)" />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
           <clipPath id={clip}>
@@ -36,7 +36,7 @@ export function ArchedWindow({ className }: { className?: string }) {
         <g clipPath={`url(#${clip})`}>
           <rect x="0" y="0" width="300" height="520" fill={`url(#${light})`} />
           {/* Mashrabiya lattice */}
-          <g stroke="rgba(227,197,103,0.22)" strokeWidth="1.5">
+          <g stroke="color-mix(in srgb, var(--color-gold-300) 22%, transparent)" strokeWidth="1.5">
             {[60, 100, 140, 180, 220, 260].map((x) => (
               <line key={`v${x}`} x1={x} y1="40" x2={x} y2="500" />
             ))}
@@ -50,7 +50,7 @@ export function ArchedWindow({ className }: { className?: string }) {
         </g>
         <path
           d="M24 500 L24 190 Q150 24 276 190 L276 500"
-          stroke="rgba(227,197,103,0.4)"
+          stroke="color-mix(in srgb, var(--color-gold-300) 40%, transparent)"
           strokeWidth="2.5"
           fill="none"
         />

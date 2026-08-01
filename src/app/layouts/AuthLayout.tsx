@@ -39,7 +39,7 @@ export function AuthLayout() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(60rem 44rem at 12% 76%, rgba(201,162,39,0.14), transparent 60%), radial-gradient(52rem 40rem at 90% 20%, rgba(227,197,103,0.09), transparent 62%)',
+            'radial-gradient(60rem 44rem at 12% 76%, color-mix(in srgb, var(--color-gold-500) 14%, transparent), transparent 60%), radial-gradient(52rem 40rem at 90% 20%, color-mix(in srgb, var(--color-gold-300) 9%, transparent), transparent 62%)',
         }}
       />
       <div aria-hidden className="absolute inset-0 z-0">
@@ -83,7 +83,7 @@ export function AuthLayout() {
             className="absolute -inset-8 -z-10 rounded-[64px] opacity-70 blur-3xl"
             style={{
               background:
-                'radial-gradient(closest-side, rgba(16,185,129,0.22), transparent 70%), radial-gradient(closest-side at 70% 30%, rgba(201,162,39,0.14), transparent 72%)',
+                'radial-gradient(closest-side, color-mix(in srgb, var(--color-brand-500) 22%, transparent), transparent 70%), radial-gradient(closest-side at 70% 30%, color-mix(in srgb, var(--color-gold-500) 14%, transparent), transparent 72%)',
             }}
           />
           {/* One gentle entrance, then nothing moves. */}
