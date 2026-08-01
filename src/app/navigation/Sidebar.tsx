@@ -47,15 +47,17 @@ function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
             )}
             aria-hidden
           />
-          {/* Opacity-only, at natural width — the sidebar's own overflow-hidden
-              clips this while collapsed, so it doesn't need its own width
-              animation. Animating width on every item alongside the sidebar's
-              own width was the lag: layout recalculated for the rail AND every
-              label AND the profile block, all at once, on every frame. */}
+          {/* w-0 is an instant snap, not an animated property (only opacity is
+              in the transition list) — one single reflow at the moment of
+              toggle, not recalculated every frame. Needed: at natural width
+              with only opacity hidden, the invisible label still occupies
+              layout space, so the row (and the active-item background sized
+              to it) was rendering wider than the visible 76px rail and
+              getting clipped into a stretched, mispositioned shape. */}
           <span
             className={cn(
-              'relative z-10 text-nowrap transition-opacity duration-150',
-              collapsed ? 'opacity-0' : 'opacity-100',
+              'relative z-10 overflow-hidden text-nowrap transition-opacity duration-150',
+              collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
             )}
           >
             {label}
@@ -136,8 +138,8 @@ export function Sidebar() {
           </span>
           <div
             className={cn(
-              'min-w-0 transition-opacity duration-150',
-              collapsed ? 'opacity-0' : 'opacity-100',
+              'min-w-0 overflow-hidden transition-opacity duration-150',
+              collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
             )}
           >
             <p className="text-ink truncate text-sm font-medium text-nowrap">{name}</p>
