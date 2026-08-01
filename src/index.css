@@ -24,25 +24,25 @@
     'Inter', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Fraunces Variable', 'Amiri', ui-serif, Georgia, 'Times New Roman', serif;
 
-  /* ── Brand — emerald (light values; interactive steps sit one darker) ──── */
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-200: #a7f3d0;
-  --color-brand-300: #6ee7b7;
-  --color-brand-400: #34d399;
-  --color-brand-500: #10b981;
-  --color-brand-600: #059669;
-  --color-brand-700: #047857;
-  --color-brand-800: #065f46;
-  --color-brand-900: #064e3b;
-  --color-brand-wash: rgba(5, 150, 105, 0.1);
-  --color-on-brand: #04110b;
+  /* ── Brand — violet (light values; interactive steps sit one darker) ──── */
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-200: #ddd6fe;
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #7c3aed;
+  --color-brand-600: #6d28d9;
+  --color-brand-700: #5b21b6;
+  --color-brand-800: #4c1d95;
+  --color-brand-900: #3b0764;
+  --color-brand-wash: rgba(124, 58, 237, 0.1);
+  --color-on-brand: #ffffff;
 
-  /* ── Gold (Barakah) — milestones only, ≤1 per screen ──────────────────── */
-  --color-gold-300: #b8901f;
-  --color-gold-400: #a88420;
-  --color-gold-500: #c9a227;
-  --color-gold-wash: rgba(201, 162, 39, 0.12);
+  /* ── Secondary accent (cyan) — milestones only, ≤1 per screen ──────────── */
+  --color-gold-300: #0891b2;
+  --color-gold-400: #0e7490;
+  --color-gold-500: #0ea5e9;
+  --color-gold-wash: rgba(14, 165, 233, 0.12);
 
   /* ── Surfaces & text — MITHAQ light (§2.2) ────────────────────────────── */
   --color-bg-0: #f6faf8;
@@ -74,7 +74,7 @@
 
   --color-border-1: rgba(10, 31, 23, 0.08);
   --color-border-2: rgba(10, 31, 23, 0.14);
-  --color-border-accent: rgba(5, 150, 105, 0.35);
+  --color-border-accent: rgba(124, 58, 237, 0.35);
   /* Legacy aliases */
   --color-line: rgba(10, 31, 23, 0.08);
   --color-line-strong: rgba(10, 31, 23, 0.14);
@@ -105,7 +105,7 @@
   --shadow-e2: 0 6px 20px rgba(10, 31, 23, 0.08);
   --shadow-elevated: 0 16px 48px rgba(10, 31, 23, 0.12);
   --shadow-e3: 0 16px 48px rgba(10, 31, 23, 0.12);
-  --shadow-glow: 0 8px 28px rgba(5, 150, 105, 0.22);
+  --shadow-glow: 0 8px 28px rgba(124, 58, 237, 0.22);
 
   /* ── Named animations ─────────────────────────────────────────────────── */
   --animate-fade-up: fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -115,20 +115,20 @@
 /* Non-utility tokens (effects that aren't Tailwind colour/space scales). */
 :root {
   --inner-hi: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  --glow-brand: 0 8px 28px rgba(5, 150, 105, 0.22);
-  --focus-ring: rgba(52, 211, 153, 0.15);
+  --glow-brand: 0 8px 28px rgba(124, 58, 237, 0.22);
+  --focus-ring: rgba(139, 92, 246, 0.18);
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-blur: blur(12px);
   /* More opaque, blur-free chrome for always-on surfaces (top bar, bottom nav). */
   --glass-solid-bg: rgba(250, 250, 249, 0.94);
 
-  --btn-primary-bg: #059669;
-  --btn-primary-bg-hover: #047857;
+  --btn-primary-bg: #7c3aed;
+  --btn-primary-bg-hover: #6d28d9;
   --btn-primary-fg: #ffffff;
-  --btn-primary-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
-  --btn-gold-bg: linear-gradient(135deg, #d8b74e, #c9a227);
-  --btn-gold-fg: #241a02;
-  --btn-gold-shadow: 0 4px 16px rgba(201, 162, 39, 0.24);
+  --btn-primary-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+  --btn-gold-bg: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  --btn-gold-fg: #04141f;
+  --btn-gold-shadow: 0 4px 16px rgba(14, 165, 233, 0.24);
 }
 
 /* ── Dark theme — violet/indigo reskin (2026-08-02) ──────────────────────────
