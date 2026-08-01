@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 import { Logo } from '@/components/Logo';
 import { cn } from '@/utils/cn';
@@ -11,14 +10,8 @@ import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { guardiansNav, plansNav, primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
 
-const SIDEBAR_COLLAPSED_KEY = 'marriage-platform.sidebarCollapsed';
 const WIDTH_EXPANDED = 288; // 18rem, matches the previous fixed w-72
 const WIDTH_COLLAPSED = 76;
-
-function getInitialCollapsed(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
-}
 
 function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const { t } = useTranslation();
@@ -76,11 +69,10 @@ function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
 export function Sidebar() {
   const { t } = useTranslation();
   const { profile, hasRole } = useSession();
-  const [collapsed, setCollapsed] = useState(getInitialCollapsed);
-
-  useEffect(() => {
-    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
-  }, [collapsed]);
+  // Hover-driven, not a persisted choice: collapsed by default, expands while
+  // the pointer is over it, collapses again the moment it leaves. No local
+  // storage — there's nothing to remember, it's purely "is the mouse here".
+  const [collapsed, setCollapsed] = useState(true);
 
   // Role items appear only for users who actually hold the role (real gating).
   const roleItems = roleNav.filter((item) =>
@@ -90,10 +82,11 @@ export function Sidebar() {
   const name = profile?.display_name ?? t('common.guest');
   const initial = (profile?.display_name?.[0] ?? t('common.guestInitial')).toUpperCase();
   const tier = profile?.subscription_tier ?? 'free';
-  const ToggleIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
 
   return (
     <motion.aside
+      onMouseEnter={() => setCollapsed(false)}
+      onMouseLeave={() => setCollapsed(true)}
       animate={{ width: collapsed ? WIDTH_COLLAPSED : WIDTH_EXPANDED }}
       transition={springLayout}
       className="border-line bg-panel hidden shrink-0 flex-col overflow-hidden border-e md:flex"
@@ -125,27 +118,6 @@ export function Sidebar() {
           <SidebarLink item={settingsNav} collapsed={collapsed} />
         </div>
       </nav>
-
-      <button
-        type="button"
-        onClick={() => setCollapsed((v) => !v)}
-        aria-label={t(collapsed ? 'common.expandSidebar' : 'common.collapseSidebar')}
-        title={t(collapsed ? 'common.expandSidebar' : 'common.collapseSidebar')}
-        className={cn(
-          'border-line text-muted hover:bg-bg-3 hover:text-ink flex h-11 shrink-0 items-center gap-2 border-t text-sm font-medium transition-colors',
-          collapsed ? 'justify-center px-0' : 'justify-start px-5',
-        )}
-      >
-        <ToggleIcon className="h-[1.1rem] w-[1.1rem] shrink-0 rtl:-scale-x-100" aria-hidden />
-        <span
-          className={cn(
-            'overflow-hidden text-nowrap transition-[opacity] duration-150',
-            collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
-          )}
-        >
-          {t('common.collapseSidebar')}
-        </span>
-      </button>
 
       <div className={cn('border-line border-t p-3', collapsed && 'flex justify-center px-0')}>
         <div
