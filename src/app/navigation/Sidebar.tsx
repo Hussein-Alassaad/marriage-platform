@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 
 import { Logo } from '@/components/Logo';
 import { cn } from '@/utils/cn';
-import { springLayout } from '@/lib/motion';
 import { ROUTES } from '@/app/routes';
 import { useSession } from '@/hooks/useSession';
 import { guardiansNav, plansNav, primaryNav, roleNav, settingsNav, type NavItem } from './navItems';
@@ -29,14 +27,18 @@ function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
     >
       {({ isActive }) => (
         <>
+          {/* A plain conditional, not a Framer Motion layoutId/shared-layout
+              animation: layoutId measures this element's position via the DOM
+              to animate it sliding between nav items across route changes, and
+              that measurement got corrupted by the sidebar's own width also
+              changing (hover expand/collapse) at the same time — it rendered
+              as a stretched, mispositioned blob that visually covered other
+              nav items. A plain per-item background can't do that; it's
+              always sized to exactly its own item. */}
           {isActive ? (
-            <motion.span
-              layoutId="sidebar-active"
-              transition={springLayout}
-              className="absolute inset-0 z-0 rounded-md border border-[color:var(--color-border-accent)] [background:linear-gradient(90deg,var(--color-brand-wash),transparent)]"
-            >
+            <span className="absolute inset-0 z-0 rounded-md border border-[color:var(--color-border-accent)] [background:linear-gradient(90deg,var(--color-brand-wash),transparent)]">
               <span className="bg-brand-400 absolute inset-y-3 start-0 w-[3px] rounded-full" />
-            </motion.span>
+            </span>
           ) : null}
           <Icon
             className={cn(
