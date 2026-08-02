@@ -1,0 +1,27 @@
+name: Uptime
+
+# External uptime monitor for the platform, closing the Runbook §5 gap ("No
+# uptime monitor. If Supabase is down, you will learn it from a member.").
+# Hits the public health-check function on a schedule; a failed run makes
+# GitHub email the repo's watchers, which is the actual point — nothing pages
+# anyone today, this is a step up from "you find out from a member."
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check platform health
+        run: |
+          url="https://kondapkaroqmoduadopj.supabase.co/functions/v1/health-check"
+          status=$(curl -s -o /tmp/health.json -w "%{http_code}" "$url")
+          echo "HTTP $status"
+          cat /tmp/health.json
+          if [ "$status" != "200" ]; then
+            echo "::error::Health check failed with HTTP $status"
+            exit 1
+          fi
