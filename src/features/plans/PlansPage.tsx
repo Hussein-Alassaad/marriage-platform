@@ -33,6 +33,7 @@ import {
   usePlans,
   useUploadReceipt,
 } from '@/hooks/useSubscription';
+import { getPaddle } from '@/lib/paddle';
 import { subscriptionService, tierAtLeast } from '@/services/subscriptionService';
 import type {
   BillingPeriod,
@@ -466,12 +467,14 @@ function ChooseMethodModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { bool } = useSettings();
   const create = useCreateClaim();
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [applied, setApplied] = useState<CouponPreview | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [cardPending, setCardPending] = useState(false);
 
   const apply = async () => {
     if (!plan || !code.trim()) return;
@@ -500,6 +503,28 @@ function ChooseMethodModal({
       onClose();
     } catch {
       setError(t('plans.claimError'));
+    }
+  };
+
+  const startCard = async () => {
+    if (!plan) return;
+    setError(null);
+    setCardPending(true);
+    try {
+      const info = await subscriptionService.checkout(plan.tier, period);
+      const paddle = await getPaddle(info.clientToken, info.environment);
+      // Closes this modal first — Paddle opens its own overlay on top, and the
+      // activation itself happens server-side (the webhook), not from any
+      // event this call returns, so there's nothing more to await here.
+      onClose();
+      paddle.Checkout.open({
+        items: [{ priceId: info.priceId, quantity: 1 }],
+        customData: info.customData,
+      });
+    } catch (e) {
+      setError(e instanceof Error && e.message === 'gateway_not_configured' ? t('plans.cardSoon') : t('plans.claimError'));
+    } finally {
+      setCardPending(false);
     }
   };
 
@@ -544,6 +569,19 @@ function ChooseMethodModal({
       </div>
 
       <div className="space-y-2">
+        {bool('card_payments_enabled') ? (
+          <button
+            type="button"
+            disabled={cardPending}
+            onClick={startCard}
+            className="border-line bg-surface hover:border-brand-400 hover:bg-brand-wash flex w-full items-center gap-3 rounded-xl border p-4 text-start transition-colors disabled:opacity-60"
+          >
+            <CreditCard className="text-brand-600 h-5 w-5" aria-hidden />
+            <span className="text-ink text-sm font-medium">
+              {cardPending ? t('common.pleaseWait') : t('plans.method.card')}
+            </span>
+          </button>
+        ) : null}
         {METHODS.map((method) => {
           const Icon = METHOD_ICONS[method];
           return (

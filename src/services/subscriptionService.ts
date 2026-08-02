@@ -55,6 +55,13 @@ export interface CouponPreview {
   currency: string;
 }
 
+export interface PaddleCheckoutInfo {
+  environment: 'sandbox' | 'production';
+  clientToken: string;
+  priceId: string;
+  customData: { userId: string; tier: Tier; period: BillingPeriod };
+}
+
 export interface AdminClaim {
   id: string;
   userId: string;
@@ -148,6 +155,25 @@ export const subscriptionService = {
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
     return data.claim as PaymentClaim;
+  },
+
+  /** Card path — Paddle. Returns what the frontend needs to open Paddle.js's
+   *  checkout; the server resolves the price ID and embeds the caller's own
+   *  userId into customData, so a payment can never be attributed to anyone
+   *  else. Throws 'gateway_not_configured' until card payments are actually
+   *  enabled and the Paddle secrets are set. */
+  async checkout(tier: Tier, period: BillingPeriod): Promise<PaddleCheckoutInfo> {
+    const supabase = requireSupabaseClient();
+    const { data, error } = await supabase.functions.invoke('subscriptions', {
+      body: { action: 'checkout', tier, period },
+    });
+    if (error) {
+      const detail = await error.context?.json?.().catch(() => null);
+      if (detail?.error) throw new Error(detail.error);
+      throw error;
+    }
+    if (data?.error) throw new Error(data.error);
+    return data as PaddleCheckoutInfo;
   },
 
   /** Upload the receipt into the caller's own folder, then attach it to the claim. */

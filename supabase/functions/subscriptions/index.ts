@@ -373,12 +373,36 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === 'checkout') {
-      // Honest stub: no card flow exists until a gateway is configured. We never
-      // want a checkout screen that looks real and silently does nothing.
+      // Card path — Paddle. Still an honest gate: if it isn't actually
+      // configured, say so rather than open a checkout that can't complete.
       const enabled = await setting(admin, 'card_payments_enabled', false);
-      const configured = Boolean(Deno.env.get('AREEBA_MERCHANT_ID') && Deno.env.get('AREEBA_API_KEY'));
+      const clientToken = Deno.env.get('PADDLE_CLIENT_TOKEN');
+      const configured = Boolean(Deno.env.get('PADDLE_API_KEY') && clientToken);
       if (!enabled || !configured) return json({ error: 'gateway_not_configured' }, 501);
-      return json({ error: 'gateway_not_implemented' }, 501);
+
+      const tier = String(body.tier ?? '');
+      const period = body.period === 'yearly' ? 'yearly' : 'monthly';
+      if (!PAID_TIERS.has(tier)) return json({ error: 'bad_tier' }, 400);
+
+      const { data: plan } = await admin
+        .from('subscription_plans')
+        .select('paddle_price_id_monthly, paddle_price_id_yearly, active')
+        .eq('tier', tier)
+        .maybeSingle();
+      if (!plan || !plan.active) return json({ error: 'plan_unavailable' }, 400);
+
+      const priceId = period === 'yearly' ? plan.paddle_price_id_yearly : plan.paddle_price_id_monthly;
+      if (!priceId) return json({ error: 'period_unavailable' }, 400);
+
+      // customData carries the userId server-side, from the authenticated JWT —
+      // never trusted from the client — so the webhook can never attribute a
+      // payment to someone other than whoever actually paid.
+      return json({
+        environment: Deno.env.get('PADDLE_ENV') === 'production' ? 'production' : 'sandbox',
+        clientToken,
+        priceId,
+        customData: { userId: uid, tier, period },
+      });
     }
 
     return json({ error: 'unknown_action' }, 400);

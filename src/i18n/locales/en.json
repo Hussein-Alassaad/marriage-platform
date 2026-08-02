@@ -257,6 +257,7 @@
     "methodTitle": "How would you like to pay?",
     "methodBody": "Choose a method and we'll give you a reference code. Send the amount, then upload your receipt — an admin activates your membership after checking it.",
     "method": {
+      "card": "Credit or debit card",
       "omt": "OMT",
       "whish": "Whish Money",
       "bank_transfer": "Bank transfer"
