@@ -63,7 +63,7 @@ export function LoginPage() {
       {/* Gold geometric watermark (Barakah texture), bottom-end corner. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute bottom-0 h-28 w-28 opacity-[0.06] ltr:right-0 rtl:left-0"
+        className="pointer-events-none absolute bottom-0 h-28 w-28 opacity-[0.06] end-0"
         style={{
           background: 'radial-gradient(circle at 70% 70%, var(--color-gold-400), transparent 60%)',
         }}

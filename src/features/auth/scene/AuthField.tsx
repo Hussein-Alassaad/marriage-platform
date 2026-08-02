@@ -51,7 +51,7 @@ export function AuthField({
         animate={error && !reduced ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
         transition={{ duration: 0.32 }}
       >
-        <span className="text-muted group-focus-within:text-brand-400 pointer-events-none absolute inset-y-0 z-10 grid w-11 place-items-center transition-colors ltr:left-0 rtl:right-0">
+        <span className="text-muted group-focus-within:text-brand-400 pointer-events-none absolute inset-y-0 z-10 grid w-11 place-items-center transition-colors start-0">
           <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />
         </span>
         <input
@@ -71,7 +71,7 @@ export function AuthField({
           )}
           {...registration}
         />
-        <span className="absolute inset-y-0 grid w-11 place-items-center ltr:right-0 rtl:left-0">
+        <span className="absolute inset-y-0 grid w-11 place-items-center end-0">
           {isPassword ? (
             <button
               type="button"

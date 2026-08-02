@@ -45,7 +45,12 @@ export function MediaBubble({ messageId, kind }: MediaBubbleProps) {
   }
 
   return kind === 'image' ? (
-    <img src={url} alt={t('media.imageAlt')} className="max-h-72 w-full rounded-xl object-cover" />
+    <img
+      src={url}
+      alt={t('media.imageAlt')}
+      loading="lazy"
+      className="max-h-72 w-full rounded-xl object-cover"
+    />
   ) : (
     <video src={url} controls className="max-h-72 w-full rounded-xl" />
   );

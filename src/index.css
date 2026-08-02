@@ -60,17 +60,21 @@
   --color-text-1: #0e1f18;
   --color-text-2: #3f544b;
   /* text-3/muted darkened from #6c8078 (4.20:1 on white — fails WCAG AA's 4.5:1)
-     to #657770 (4.75:1 — passes) with no other visual change; text-4/faint
-     from #93a49c (2.62:1) to #84948c (3.18:1 — meets the large-text/decorative
-     tier it's actually used for) while staying visibly lighter than muted, so
-     the ink → ink-soft → muted → faint hierarchy doesn't collapse. */
+     to #657770 (4.75:1 — passes) with no other visual change. text-4/faint was
+     kept lighter (#84948c, 3.18:1) on the assumption it was only used for large/
+     decorative text, but an audit found it's actually used at 11-12px in ~80
+     places (nav labels, hints, timestamps) — real small text needing 4.5:1, not
+     3:1. Since white is the lightest possible background, any tone lighter than
+     text-3 drops below 4.5:1 too (text-3 itself only clears it by 0.25:1), so
+     there's no room for a visibly-distinct fourth tier that still passes —
+     faint is set equal to muted rather than shipping it slightly too light. */
   --color-text-3: #657770;
-  --color-text-4: #84948c;
+  --color-text-4: #657770;
   /* Legacy aliases → MITHAQ text ramp */
   --color-ink: #0e1f18;
   --color-ink-soft: #3f544b;
   --color-muted: #657770;
-  --color-faint: #84948c;
+  --color-faint: #657770;
 
   --color-border-1: rgba(10, 31, 23, 0.08);
   --color-border-2: rgba(10, 31, 23, 0.14);
@@ -168,11 +172,12 @@
   --color-text-1: #f1f0f7;
   --color-text-2: #b4b2c4;
   --color-text-3: #8b899d;
-  --color-text-4: #5c5a6e;
+  /* faint = muted here too — same WCAG reasoning as the light-mode block above. */
+  --color-text-4: #8b899d;
   --color-ink: #f1f0f7;
   --color-ink-soft: #b4b2c4;
   --color-muted: #8b899d;
-  --color-faint: #5c5a6e;
+  --color-faint: #8b899d;
 
   --color-border-1: rgba(255, 255, 255, 0.07);
   --color-border-2: rgba(255, 255, 255, 0.12);

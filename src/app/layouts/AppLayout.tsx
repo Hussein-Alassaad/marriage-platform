@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -17,20 +17,42 @@ import { RouteFallback } from '@/components/RouteFallback';
 export function AppLayout() {
   const location = useLocation();
   const { t } = useTranslation();
+  const mainRef = useRef<HTMLElement>(null);
+  const hasNavigated = useRef(false);
+
+  useEffect(() => {
+    // Skip the very first mount: a hard page load should leave focus with the
+    // browser (URL bar), not steal it. Client-side route changes after that
+    // reset scroll and move focus to the new page — otherwise a keyboard/
+    // screen-reader user keeps the previous page's scroll position and focus
+    // target, with no indication anything navigated.
+    if (!hasNavigated.current) {
+      hasNavigated.current = true;
+      return;
+    }
+    window.scrollTo({ top: 0 });
+    mainRef.current?.focus({ preventScroll: true });
+  }, [location.pathname]);
+
   return (
     <div className="app-backdrop flex min-h-screen">
       {/* Keyboard-only: lets a screen-reader/keyboard user bypass the sidebar and
           top bar nav (repeated on every page) and jump straight to page content. */}
       <a
         href="#main-content"
-        className="bg-brand-600 text-on-brand focus-visible:outline-brand-400 sr-only z-50 rounded-md px-4 py-2 text-sm font-medium focus:not-sr-only focus:absolute focus:top-4 focus-visible:outline-2 focus-visible:outline-offset-2 ltr:focus:left-4 rtl:focus:right-4"
+        className="bg-brand-600 text-on-brand focus-visible:outline-brand-400 sr-only z-50 rounded-md px-4 py-2 text-sm font-medium focus:not-sr-only focus:absolute focus:top-4 focus:start-4 focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         {t('common.skipToContent')}
       </a>
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main id="main-content" className="flex-1 px-4 pt-8 pb-28 md:px-8 md:pb-12">
+        <main
+          ref={mainRef}
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 px-4 pt-8 pb-28 outline-none md:px-8 md:pb-12"
+        >
           <div className="mx-auto w-full max-w-6xl">
             <PageTransition pathname={location.pathname}>
               <ErrorBoundary key={location.pathname}>

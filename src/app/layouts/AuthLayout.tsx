@@ -49,27 +49,27 @@ export function AuthLayout() {
       {/* Central architectural arch, framing the card with warm light. */}
       <div
         aria-hidden
-        className="absolute top-1/2 left-1/2 z-0 hidden h-[94vh] w-[64vh] -translate-x-1/2 -translate-y-1/2 opacity-80 lg:block"
+        className="absolute top-1/2 start-1/2 z-0 hidden h-[94vh] w-[64vh] -translate-x-1/2 -translate-y-1/2 opacity-80 lg:block"
       >
         <ArchedWindow className="inset-0 h-full w-full" />
       </div>
 
       {/* Twin lanterns */}
-      <div className="absolute top-0 z-0 ltr:left-[17%] rtl:right-[17%]">
+      <div className="absolute top-0 z-0 start-[17%]">
         <Lantern />
       </div>
-      <div className="absolute top-0 z-0 hidden scale-90 opacity-90 lg:block ltr:right-[17%] rtl:left-[17%]">
+      <div className="absolute top-0 z-0 hidden scale-90 opacity-90 lg:block end-[17%]">
         <Lantern />
       </div>
 
       {/* Trust pill (top-start) */}
-      <div className="glass border-line absolute top-4 z-30 hidden items-center gap-2 rounded-full border px-3.5 py-2 sm:flex ltr:left-4 rtl:right-4">
+      <div className="glass border-line absolute top-4 z-30 hidden items-center gap-2 rounded-full border px-3.5 py-2 sm:flex start-4">
         <Users className="text-gold-400 h-4 w-4" aria-hidden />
         <span className="text-ink-soft text-xs font-medium">{t('auth.trustedBy')}</span>
       </div>
 
       {/* Top-end controls */}
-      <div className="absolute top-4 z-30 flex items-center gap-2 ltr:right-4 rtl:left-4">
+      <div className="absolute top-4 z-30 flex items-center gap-2 end-4">
         <LanguageSwitcher />
         <ThemeToggle />
       </div>
