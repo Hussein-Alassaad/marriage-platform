@@ -40,11 +40,27 @@ function staleThresholdMs(schedule: string): number {
 }
 
 export async function runHealthChecks(admin: SupabaseClient): Promise<{ checks: HealthCheck[]; healthy: boolean }> {
+  // These five reads are independent of each other, so run them concurrently rather
+  // than one round-trip at a time — the sequential version measured 1.5-4s p50-p99
+  // under light load for what should be a fast health probe.
+  const [aiEnabled, jobsRes, rateRes, pendingVerifications, pendingClaims] = await Promise.all([
+    setting(admin, 'moderation_ai_enabled', true),
+    admin.from('scheduled_jobs').select('name, schedule, enabled, last_run_at, last_result'),
+    admin
+      .from('exchange_rates')
+      .select('as_of')
+      .eq('base_currency', 'USD')
+      .order('as_of', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    countWhere(admin, 'identity_verifications', 'status', 'pending'),
+    countWhere(admin, 'payment_claims', 'status', 'pending'),
+  ]);
+
   const checks: HealthCheck[] = [];
 
   // 1. Moderation. The dangerous state is not "off" — it is "on, but the key is gone",
   //    which fails closed and silently blocks every message on the platform.
-  const aiEnabled = await setting(admin, 'moderation_ai_enabled', true);
   const hasKey = Boolean(Deno.env.get('ANTHROPIC_API_KEY'));
   checks.push({
     key: 'moderation',
@@ -54,7 +70,7 @@ export async function runHealthChecks(admin: SupabaseClient): Promise<{ checks: 
 
   // 2. Jobs that have not run when they should have — judged against EACH job's own
   //    schedule, not one blanket number (see staleThresholdMs).
-  const { data: jobs } = await admin.from('scheduled_jobs').select('name, schedule, enabled, last_run_at, last_result');
+  const jobs = jobsRes.data;
   const stale = (
     (jobs ?? []) as { name: string; schedule: string; enabled: boolean; last_run_at: string | null }[]
   )
@@ -77,13 +93,7 @@ export async function runHealthChecks(admin: SupabaseClient): Promise<{ checks: 
 
   // 3. Exchange rates. A stale rate does not error — it quietly makes every figure on
   //    the finance page wrong, which is worse than an outage.
-  const { data: rate } = await admin
-    .from('exchange_rates')
-    .select('as_of')
-    .eq('base_currency', 'USD')
-    .order('as_of', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const rate = rateRes.data;
   const ageDays = rate?.as_of ? Math.floor((Date.now() - new Date(rate.as_of).getTime()) / 864e5) : Infinity;
   checks.push({
     key: 'exchange_rates',
@@ -93,8 +103,6 @@ export async function runHealthChecks(admin: SupabaseClient): Promise<{ checks: 
 
   // 4. Backlog: work waiting on a human. Not an outage, but a queue nobody is working
   //    is how a member waits a fortnight to be verified.
-  const pendingVerifications = await countWhere(admin, 'identity_verifications', 'status', 'pending');
-  const pendingClaims = await countWhere(admin, 'payment_claims', 'status', 'pending');
   checks.push({
     key: 'queues',
     ok: pendingVerifications < 20 && pendingClaims < 20,
